@@ -1,12 +1,20 @@
 package flink.graphs.example;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.flink.api.common.ProgramDescription;
+import org.apache.flink.api.common.functions.FlatJoinFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.spargel.java.MessageIterator;
 import org.apache.flink.spargel.java.MessagingFunction;
+import org.apache.flink.spargel.java.OutgoingEdge;
 import org.apache.flink.spargel.java.VertexUpdateFunction;
+import org.apache.flink.util.Collector;
 
 import flink.graphs.Edge;
 import flink.graphs.Graph;
@@ -21,74 +29,132 @@ import flink.graphs.Vertex;
  */
 public class RelevanceSearch implements ProgramDescription {
 
-	private int k; // the number of given sources
-	private Long[] sources; // the source ids
-	private final float probC = 0.15f; // the restarting probability 
+	private static int k = 3; // the number of given sources
+	private static Long[] sources; // the source ids
+	private final static float probC = 0.15f; // the restarting probability 
 
 	@Override
 	public String getDescription() {
 		return "Relevance Search Algorithm";
 	}
 
+	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
 
 		ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-		
-		// read k
-		//...
-		// read the source vertices
-		// ...
+
+		sources = new Long[k];
+		sources[0] = 1l;
+		sources[1] = 2l;
+		sources[2] = 3l;
 
 		/** read the edges input **/
-		DataSet<Edge<Long, Double>> edges = getEdgesDataSet();
+		DataSet<Edge<Long, Double>> edges = getDirectedEdgesDataSet(env);
 		
 		/** create the referers vertex group **/
-		// the first field of the Tuple2 corresponds to the vertex type: 0 for referer, 1 for host
-		DataSet<Vertex<Long, Tuple2<Integer, Double[]>>> referers = getReferersDataSet(edges);
+		DataSet<Vertex<Long, Double[]>> referers = getReferersDataSet(edges);
 
 		/** create the hosts vertex group **/
-		DataSet<Vertex<Long, Tuple2<Integer, Double[]>>> hosts = getHostsDataSet(edges);
-		
+		DataSet<Vertex<Long, Double[]>> hosts = getHostsDataSet(edges);
 		/** create the graph **/
-		Graph<Long, Tuple2<Integer, Double[]>, Double> graph = Graph.create(referers.union(hosts), edges, env);
+		Graph<Long, Double[], Double> graph = Graph.create(referers.union(hosts), edges, env).getUndirected();
 		
-		graph.runVertexCentricIteration(new ComputeRelevanceScores(), new SendNewScores(), 20);
+		/** scale the edge weights by dividing each edge weight with the sum of weights of all out-edges */
+		DataSet<Tuple2<Long, Long>> outDegrees = graph.outDegrees();
+		DataSet<Edge<Long, Double>> scaledEdges = graph.getEdges().join(outDegrees).where(0).equalTo(0)
+				.with(new FlatJoinFunction<Edge<Long, Double>, Tuple2<Long, Long>, Edge<Long, Double>>() {
+					public void join(Edge<Long, Double> edge, Tuple2<Long, Long> vertexWithDegree,
+							Collector<Edge<Long, Double>> out) {
+						edge.setValue(edge.getValue() / (double) vertexWithDegree.f1);
+						out.collect(edge);
+					}
+		});
+
+		/** run the iterative update of relevance scores */
+		Graph<Long, Double[], Double> scaledGraph = Graph.create(graph.getVertices(), scaledEdges, env);
+		scaledGraph.runVertexCentricIteration(new ComputeRelevanceScores(), new SendNewScores(), 10).getVertices().print();
 
 		env.execute();
 	}
 	
-	/** 
-	 * The incoming messages are of the type Tuple2<SenderId, SenderScores>
+	@SuppressWarnings("serial")
+	public static final class ComputeRelevanceScores extends VertexUpdateFunction<Long, Double[], Double[]> {
+		public void updateVertex(Long vertexKey, Double[] vertexValue, MessageIterator<Double[]> inMessages) {
+			Double[] newScores = new Double[k];
+			for (int i=0; i<k; i++) {
+				newScores[i] = 0.0;
+			}
+			for (Double[] message : inMessages) {
+				for (int i=0; i<k; i++) {
+					newScores[i] += message[i];
+				}
+			}
+			// add the q vector value if needed
+			for (int i=0; i<k; i++) {
+				if (sources[i] == vertexKey) {
+					newScores[i] += probC;
+					break;
+				}
+			}
+			setNewVertexValue(newScores);
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	public static final class SendNewScores extends MessagingFunction<Long, Double[], Double[], Double> {
+		public void sendMessages(Long vertexKey, Double[] vertexValue) {
+			// (1-c)*edgeValue*score
+			Double[] scaledScores = new Double[k];
+			 for (OutgoingEdge<Long, Double> edge : getOutgoingEdges()) {
+				 for(int i=0; i<k; i++) {
+					 scaledScores[i] = vertexValue[i]*edge.edgeValue()*(1-probC);
+				 }
+	                sendMessageTo(edge.target(), scaledScores);
+	            }
+		}
+	}
+	
+	private static DataSet<Edge<Long, Double>> getDirectedEdgesDataSet(ExecutionEnvironment env) {
+		List<Edge<Long, Double>> edges = new ArrayList<Edge<Long, Double>>();
+		edges.add(new Edge<Long, Double>(1L, 5L, 1.0));
+		edges.add(new Edge<Long, Double>(1L, 6L, 1.0));
+		edges.add(new Edge<Long, Double>(2L, 5L, 1.0));
+		edges.add(new Edge<Long, Double>(3L, 6L, 1.0));
+		return env.fromCollection(edges);
+	}
+
+	/**
+	 * Pages having no incoming edges
 	 */
 	@SuppressWarnings("serial")
-	public static final class ComputeRelevanceScores extends VertexUpdateFunction<Long, Tuple2<Integer, Double[]>, 
-		Tuple2<Long, Double[]>> {
-		public void updateVertex(Long vertexKey, Tuple2<Integer, Double[]> vertexValue,
-				MessageIterator<Tuple2<Long, Double[]>> inMessages) {
-			// TODO Auto-generated method stub
-		}
+	private static DataSet<Vertex<Long, Double[]>> getReferersDataSet(DataSet<Edge<Long, Double>> edges) {
+		DataSet<Vertex<Long, Double[]>> referers = edges.map(
+				new MapFunction<Edge<Long, Double>, Tuple1<Long>>() {
+					public Tuple1<Long> map(Edge<Long, Double> edge) { return new Tuple1<Long>(edge.getSource()); }
+		}).distinct().map(new InitializeVertex());
+		return referers;
+	}
+
+	/**
+	 * Pages having no outgoing edges
+	 */
+	@SuppressWarnings("serial")
+	private static DataSet<Vertex<Long, Double[]>> getHostsDataSet(DataSet<Edge<Long, Double>> edges) {
+		DataSet<Vertex<Long, Double[]>> hosts = edges.map(
+				new MapFunction<Edge<Long, Double>, Tuple1<Long>>() {
+					public Tuple1<Long> map(Edge<Long, Double> edge) { return new Tuple1<Long>(edge.getTarget()); }
+		}).distinct().map(new InitializeVertex());
+		return hosts;
 	}
 	
 	@SuppressWarnings("serial")
-	public static final class SendNewScores extends MessagingFunction<Long, Tuple2<Integer, Double[]>, Tuple2<Long, Double[]>, Double> {
-		public void sendMessages(Long vertexKey, Tuple2<Integer, Double[]> vertexValue) {
-			// TODO Auto-generated method stub
+	public static final class InitializeVertex implements MapFunction<Tuple1<Long>, Vertex<Long, Double[]>> {
+		public Vertex<Long, Double[]> map(Tuple1<Long> vertexId) {
+			Double[] vertexValue = new Double[k];
+			for (int i=0; i<k; i++) {
+				vertexValue[i] = 0.0;
+			}
+			return new Vertex<Long, Double[]>(vertexId.f0, vertexValue);
 		}
 	}
-	
-	private static DataSet<Edge<Long, Double>> getEdgesDataSet() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static DataSet<Vertex<Long, Tuple2<Integer, Double[]>>> getHostsDataSet(DataSet<Edge<Long, Double>> edges) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static DataSet<Vertex<Long, Tuple2<Integer, Double[]>>> getReferersDataSet(DataSet<Edge<Long, Double>> edges) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
