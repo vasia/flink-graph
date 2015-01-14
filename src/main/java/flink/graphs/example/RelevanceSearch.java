@@ -29,7 +29,7 @@ import flink.graphs.Vertex;
  */
 public class RelevanceSearch implements ProgramDescription {
 
-	private static int k = 3; // the number of given sources
+	private static int k; // the number of given sources
 	private static Long[] sources; // the source ids
 	private final static float probC = 0.15f; // the restarting probability 
 
@@ -40,22 +40,27 @@ public class RelevanceSearch implements ProgramDescription {
 
 	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
+		if (args.length < 4) {
+			System.err.println("Usage: Relevance Search <input-edges> <number-of-sources> <source-ids> <output-path>");
+		}
 
 		ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
+		k = Integer.parseInt(args[1]);
 		sources = new Long[k];
-		sources[0] = 1l;
-		sources[1] = 2l;
-		sources[2] = 3l;
+		sources[0] = Long.parseLong(args[2]);
 
 		/** read the edges input **/
-		DataSet<Edge<Long, Double>> edges = getDirectedEdgesDataSet(env);
+		DataSet<Edge<Long, Double>> edges = env.readCsvFile(args[0]).fieldDelimiter('\t').lineDelimiter("\n")
+				.types(Long.class, Long.class).map(new InitEdgesMapper()); 
+//				getDirectedEdgesDataSet(env);
 		
 		/** create the referers vertex group **/
 		DataSet<Vertex<Long, Double[]>> referers = getReferersDataSet(edges);
 
 		/** create the hosts vertex group **/
 		DataSet<Vertex<Long, Double[]>> hosts = getHostsDataSet(edges);
+
 		/** create the graph **/
 		Graph<Long, Double[], Double> graph = Graph.create(referers.union(hosts), edges, env).getUndirected();
 		
@@ -72,9 +77,20 @@ public class RelevanceSearch implements ProgramDescription {
 
 		/** run the iterative update of relevance scores */
 		Graph<Long, Double[], Double> scaledGraph = Graph.create(graph.getVertices(), scaledEdges, env);
-		scaledGraph.runVertexCentricIteration(new ComputeRelevanceScores(), new SendNewScores(), 10).getVertices().print();
+		
+		/** store the output **/
+		scaledGraph.runVertexCentricIteration(new ComputeRelevanceScores(), new SendNewScores(), 1)
+		.getVertices().writeAsCsv(args[3], "\n", "\t");
+		//.print();
 
 		env.execute();
+	}
+
+	@SuppressWarnings("serial")
+	public static final class InitEdgesMapper implements MapFunction<Tuple2<Long, Long>, Edge<Long, Double>> {
+		public Edge<Long, Double> map(Tuple2<Long, Long> input) {
+			return new Edge<Long, Double>(input.f0, input.f1, 1.0);
+		}	
 	}
 	
 	@SuppressWarnings("serial")
