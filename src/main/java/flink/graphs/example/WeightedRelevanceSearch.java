@@ -21,14 +21,14 @@ import flink.graphs.spargel.VertexUpdateFunction;
 
 /**
  * 
- * A Relevance Search algorithm for bipartite graphs.
+ * A Relevance Search algorithm for weighted bipartite graphs.
  * Given a bipartite graph with vertex groups V1, V2 and a set of k source nodes in group V1, 
  * the algorithm computes relevance scores to the k source nodes for all other nodes in V1. 
  *
  * The implementation is based on the paper "Relevance search and anomaly detection in bipartite graphs"
  * SIGKDD, December 2005.
  */
-public class RelevanceSearch implements ProgramDescription {
+public class WeightedRelevanceSearch implements ProgramDescription {
 
 	private static long source; // the source id
 	private final static float probC = 0.15f; // the restarting probability
@@ -52,7 +52,7 @@ public class RelevanceSearch implements ProgramDescription {
 
 		/** read the edges input **/
 		DataSet<Edge<Long, Double>> edges = env.readCsvFile(args[0]).fieldDelimiter('\t').lineDelimiter("\n")
-				.types(Long.class, Long.class).map(new InitEdgesMapper()); 
+				.types(Long.class, Long.class, Double.class).map(new InitEdgesMapper()); 
 		
 		/** create the referers vertex group **/
 		DataSet<Vertex<Long, Double>> referers = getReferersDataSet(edges);
@@ -114,9 +114,9 @@ public class RelevanceSearch implements ProgramDescription {
 	}
 
 	@SuppressWarnings("serial")
-	public static final class InitEdgesMapper implements MapFunction<Tuple2<Long, Long>, Edge<Long, Double>> {
-		public Edge<Long, Double> map(Tuple2<Long, Long> input) {
-			return new Edge<Long, Double>(input.f0, input.f1, 1.0);
+	public static final class InitEdgesMapper implements MapFunction<Tuple3<Long, Long, Double>, Edge<Long, Double>> {
+		public Edge<Long, Double> map(Tuple3<Long, Long, Double> input) {
+			return new Edge<Long, Double>(input.f0, input.f1, input.f2);
 		}	
 	}
 	
