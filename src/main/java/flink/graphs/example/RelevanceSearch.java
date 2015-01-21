@@ -22,8 +22,8 @@ import flink.graphs.spargel.VertexUpdateFunction;
 /**
  * 
  * A Relevance Search algorithm for bipartite graphs.
- * Given a bipartite graph with vertex groups V1, V2 and a set of k source nodes in group V1, 
- * the algorithm computes relevance scores to the k source nodes for all other nodes in V1. 
+ * Given a bipartite graph with vertex groups V1, V2 and a source node in group V1, 
+ * the algorithm computes relevance scores of the source node for all other nodes in V1. 
  *
  * The implementation is based on the paper "Relevance search and anomaly detection in bipartite graphs"
  * SIGKDD, December 2005.
