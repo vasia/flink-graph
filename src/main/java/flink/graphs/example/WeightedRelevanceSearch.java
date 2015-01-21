@@ -61,7 +61,7 @@ public class WeightedRelevanceSearch implements ProgramDescription {
 		DataSet<Vertex<Long, Double>> hosts = getHostsDataSet(edges);
 
 		/** create the graph **/
-		Graph<Long, Double, Double> graph = Graph.create(referers.union(hosts), edges, env).getUndirected();
+		Graph<Long, Double, Double> graph = Graph.fromDataSet(referers.union(hosts), edges, env).getUndirected();
 		
 		/** scale the edge weights by dividing each edge weight with the sum of weights of all out-edges */
 		DataSet<Tuple2<Long, Long>> outDegrees = graph.outDegrees();
@@ -75,7 +75,7 @@ public class WeightedRelevanceSearch implements ProgramDescription {
 		});
 
 		/** run the iterative update of relevance scores */
-		Graph<Long, Double, Double> scaledGraph = Graph.create(graph.getVertices(), scaledEdges, env);
+		Graph<Long, Double, Double> scaledGraph = Graph.fromDataSet(graph.getVertices(), scaledEdges, env);
 		
 		/** compute the relevance scores **/
 		DataSet<Vertex<Long, Double>> scaledScoredVertices = scaledGraph.runVertexCentricIteration(
