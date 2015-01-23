@@ -2,16 +2,21 @@ package flink.graphs.example;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.apache.flink.api.common.ProgramDescription;
 import org.apache.flink.api.common.functions.FlatJoinFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.GroupReduceFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
+import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 
@@ -35,21 +40,24 @@ public class MultiSourceRelevanceSearch implements ProgramDescription {
 
 	private final static float probC = 0.15f; // the restarting probability
 	private static int maxIterations;
+	private static int nodesPerSrc;	// how many relevant nodes per source we consider in the end of the algorithm
 
 	@Override
 	public String getDescription() {
-		return "Relevance Search Algorithm";
+		return "Multi-Source Relevance Search Algorithm";
 	}
 
 	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
-		if (args.length < 4) {
-			System.err.println("Usage: Relevance Search <input-edges> <input-sourceIds> <output-path> <number-of-iterations>");
+		if (args.length < 5) {
+			System.err.println("Usage: Relevance Search <input-edges> <input-sourceIds> <output-path> <number-of-iterations>"
+					+ " <relevant-nodes-per-source>");
 		}
 
 		ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
 		maxIterations = Integer.parseInt(args[3]);
+		nodesPerSrc = Integer.parseInt(args[4]);
 
 		/** read the edges input **/
 		DataSet<Edge<Long, Double>> edges = env.readCsvFile(args[0]).fieldDelimiter('\t').lineDelimiter("\n")
@@ -89,7 +97,7 @@ public class MultiSourceRelevanceSearch implements ProgramDescription {
 				.getVertices();
 
 		/** filter out the referers */
-		scaledScoredVertices
+		DataSet<Vertex<Long, HashMap<Long, Double>>> hostsWithScores = scaledScoredVertices
 		.join(hosts).where(0).equalTo(0).with(
 				new FlatJoinFunction<Vertex<Long, HashMap<Long, Double>>, 
 					Vertex<Long, HashMap<Long, Double>>, Vertex<Long, HashMap<Long, Double>>>() {
@@ -99,12 +107,75 @@ public class MultiSourceRelevanceSearch implements ProgramDescription {
 
 						out.collect(first);
 					}
-		})
+		});
+
 		/**
-		 * 	 
+		 * 
+		 * For every given source, select the _nodesPerSrc_ most relevant nodes,
+		 * union all of them and then rank them according to how often they appear
+		 * in the final list of most relevant nodes.
+		 * 
 		 */
 
-		/** store the output **/
+		// emit <srcId, hostId, score> tuples
+		DataSet<Tuple3<Long, Long, Double>> sourcesWithRelevantNodes = hostsWithScores.flatMap(
+				new FlatMapFunction<Vertex<Long,HashMap<Long,Double>>, Tuple3<Long, Long, Double>>() {
+					public void flatMap(Vertex<Long, HashMap<Long, Double>> vertexWithScoresMap,
+							Collector<Tuple3<Long, Long, Double>> out) {
+
+						final Long vertexId = vertexWithScoresMap.getId();
+
+						for (Entry<Long, Double> srcScorePair : vertexWithScoresMap.getValue().entrySet()) {
+							out.collect(new Tuple3<Long, Long, Double>(
+									srcScorePair.getKey(), vertexId, srcScorePair.getValue()));
+						}
+					}
+		});
+		
+		// group by source ID and select the _nodesPerSrc_ most relevant nodes
+		// (with positive score)
+		DataSet<Tuple1<Long>> mostRelevantNodes = sourcesWithRelevantNodes.groupBy(0).sortGroup(2, Order.DESCENDING)
+				.reduceGroup(new GroupReduceFunction<Tuple3<Long, Long, Double>, Tuple1<Long>>() {
+
+					public void reduce(Iterable<Tuple3<Long, Long, Double>> values,	Collector<Tuple1<Long>> out) {
+						
+						final Iterator<Tuple3<Long, Long, Double>> valuesIterator = values.iterator();
+						int i = 0;
+						while (valuesIterator.hasNext()) {
+							Tuple3<Long, Long, Double> tuple = valuesIterator.next();
+							if ((i < nodesPerSrc) && (tuple.f2 > 0)) {
+								out.collect(new Tuple1<Long>(tuple.f1));
+								i++;
+							}
+						}
+					}
+				});
+
+		// rank the relevant nodes according to how many times they appear in the list
+		// create <hostId, #occurrences> tuples
+		DataSet<Tuple2<Long, Integer>> relevantNodesWithOccurrences = mostRelevantNodes.map(
+				new MapFunction<Tuple1<Long>, Tuple2<Long, Integer>>() {
+					public Tuple2<Long, Integer> map(Tuple1<Long> vertexId) {
+						System.out.println("summing ***");
+						return new Tuple2<Long, Integer>(vertexId.f0, 1);
+					}
+		}).groupBy(0).sum(1);
+
+		/** sort and store the output **/
+		relevantNodesWithOccurrences.map(new MapFunction<Tuple2<Long, Integer>, Tuple3<Integer, Long, Integer>>() {
+			
+			public Tuple3<Integer, Long, Integer> map(Tuple2<Long, Integer> value) {
+				return new Tuple3<Integer, Long, Integer>(42, value.f0, value.f1);
+			}
+		}).groupBy(0).sortGroup(2, Order.DESCENDING).reduceGroup(
+				new GroupReduceFunction<Tuple3<Integer, Long, Integer>, Tuple2<Long, Integer>>() {
+					public void reduce(Iterable<Tuple3<Integer, Long, Integer>> values,
+							Collector<Tuple2<Long, Integer>> out) {
+						for (Tuple3<Integer, Long, Integer> value : values) {
+							out.collect(new Tuple2<Long, Integer>(value.f1, value.f2));
+						}
+					}
+		})
 		.writeAsCsv(args[2], "\n", "\t");
 		env.execute();
 	}
