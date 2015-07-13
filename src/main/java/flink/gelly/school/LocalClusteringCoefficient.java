@@ -47,16 +47,21 @@ import org.apache.flink.util.Collector;
 
 public class LocalClusteringCoefficient {
 
-
+	private static boolean fileOutput = false;
 	private static String edgeInputPath = null;
+	private static String outputPath = null;
 	
 	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
 		
-		if (args.length == 1) {			
+		if (args.length == 2) {
+			
+			fileOutput = true;
 			edgeInputPath = args[0];
+			outputPath = args[1];
+			
 		} else {
-			System.err.println("Usage: <input edges path> ");
+			System.err.println("Usage: <input edges path> <output path>");
 			return;
 		}
 
@@ -97,10 +102,16 @@ public class LocalClusteringCoefficient {
 						return value.f1;
 					}});
 	
-        //calculate the local coeff for each vertex
+        //calculate the local coefficients for each vertex
         DataSet<Tuple2<Long,Double>> coefficients= graph2.groupReduceOnNeighbors(new CoefficientCalc(), EdgeDirection.ALL);
 		
-        coefficients.print();
+        if(fileOutput){
+        	coefficients.writeAsCsv(outputPath, "\n", ",");
+			// since file sinks are lazy, we trigger the execution explicitly
+			env.execute("LCC Example");
+        }
+        else
+        	coefficients.print();
         
 	}
 	
@@ -178,10 +189,6 @@ public class LocalClusteringCoefficient {
 			
 			//number of connections amongst neighbors
 			numerator=links.size();
-			
-			//for debug
-			//System.out.println("vertex " +vertex.f0+ " links: "+links.toString());
-			//System.out.println("count " +count+"  "+den);
 			
 			if(denominator<1)
 				coefficient=0.0;
