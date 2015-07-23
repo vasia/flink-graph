@@ -61,6 +61,7 @@ It is to be noted that gather takes a Neighbor type as an argument. This is a co
 		}
 	}
 
+For a complete overview, have a look at the full implementation of the above [GSAPageRank](https://github.com/apache/flink/blob/master/flink-staging/flink-gelly/src/main/java/org/apache/flink/graph/example/GSAPageRank.java).
 
 ####Configuring a Gather-Sum-Apply Iteration
 

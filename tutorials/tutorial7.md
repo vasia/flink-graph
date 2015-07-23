@@ -12,6 +12,11 @@ The user only needs to implement two functions, corresponding to the phases abov
 
 
 Let's understand this better with an example. We are going to consider a simplified implementation of the [**PageRank**](https://en.wikipedia.org/wiki/PageRank) algorithm.
+#####A few words about PageRank
+*PageRank* is a numeric value that represents the important of a page on the web and is used by Google to rank websites in their search engine results.
+In short, the output of the algorithm is a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. For details, have a good read of the wikipedia article.
+
+#####Hands on
 In each superstep, each vertex sends a rank message to all of its neighbors. The message value is the part of the rank that the vertex is going to assign to the neighbor according to the edge weight connecting this vertex with its neighbor. Upon receiving the rank messages, each vertex sums the partial ranks, calculates its new ranking according to the dampening formula and updates its own PageRank value. The algorithm converges when there are no value updates. 
 
 
@@ -97,6 +102,7 @@ The above vertex-centric iteration can be executed as follows:
 				.getVertices();
 
 The output is a DataSet of vertices, where the Vertex value is the rank of the given Vertex.
+You can find the full implementation [here](https://github.com/apache/flink/blob/master/flink-staging/flink-gelly/src/main/java/org/apache/flink/graph/library/PageRankAlgorithm.java).
 
 ####Configuring a Vertex-Centric Iteration
 A vertex-centric iteration can be extended with information such as the total number of vertices, the in degree and out degree. Additionally, the neighborhood type (in/out/all) over which to run the vertex-centric iteration can be specified. By default, the updates from the in-neighbors are used to modify the current vertex’s state and messages are sent to out-neighbors.
