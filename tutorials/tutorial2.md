@@ -12,6 +12,9 @@ Suppose that we want to retrieve information regarding the number of vertices, n
 		DataSet<Tuple2<Long, Long>> vertexInDegrees = graph.inDegrees();
 		DataSet<Tuple2<Long, Long>> totDegrees = graph.getDegrees();
 
+Here is a snapshot of some statistics obtained by calling the *numberOfVertcies *and *numberOfEdges* methods for the three different ways of Graph creation as discussed in the last tutorial.
+
+.....image upload...
 
 
  ***A piece of cake, isn't it?!***           
@@ -44,5 +47,3 @@ Below is a full list of methods that can be used to retrieve metrics and statist
     // get the number of edges
     long numberOfEdges()
 
-    // get a DataSet of Triplets<srcVertex, trgVertex, edge>
-    DataSet<Triplet<K, VV, EV>> getTriplets()

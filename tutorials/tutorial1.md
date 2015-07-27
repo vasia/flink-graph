@@ -26,7 +26,7 @@ Flink programs look like regular Java programs with a main() method. Each progra
 
 The *ExecutionEnvironment* is the basis for all Flink programs. If you are executing your program inside an IDE or as a regular Java program it will create a local environment that will execute your program on your local machine. If you created a JAR file from you program, and invoke it through the command line or the web interface, the Flink cluster manager will execute your main method and getExecutionEnvironment() will return an execution environment for executing your program on a cluster.
 
-For specifying data sources the execution environment has several methods to read from files using various methods: you can just read them line by line, as CSV files, or using completely custom data input formats. Once you have a DataSet you can apply transformations to create a new DataSet which you can then write to a file, transform again, or combine with other DataSets. For more details, refer to the [DataSet API](https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html) as our focus in this tutorial is going to be *[Gelly](https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html)*.
+For specifying data sources the execution environment has several methods to read from files using various methods: you can just read them line by line, as CSV files, or using completely custom data input formats. Once you have a DataSet you can apply transformations to create a new DataSet which you can then write to a file, transform again, or combine with other DataSets. For more details, refer to the [DataSet API](https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html) as our focus in this tutorial is going to be *[Gelly](https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html)*. To be noted that mixing DataSet API and Gelly is seamless.
 
 ####Here comes in Gelly! 
 #####Some basics first
@@ -57,7 +57,7 @@ For example,
 
  The examples in this tutorial, assume that the user is given as input only information regarding edges. However, if the vertices' information is also present, then a similar approach is to be used to parse the input file. The optional DataSet of vertices can be passed as first parameter to the Graph creation methods. 
  If no vertex input is provided during Graph creation, Gelly will automatically produce the Vertex DataSet from the edge input. In this case, vertices will have no values. Alternatively, as we will see in the example below, you can provide a *MapFunction* as an argument to the creation method in order to initialize the Vertex values.
- For practicing, you can start with any publicly available graph data set (e.g. SNAP or Konnect) to read a file of edges, create and initialize a Gelly-Graph.
+ For practicing, you can start with any publicly available graph data set (e.g. SNAP or Konnect) to read a file of edges, create and initialize a Gelly-Graph. For our tutorials, we are going to use the "*[twitter list](http://konect.uni-koblenz.de/networks/ego-twitter)*" data set from Konnect, where a node represent a user and an edge the "follow relation" amongst users. 
 
 ***fromDataSet*** 
 
