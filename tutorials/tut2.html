@@ -1,0 +1,44 @@
+<h2>Tutorial #2: Know your Graph</h2>
+<p>In this very short tutorial, we will see how to get some information out of our Gelly-Graph. 
+Gelly includes built-in methods for retrieving various Graph properties and metrics. <img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSwRv5Zma4FlM2RjwmAXkvb__OxoQAusBBrUwu4mAJULXrtQu1u" />
+<strong>pic just for reference, draw a similar one</strong></p>
+<p>Suppose that we want to retrieve information regarding the number of vertices, number of edges and degrees (<em>IN</em>,<em>OUT<em>,</em>ALL</em>) of every node in our Graph. Then, we can simply do as follows:</p>
+<pre><code>    Long numVertices = graph.numberOfVertices();
+    Long numEdges = graph.numberOfEdges();      
+    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.outDegrees();
+    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.inDegrees();
+    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.getDegrees();
+</code></pre>
+
+<p>Here is a snapshot of some statistics obtained by calling the *numberOfVertcies *and <em>numberOfEdges</em> methods for the three different ways of Graph creation as discussed in the last tutorial.</p>
+<p>.....image upload...</p>
+<p><strong><em>A piece of cake, isn't it?!</em></strong>         <br />
+Below is a full list of methods that can be used to retrieve metrics and statistics in Gelly.</p>
+<pre><code>// get the Vertex DataSet
+DataSet&lt;Vertex&lt;K, VV&gt;&gt; getVertices()
+
+// get the Edge DataSet
+DataSet&lt;Edge&lt;K, EV&gt;&gt; getEdges()
+
+// get the IDs of the vertices as a DataSet
+DataSet&lt;K&gt; getVertexIds()
+
+// get the source-target pairs of the edge IDs as a DataSet
+DataSet&lt;Tuple2&lt;K, K&gt;&gt; getEdgeIds() 
+
+// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices
+DataSet&lt;Tuple2&lt;K, Long&gt;&gt; inDegrees() 
+
+// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices
+DataSet&lt;Tuple2&lt;K, Long&gt;&gt; outDegrees()
+
+// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree is the sum of in- and out- degrees
+DataSet&lt;Tuple2&lt;K, Long&gt;&gt; getDegrees()
+
+// get the number of vertices
+long numberOfVertices()
+
+// get the number of edges
+long numberOfEdges()
+</code></pre>
+
