@@ -1,126 +1,149 @@
-    <!DOCTYPE html><html>
-        <head>
-           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-            <title>Tutorial1</title>
-            <link rel="stylesheet" type="text/css" href="styles.css">
-        </head>
+        <!DOCTYPE html><html>
+            <head>
+               <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <title>Tutorial1</title>
+                <link rel="stylesheet" type="text/css" href="styles.css">
+            </head>
+        <body>
+                <div id="wrapper">
+                            <div id="menu">
+                    <ul>
+                        <li><a href="http://gellyschool.com" title="Home">Home</a></li>
+                        <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly Source Code">Code</a></li>
+                    </ul>
+                </div><!-- menu -->
+                <div id="header">
+                <img src="./images/logo_color_50.png">
+                    <h1>Learn you some Gelly</h1></img>
+                 </div> <!-- header -->
 
-    <h1 style="margin-top: -3em">Tutorial #1: Load public data and create a graph</h1>
-    <p><img src="http://leap2it.files.wordpress.com/2013/04/lets_get_started_shout.jpg" /></p>
-    <p><strong>make a similar drawing, this is just for reference</strong></p>
-    <h3>What you need to get started</h3>
-    <p>All you need to start with a gelly-based flink project, is to add the following dedpendency to your pom.xml:</p>
-    <p><code>&lt;dependency&gt;</code>            <br />
-       <code>&lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</code>
-       <code>&lt;artifactId&gt;flink-gelly&lt;/artifactId&gt;</code>
-        <code>&lt;version&gt;0.10-SNAPSHOT&lt;/version&gt;</code>
-    <code>&lt;/dependency&gt;</code></p>
-    <h3>Let's get to coding</h3>
-    <h6>General overview</h6>
-    <p style="margin-top: -20px">Flink programs look like regular Java programs with a main() method. Each program consists of the same basic parts:</p>
-    <ol>
-    <li>Obtain an <em>ExecutionEnvironment</em>,</li>
-    <li>Load/create the initial data,</li>
-    <li>Specify transformations on this data,</li>
-    <li>Specify where to put the results of your computations, and</li>
-    <li>Trigger the program execution</li>
-    </ol>
-    <p>The <em>ExecutionEnvironment</em> is the basis for all Flink programs. If you are executing your program inside an IDE or as a regular Java program it will create a local environment that will execute your program on your local machine. If you created a JAR file from you program, and invoke it through the command line or the web interface, the Flink cluster manager will execute your main method and getExecutionEnvironment() will return an execution environment for executing your program on a cluster.</p>
-    <p>For specifying data sources the execution environment has several methods to read from files using various methods: you can just read them line by line, as CSV files, or using completely custom data input formats. Once you have a DataSet you can apply transformations to create a new DataSet which you can then write to a file, transform again, or combine with other DataSets. For more details, refer to the <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html">DataSet API</a> as our focus in this tutorial is going to be <em><a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html">Gelly</a></em>. To be noted that mixing DataSet API and Gelly is seamless.</p>
-    <h4>Here comes in Gelly!</h4>
-    <h5>Some basics first</h5>
-    <p>In Gelly, a Graph is represented by a DataSet of vertices and a DataSet of edges.
-    The Graph nodes are represented by the <em>Vertex</em> type. A Vertex is defined by a unique ID and a value. Vertex IDs should implement the Comparable interface. Vertices without value can be represented by setting the value type to NullValue.
-    The graph edges are represented by the <em>Edge</em> type. An Edge is defined by a source ID (the ID of the source Vertex), a target ID (the ID of the target Vertex) and an optional value. The source and target IDs should be of the same type as the Vertex IDs. Edges with no value have a NullValue value type.
-    For example,</p>
-    <pre><code>Vertex&lt;Long, String&gt; v = new Vertex&lt;Long, String&gt;(1L, &quot;foo&quot;);
-    Edge&lt;Long, Double&gt; e = new Edge&lt;Long, Double&gt;(1L, 2L, 0.5);
+                <div id="container">
 
-     /**
-     * Graph&lt;&lt;K&gt;,&lt;VV&gt;,&lt;EV&gt;&gt;
-     * &lt;K&gt; key type for edge and vertex id
-     * &lt;VV&gt;value type for vertices
-     * &lt;EV&gt;value type for edges
-     **/
-    </code></pre>
+        <h1 style="margin-top: -3em">Tutorial #1: Load public data and create a graph</h1>
+        <p><img src="./images/lets_get_started_shout.jpg" align="right"/></p>
+        <h3>What you need to get started</h3>
+        <p>All you need to start with a gelly-based flink project, is to add the following dedpendency to your pom.xml:</p>
+        <p><code>&lt;dependency&gt;</code>            <br />
+           <code>&lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</code>
+           <code>&lt;artifactId&gt;flink-gelly&lt;/artifactId&gt;</code>
+            <code>&lt;version&gt;0.10-SNAPSHOT&lt;/version&gt;</code>
+        <code>&lt;/dependency&gt;</code></p>
+        <h3>Let's get to coding</h3>
+        <h6>General overview</h6>
+        <p style="margin-top: -20px">Flink programs look like regular Java programs with a main() method. Each program consists of the same basic parts:</p>
+        <ol>
+        <li>Obtain an <em>ExecutionEnvironment</em>,</li>
+        <li>Load/create the initial data,</li>
+        <li>Specify transformations on this data,</li>
+        <li>Specify where to put the results of your computations, and</li>
+        <li>Trigger the program execution</li>
+        </ol>
+        <p>The <em>ExecutionEnvironment</em> is the basis for all Flink programs. If you are executing your program inside an IDE or as a regular Java program it will create a local environment that will execute your program on your local machine. If you created a JAR file from you program, and invoke it through the command line or the web interface, the Flink cluster manager will execute your main method and getExecutionEnvironment() will return an execution environment for executing your program on a cluster.</p>
+        <p>For specifying data sources the execution environment has several methods to read from files using various methods: you can just read them line by line, as CSV files, or using completely custom data input formats. Once you have a DataSet you can apply transformations to create a new DataSet which you can then write to a file, transform again, or combine with other DataSets. For more details, refer to the <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html">DataSet API</a> as our focus in this tutorial is going to be <em><a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html">Gelly</a></em>. To be noted that mixing DataSet API and Gelly is seamless.</p>
+        <h4>Here comes in Gelly!</h4>
+        <h5>Some basics first</h5>
+        <p>In Gelly, a Graph is represented by a DataSet of vertices and a DataSet of edges.
+        The Graph nodes are represented by the <em>Vertex</em> type. A Vertex is defined by a unique ID and a value. Vertex IDs should implement the Comparable interface. Vertices without value can be represented by setting the value type to NullValue.
+        The graph edges are represented by the <em>Edge</em> type. An Edge is defined by a source ID (the ID of the source Vertex), a target ID (the ID of the target Vertex) and an optional value. The source and target IDs should be of the same type as the Vertex IDs. Edges with no value have a NullValue value type.
+        For example,</p>
+        <pre><code>Vertex&lt;Long, String&gt; v = new Vertex&lt;Long, String&gt;(1L, &quot;foo&quot;);
+        Edge&lt;Long, Double&gt; e = new Edge&lt;Long, Double&gt;(1L, 2L, 0.5);
 
-    <h5 style="margin-top: -20px">Steps to follow</h5>
-    <p style="margin-top: -5px">1)Read data from input file as a DataSet of Edges, DataSet of Tuple3 or as a Collection
-     2)Depending on the choice in step one, use the appropriate graph creation method:</p>
-    <pre><code> Graph.fromDataSet(vertices, edges, env);
-     Graph.fromTupleDataSet(vertexTuples, edgeTuples, env);
-     Graph.fromCollection(vertexList, edgeList, env);
-    </code></pre>
+         /**
+         * Graph&lt;&lt;K&gt;,&lt;VV&gt;,&lt;EV&gt;&gt;
+         * &lt;K&gt; key type for edge and vertex id
+         * &lt;VV&gt;value type for vertices
+         * &lt;EV&gt;value type for edges
+         **/
+        </code></pre>
 
-    <p>The examples in this tutorial, assume that the user is given as input only information regarding edges. However, if the vertices' information is also present, then a similar approach is to be used to parse the input file. The optional DataSet of vertices can be passed as first parameter to the Graph creation methods.
-     If no vertex input is provided during Graph creation, Gelly will automatically produce the Vertex DataSet from the edge input. In this case, vertices will have no values. Alternatively, as we will see in the example below, you can provide a <em>MapFunction</em> as an argument to the creation method in order to initialize the Vertex values.
-     For practicing, you can start with any publicly available graph data set (e.g. SNAP or Konnect) to read a file of edges, create and initialize a Gelly-Graph. For our tutorials, we are going to use the &quot;<em><a href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter list</a></em>&quot; data set from Konnect, where a node represent a user and an edge the &quot;follow relation&quot; amongst users. </p>
-    <p style="color:#002182"><strong><em>fromDataSet</em></strong> </p>
-    <pre><code>    ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; links = getLinksDataSet(env);
+        <h5 style="margin-top: -20px">Steps to follow</h5>
+        <p style="margin-top: -5px">1)Read data from input file as a DataSet of Edges, DataSet of Tuple3 or as a Collection
+         2)Depending on the choice in step one, use the appropriate graph creation method:</p>
+        <pre><code> Graph.fromDataSet(vertices, edges, env);
+         Graph.fromTupleDataSet(vertexTuples, edgeTuples, env);
+         Graph.fromCollection(vertexList, edgeList, env);
+        </code></pre>
 
-        Graph&lt;Long, Double, NullValue&gt; graph = Graph.fromDataSet(links, new MapFunction&lt;Long, Double&gt;() {
+        <p>The examples in this tutorial, assume that the user is given as input only information regarding edges. However, if the vertices' information is also present, then a similar approach is to be used to parse the input file. The optional DataSet of vertices can be passed as first parameter to the Graph creation methods.
+         If no vertex input is provided during Graph creation, Gelly will automatically produce the Vertex DataSet from the edge input. In this case, vertices will have no values. Alternatively, as we will see in the example below, you can provide a <em>MapFunction</em> as an argument to the creation method in order to initialize the Vertex values.
+         For practicing, you can start with any publicly available graph data set (e.g. SNAP or Konnect) to read a file of edges, create and initialize a Gelly-Graph. For our tutorials, we are going to use the &quot;<em><a href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter list</a></em>&quot; data set from Konnect, where a node represent a user and an edge the &quot;follow relation&quot; amongst users. </p>
+        <p style="color:#002182"><strong><em>fromDataSet</em></strong> </p>
+        <pre><code>    ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+            DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; links = getLinksDataSet(env);
 
-            //mapping function to initialize vertex values to 1.0
-            public Double map(Long value) throws Exception {
-                return 1.0;
-            }
-        }, env);
+            Graph&lt;Long, Double, NullValue&gt; graph = Graph.fromDataSet(links, new MapFunction&lt;Long, Double&gt;() {
+
+                //mapping function to initialize vertex values to 1.0
+                public Double map(Long value) throws Exception {
+                    return 1.0;
+                }
+            }, env);
 
 
 
-    @SuppressWarnings(&quot;serial&quot;)
-    private static DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; getLinksDataSet(
-            ExecutionEnvironment env) {
+        @SuppressWarnings(&quot;serial&quot;)
+        private static DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; getLinksDataSet(
+                ExecutionEnvironment env) {
 
-    //Input data format: &lt;srcEdgeId&gt;\t&lt;targetEdgeId&gt;\n
-    //Since the output is a data set of edges, a mapper is used to create an edge from
-    //a Tuple2, with edge value set to null
-            return env.readCsvFile(edgeInputPath)
+        //Input data format: &lt;srcEdgeId&gt;\t&lt;targetEdgeId&gt;\n
+        //Since the output is a data set of edges, a mapper is used to create an edge from
+        //a Tuple2, with edge value set to null
+                return env.readCsvFile(edgeInputPath)
+                        .fieldDelimiter(&quot; &quot;)
+                        .lineDelimiter(&quot;\n&quot;)
+                        .types(Long.class, Long.class)
+                        .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
+                            public Edge&lt;Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; value) {
+                                return new Edge&lt;Long, NullValue&gt;(value.f0, value.f1,
+                                        NullValue.getInstance());
+                                }
+                            });
+
+
+        //in case the input is: &lt;srcEdgeId&gt;\t&lt;targetEdgeId&gt;\t&lt;EdgeValue&gt;\n, replace with:
+                //.types(String.class, String.class, Double.class)
+                //.map(new Tuple3ToEdgeMap&lt;String, Double&gt;());
+                }
+
+        }
+        </code></pre>
+
+        <p style="color:#002182"><strong><em>fromTupleDataSet</em></strong> </p>
+        <pre><code>    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; edgeTuples = env.readCsvFile(args[0])
                     .fieldDelimiter(&quot; &quot;)
                     .lineDelimiter(&quot;\n&quot;)
-                    .types(Long.class, Long.class)
-                    .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
-                        public Edge&lt;Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; value) {
-                            return new Edge&lt;Long, NullValue&gt;(value.f0, value.f1,
-                                    NullValue.getInstance());
-                            }
-                        });
+                    .types(Long.class, Long.class);
 
 
-    //in case the input is: &lt;srcEdgeId&gt;\t&lt;targetEdgeId&gt;\t&lt;EdgeValue&gt;\n, replace with:
-            //.types(String.class, String.class, Double.class)
-            //.map(new Tuple3ToEdgeMap&lt;String, Double&gt;());
-            }
+            //This Graph creation method takes as input Edges, as a Tuple3 DataSet.
+            //In case, input is a Tuple2 use a mapper function which initializes edge values
+            //as follows:
 
-    }
-    </code></pre>
+            Graph&lt;Long, NullValue, NullValue&gt; graph2 = Graph.fromTupleDataSet(edgeTuples
+                    .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Tuple3&lt;Long, Long, NullValue&gt;&gt;() {
+                        public Tuple3&lt;Long, Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; input) {
+                            return new Tuple3&lt;Long, Long, NullValue&gt;(input.f0, input.f1, null);
+                        }
+                    }), env);
+        </code></pre>
 
-    <p style="color:#002182"><strong><em>fromTupleDataSet</em></strong> </p>
-    <pre><code>    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; edgeTuples = env.readCsvFile(args[0])
-                .fieldDelimiter(&quot; &quot;)
-                .lineDelimiter(&quot;\n&quot;)
-                .types(Long.class, Long.class);
+        <p style="color:#002182"><strong><em>fromCollection</em></strong></p>
+        <pre><code>    //getLinksDataSet() method is the same as for case 1
+            List&lt;Edge&lt;Long, NullValue&gt;&gt; edgeList = getLinksDataSet(env).collect();
+            Graph&lt;Long, NullValue, NullValue&gt; graph3 = Graph.fromCollection(edgeList, env);
+        </code></pre>
+
+        <h5 style="padding-top: 80px">It was that easy!</h5>
+        <p>Now, we know how to create a Graph in Gelly from virtually any sort of input data set. In the next tutorial, we will get to know some details regarding the Graph we have just created. See you in  <a href="./tut2.html"><em>tutorial#2</em></a> </p>
 
 
-        //This Graph creation method takes as input Edges, as a Tuple3 DataSet.
-        //In case, input is a Tuple2 use a mapper function which initializes edge values
-        //as follows:
+                </div><!-- content -->
+                <div id="footer">
+                    <p>This site is maintained by  <a href="https://github.com/vasia">Vasia</a></p>
+                </div> <!-- footer -->
+            </div> <!-- wrapper -->
 
-        Graph&lt;Long, NullValue, NullValue&gt; graph2 = Graph.fromTupleDataSet(edgeTuples
-                .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Tuple3&lt;Long, Long, NullValue&gt;&gt;() {
-                    public Tuple3&lt;Long, Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; input) {
-                        return new Tuple3&lt;Long, Long, NullValue&gt;(input.f0, input.f1, null);
-                    }
-                }), env);
-    </code></pre>
 
-    <p style="color:#002182"><strong><em>fromCollection</em></strong></p>
-    <pre><code>    //getLinksDataSet() method is the same as for case 1
-        List&lt;Edge&lt;Long, NullValue&gt;&gt; edgeList = getLinksDataSet(env).collect();
-        Graph&lt;Long, NullValue, NullValue&gt; graph3 = Graph.fromCollection(edgeList, env);
-    </code></pre>
-
-    <h5 style="padding-top: 80px">It was that easy!</h5>
-    <p>Now, we know how to create a Graph in Gelly from virtually any sort of input data set. In the next tutorial, we will get to know some details regarding the Graph we have just created. See you in <em>tutorial#2</em> <strong>(add link)</strong>!<br> </p>		
-    </html>
+        </body>
+        </html>

@@ -1,50 +1,72 @@
-    <!DOCTYPE html><html>
-        <head>
-           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-            <title>Tutorial1</title>
-            <link rel="stylesheet" type="text/css" href="styles.css">
-        </head>
-		<h1 style="margin-top: -3em">Tutorial #2: Know your Graph</h1>
-<p>In this very short tutorial, we will see how to get some information out of our Gelly-Graph. 
-Gelly includes built-in methods for retrieving various Graph properties and metrics.</p> <img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSwRv5Zma4FlM2RjwmAXkvb__OxoQAusBBrUwu4mAJULXrtQu1u" />
-<p><strong>pic just for reference, draw a similar one</strong></p>
-<p>Suppose that we want to retrieve information regarding the number of vertices, number of edges and degrees (<em>IN</em>,<em>OUT<em>,</em>ALL</em>) of every node in our Graph. Then, we can simply do as follows:</p>
-<pre><code>    Long numVertices = graph.numberOfVertices();
-    Long numEdges = graph.numberOfEdges();      
-    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.outDegrees();
-    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.inDegrees();
-    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.getDegrees();
-</code></pre>
+		<!DOCTYPE html><html>
+			<head>
+			   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+				<title>Tutorial2</title>
+				<link rel="stylesheet" type="text/css" href="styles.css">
+			</head>
+				<body>
+				<div id="wrapper">
+							<div id="menu">
+					<ul>
+						<li><a href="http://gellyschool.com" title="Home">Home</a></li>
+						<li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly Source Code">Code</a></li>
+					</ul>
+				</div><!-- menu -->
+				<div id="header">
+				<img src="./images/logo_color_50.png">
+					<h1>Learn you some Gelly</h1></img>
+				 </div> <!-- header -->
 
-<p>Here is a snapshot of some statistics obtained by calling the *numberOfVertcies *and <em>numberOfEdges</em> methods for the three different ways of Graph creation as discussed in the last tutorial.</p>
-<p>.....image upload...</p>
-<p><strong><em style="color:#00004C">A piece of cake, isn't it?!</em></strong>         <br />
-Below is a full list of methods that can be used to retrieve metrics and statistics in Gelly.</p>
-<pre><code>// get the Vertex DataSet
-DataSet&lt;Vertex&lt;K, VV&gt;&gt; getVertices()
+				<div id="container">
+			<h1 style="margin-top: -3em">Tutorial #2: Know your Graph</h1>
+	<p>In this very short tutorial, we will see how to get some information out of our Gelly-Graph.
+	Gelly includes built-in methods for retrieving various Graph properties and metrics.</p> <img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSwRv5Zma4FlM2RjwmAXkvb__OxoQAusBBrUwu4mAJULXrtQu1u" align="right"/>
+	<p><strong>pic just for reference, draw a similar one</strong></p>
+	<p>Suppose that we want to retrieve information regarding the number of vertices, number of edges and degrees (<em>IN</em>,<em>OUT<em>,</em>ALL</em>) of every node in our Graph. Then, we can simply do as follows:</p>
+	<pre><code>    Long numVertices = graph.numberOfVertices();
+		Long numEdges = graph.numberOfEdges();
+		DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.outDegrees();
+		DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.inDegrees();
+		DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.getDegrees();
+	</code></pre>
 
-// get the Edge DataSet
-DataSet&lt;Edge&lt;K, EV&gt;&gt; getEdges()
+	<p>Here is a snapshot of some statistics obtained by calling the *numberOfVertcies *and <em>numberOfEdges</em> methods for the three different ways of Graph creation as discussed in the last tutorial.</p>
+	<p>.....image upload...</p>
+	<p><strong><em style="color:#00004C">A piece of cake, isn't it?!</em></strong>         <br />
+	Below is a full list of methods that can be used to retrieve metrics and statistics in Gelly.</p>
+	<pre><code>// get the Vertex DataSet
+	DataSet&lt;Vertex&lt;K, VV&gt;&gt; getVertices()
 
-// get the IDs of the vertices as a DataSet
-DataSet&lt;K&gt; getVertexIds()
+	// get the Edge DataSet
+	DataSet&lt;Edge&lt;K, EV&gt;&gt; getEdges()
 
-// get the source-target pairs of the edge IDs as a DataSet
-DataSet&lt;Tuple2&lt;K, K&gt;&gt; getEdgeIds() 
+	// get the IDs of the vertices as a DataSet
+	DataSet&lt;K&gt; getVertexIds()
 
-// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices
-DataSet&lt;Tuple2&lt;K, Long&gt;&gt; inDegrees() 
+	// get the source-target pairs of the edge IDs as a DataSet
+	DataSet&lt;Tuple2&lt;K, K&gt;&gt; getEdgeIds()
 
-// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices
-DataSet&lt;Tuple2&lt;K, Long&gt;&gt; outDegrees()
+	// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices
+	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; inDegrees()
 
-// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree is the sum of in- and out- degrees
-DataSet&lt;Tuple2&lt;K, Long&gt;&gt; getDegrees()
+	// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices
+	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; outDegrees()
 
-// get the number of vertices
-long numberOfVertices()
+	// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree is the sum of in- and out- degrees
+	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; getDegrees()
 
-// get the number of edges
-long numberOfEdges()
-</code></pre>
+	// get the number of vertices
+	long numberOfVertices()
+
+	// get the number of edges
+	long numberOfEdges()
+	</code></pre>
+				</div><!-- content -->
+				<div id="footer">
+					<p>This site is maintained by  <a href="https://github.com/vasia">Vasia</a></p>
+				</div> <!-- footer -->
+			</div> <!-- wrapper -->
+
+
+		</body>
 
