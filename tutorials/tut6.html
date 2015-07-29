@@ -1,0 +1,80 @@
+        <!DOCTYPE html><html>
+            <head>
+               <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <title>Tutorial6</title>
+                <link rel="stylesheet" type="text/css" href="styles.css">
+            </head>
+        <body>
+                <div id="wrapper">
+
+                <div id="header">
+                <img src="./images/logo_color_50.png">
+                    <h1>Learn you some Gelly</h1></img>
+                 </div> <!-- header -->
+
+		<div id="menu">
+			<ul id="list-nav">
+				<li class="first"><a href="http://gellyschool.com"
+					title="Gelly Home">HomePage</a></li>
+				<li><a href="./tut1.html"
+					title="Load public data and create a graph">Tutorial#1</a></li>
+				<li><a href="./tut2.html" title="Know your graph">Tutorial#2</a></li>
+				<li><a href="./tut3.html" title="	Simple transformations">Tutorial#3</a></li>
+				<li><a href="./tut4.html" title="Advanced transofrmations">Tutorial#4</a></li>
+				<li><a href="./tut5.html" title="Neighborhood methods">Tutorial#5</a></li>
+				<li><a href="./tut6.html" title="Implement a graph validator">Tutorial#6</a></li>
+				<li><a href="./tut7.html" title="Vertex-centric iterations">Tutorial#7</a></li>
+				<li><a href="./tut8.html" title="Gather-sum-apply iterations">Tutorial#8</a></li>
+				<li class="last"><a
+					href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly"
+					title="Gelly on GitHub">SourceCode</a></li>
+				</a>
+				</li>
+			</ul>
+		</div>
+		<!-- menu -->
+                <div id="container">
+				<h2>Tutorial #6: Implement a graph validator</h2>
+<h3>Don't trust your Graph!</h3>
+<p>Now that we know how to define a Graph in Gelly and to perform a good amount of transformations on it, we might need to check for the correctness of our Gelly-Graph. <img src="http://www.ms-addons.com/Sites/ms/content/Images/Validation%20Checks.png" align="right"/>
+Gelly provides a simple utility for performing validation checks on input graphs. Depending on the application context, a graph may or may not be valid according to certain criteria. For example, a user might need to validate whether their graph contains duplicate edges or whether its structure is bipartite. In order to validate a graph, one can define a custom <strong><em>GraphValidator</em></strong> and implement its <strong><em>validate()</em></strong> method. 
+<strong><em>InvalidVertexIdsValidator</em></strong> is Gelly’s pre-defined validator. It checks that the edge set contains valid vertex IDs, i.e. that all edge IDs also exist in the vertex IDs set.</p>
+<pre><code>    Boolean validGraph;
+    validGraph= graph.validate(new InvalidVertexIdsValidator&lt;Long,Double,Double&gt;());
+</code></pre>
+
+<p>Below is an example of a custom validator. It shows how the validate method can be defined. In this example, the method checks whether all the edges have been assigned a value or not. In case there exists an edge with null value, the validator returns false. You can implement any desired check by just modifying the validate method.</p>
+<pre><code>    validGraph= graph.validate(new InvalidEdgeValidator());
+
+
+        @SuppressWarnings(&quot;serial&quot;)
+        static final class InvalidEdgeValidator extends GraphValidator&lt;Long,Double,Double&gt; {
+
+            @Override
+            public boolean validate(Graph&lt;Long, Double, Double&gt; graph)
+                    throws Exception {      
+                DataSet&lt;Edge&lt;Long,Double&gt;&gt; edgeIds = graph.getEdges()
+                    .flatMap(new CheckEdgeIds&lt;Long,Double&gt;());
+                return edgeIds.count()==0;
+            }
+
+            private static final class CheckEdgeIds&lt;Long,Double&gt; implements FlatMapFunction&lt;Edge&lt;Long,Double&gt;,
+    		Edge&lt;Long,Double&gt;&gt; {
+                public void flatMap(Edge&lt;Long,Double&gt; edge, Collector&lt;Edge&lt;Long,Double&gt;&gt; out) {
+                    if(edge.getValue() == null){ 
+                    out.collect(new Edge&lt;Long,Double&gt;(edge.f0,edge.f1,edge.f2));
+                    }
+
+                }
+            }   
+</code></pre>
+
+                </div><!-- content -->
+                <div id="footer">
+                    <p>This site is maintained by  <a href="https://github.com/vasia">Vasia</a></p>
+                </div> <!-- footer -->
+            </div> <!-- wrapper -->
+
+
+        </body>
+        </html>

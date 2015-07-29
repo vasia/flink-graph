@@ -1,0 +1,111 @@
+        <!DOCTYPE html><html>
+            <head>
+               <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <title>Tutorial3</title>
+                <link rel="stylesheet" type="text/css" href="styles.css">
+            </head>
+        <body>
+                <div id="wrapper">
+
+                <div id="header">
+                <img src="./images/logo_color_50.png">
+                    <h1>Learn you some Gelly</h1></img>
+              </div> <!-- header -->
+
+		<div id="menu">
+			<ul id="list-nav">
+				<li class="first"><a href="http://gellyschool.com"
+					title="Gelly Home">HomePage</a></li>
+				<li><a href="./tut1.html"
+					title="Load public data and create a graph">Tutorial#1</a></li>
+				<li><a href="./tut2.html" title="Know your graph">Tutorial#2</a></li>
+				<li><a href="./tut3.html" title="	Simple transformations">Tutorial#3</a></li>
+				<li><a href="./tut4.html" title="Advanced transofrmations">Tutorial#4</a></li>
+				<li><a href="./tut5.html" title="Neighborhood methods">Tutorial#5</a></li>
+				<li><a href="./tut6.html" title="Implement a graph validator">Tutorial#6</a></li>
+				<li><a href="./tut7.html" title="Vertex-centric iterations">Tutorial#7</a></li>
+				<li><a href="./tut8.html" title="Gather-sum-apply iterations">Tutorial#8</a></li>
+				<li class="last"><a
+					href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly"
+					title="Gelly on GitHub">SourceCode</a></li>
+				</a>
+				</li>
+			</ul>
+		</div>
+		<!-- menu -->
+                <div id="container"><h2>Tutorial #3: Simple Transformations</h2>
+<h3>Fidget with your Graph</h3>
+<p>In this tutorial, we will see some simple transformations which can be performed on a Graph in Gelly.</p>
+<h4>Map</h4>
+<p>Gelly provides specialized methods for applying a map transformation on the <em>Vertex</em> values or <em>Edge</em> values. <strong><em>mapVertices</em></strong> and <strong><em>mapEdges</em></strong> return a new Graph, where the IDs of the vertices (or edges) remain unchanged, while the values are transformed according to the provided user-defined map function. The map functions also allow changing the type of the vertex or edge values.
+In the simple example below, the first map function is used to increment the value of all the vertices by one while the second one updates the Edge values from NullValue type to Double with value 1.0.</p>
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; updatedVerticesGraph = graph.mapVertices(
+                    new MapFunction&lt;Vertex&lt;Long, Double&gt;, Double&gt;() {
+                        public Double map(Vertex&lt;Long, Double&gt; value) {
+                            return value.getValue() + 1;
+                        }
+                    });
+
+    Graph&lt;Long, Double, Double&gt; updatedEdgesGraph = updatedVerticesGraph.mapEdges(
+            new MapFunction&lt;Edge&lt;Long, NullValue&gt;, Double&gt;() {
+                public Double map(Edge&lt;Long, NullValue&gt; value) {
+                    return 1.0;
+                }
+            });
+</code></pre>
+
+<h4>Reverse</h4>
+<p>This is a very handy transformation which allows us to easily reverse all the links in our Graph. The reverse() method returns a new Graph where the direction of all edges has been reversed. It can be called as follows:	</p>
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.reverse();
+</code></pre>
+
+<h4>Filter</h4>
+<p>A filter transformation applies a user-defined filter function on the vertices or edges of the Graph. <strong><em>filterOnEdges</em></strong> will create a sub-graph of the original graph, keeping only the edges that satisfy the provided predicate. Note that the vertex dataset will not be modified. Respectively, <strong><em>filterOnVertices</em></strong> applies a filter on the vertices of the graph. Edges whose source and/or target do not satisfy the vertex predicate are removed from the resulting edge dataset.</p>
+<pre><code> Graph&lt;Long, Double, NullValue&gt; filtered =graph.filterOnVertices(new FilterFunction&lt;
+    Vertex&lt;Long, Double&gt;&gt;() {
+        public boolean filter(Vertex&lt;Long, Double&gt; vertex) {
+            // keep only vertices with positive values
+            return (vertex.getValue() &gt; 0);
+       }
+   });
+
+
+
+    Graph&lt;Long, Double, Double&gt; filteredE =updatedEdgesGraph.filterOnEdges(new FilterFunction
+     &lt;Edge&lt;Long, Double&gt;&gt;() {
+        public boolean filter(Edge&lt;Long, Double&gt; e) {
+        // keep only edges with positive values
+            return (e.getValue() &gt; 0);
+       }
+
+   });
+</code></pre>
+
+<p>The <strong><em>subgraph</em></strong> method can be used to apply a filter function to the vertices and the edges at the same time.</p>
+<pre><code>graph.subgraph(
+    new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
+            public boolean filter(Vertex&lt;Long, Long&gt; vertex) {
+                // keep only vertices with positive values
+                return (vertex.getValue() &gt; 0);
+           }
+       },
+    new FilterFunction&lt;Edge&lt;Long, Long&gt;&gt;() {
+            public boolean filter(Edge&lt;Long, Long&gt; edge) {
+                // keep only edges with negative values
+                return (edge.getValue() &lt; 0);
+            }
+    })
+</code></pre>
+
+<p>The above code snippet shows a simultaneous filtering being applied to both edges and vertices.</p>
+
+
+                </div><!-- content -->
+                <div id="footer">
+                    <p>This site is maintained by  <a href="https://github.com/vasia">Vasia</a></p>
+                </div> <!-- footer -->
+            </div> <!-- wrapper -->
+
+
+        </body>
+		</html>
