@@ -73,7 +73,7 @@
       </div>
 			<h3>Here comes Gelly</h3>
 			<p>We start delving into Gelly by focusing on the following three concepts in this tutorial:
-			basics of a Gelly-Graph, reading input data set and Graph creation using the different methods available. We will
+			basics of a Gelly-Graph, reading input data set and Graph creation using the different available methods. We will
 			finish by showing how to run a library method on our Graph.					
 			<h4>Some Basics</h4>
 			<p>
@@ -81,18 +81,18 @@
 				DataSet of edges. Graph nodes are represented by the <em>Vertex</em>
 				type. A Vertex is defined by a unique ID and an optional value.
 				Vertices without value can be represented by setting the value type to NullValue.
-				The graph edges are represented by the <em>Edge</em> type. An Edge is defined
+				Graph edges are represented by the <em>Edge</em> type. An Edge is defined
 				by a source ID (the ID of the source Vertex), a target ID (the ID of
 				the target Vertex) and an optional value. The source and target IDs
 				should be of the same type as the Vertex IDs. Edges with no value
 				have a NullValue value type. For example, let's create two arbitrary vertices 
-				and an edge connecting them.
+				and an edge connecting them:
 			</p><br>
 			<p><code>Vertex&lt;Long, String&gt; v1 = new Vertex&lt;Long, String&gt;(1L, &quot;foo&quot;);<br>
                      Vertex&lt;Long, String&gt; v2 = new Vertex&lt;Long, String&gt;(2L, &quot;goo&quot;);<br>
                      Edge&lt;Long, Double&gt; e = new Edge&lt;Long, Double&gt;(1L, 2L, 0.5);</code></p><br>
 			<p>
-			So, we have created two vertices v1 and v2 with Long IDs '1L' and '2L' and String values
+			So we have created two vertices v1 and v2 with Long IDs '1L' and '2L' and String values
 			"foo" and "goo" respectively, connected by an Edge with Double value of 0.5.
 			Once we have our complete data set of edges and vertices, a Graph can be defined
 			by passing them as parameters to the graph creation methods, as we will see next.<br> 
@@ -125,7 +125,7 @@
 				to use the &quot;<em><a
 					href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter
 						list</a></em>&quot; data set from Konnect, where a node represent a user
-				and an edge the &quot;follow relation&quot; amongst users. We will see how three different 
+				and an edge the &quot;follow relation&quot; among users. We will see how three different 
 				graph creation methods can be used starting from this twitter data set. The purpose is to show the different 
 				approaches that can be adopted depending on whether you are given a data set of edges, tuples or a collection.<br><br>
 				
@@ -246,16 +246,16 @@
 </code></p>
             The result is a DataSet of vertices where each Vertex ID is associated with its PageRank.
 			Here, the purpose is just to show  how to call a library method so we are ignoring the details
-			regarding the algorithm. We will talk about it again, in a very detailed manner, in the following more advanced tutorials.		
+			regarding the algorithm. We will talk about it again, in a detailed manner, in the following more advanced tutorials.		
 			</p>
 			<br>
-			<h4>It was that easy!</h4>
+			<h4>It was that easy</h4>
 			<p>
 				We have learnt how to create a Graph in Gelly from virtually any sort
 				of input data set. In the next tutorial, we will get to know some
-				details regarding the Graph we have just created. </p>
+				details regarding the Graph we have just created. </p><br>
 
-	<p><a style="margin-left: 100px" href="./tutorial0.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial2.html"><em>Next</em></a></p>
+	<p><h4><a style="margin-left: 100px" href="./tutorial0.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial2.html"><em>Next--></em></a></h4></p>
 	<br><br>
     </div> <!-- /container -->
 

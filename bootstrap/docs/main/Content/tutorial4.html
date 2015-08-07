@@ -71,14 +71,14 @@
 		      <div class="page-header">
         <h1>Advanced Transformations</h1>
       </div><p><img src="./images/transformations.jpg" align="right" /></p>
-<h4><em>The business gets serious!</em></h4>
-<p>Let's carry on with applying some more but advanced transformations to our Gelly-Graph.</p><br>
+<h4>The business gets serious</h4>
+<p>Let's carry on with applying some more but advanced transformations on our Gelly-Graph.</p><br>
 <h4>Join</h4>
-<p>Gelly provides specialized methods for joining the vertex and edge datasets with other input datasets. <strong><em>joinWithVertices</em></strong> joins the vertices with a Tuple2 input data set. The join is performed using the vertex ID and the first field of the Tuple2 input as the join keys. The method returns a new Graph where the vertex values have been updated according to a provided user-defined map function. 
+<p>Gelly provides specialized methods for joining the vertex and edge datasets with other input datasets. <strong>joinWithVertices</strong> joins the vertices with a Tuple2 input data set. The join is performed using the vertex ID and the first field of the Tuple2 input as the join keys. The method returns a new Graph where the vertex values have been updated according to a provided user-defined map function. 
 <br>Similarly, an input dataset can be joined with the edges, using one of the three methods:
- <br><strong><em>joinWithEdges</em></strong> expects an input DataSet of Tuple3 and joins on the composite key of both source and target vertex IDs.
- <br><strong><em>joinWithEdgesOnSource</em></strong> expects a DataSet of Tuple2 and joins on the source key of the edges and the first attribute of the input dataset.<br><strong><em>joinWithEdgesOnTarget</em></strong> expects a DataSet of Tuple2 and joins on the target key of the edges and the first attribute of the input dataset.<br> All three methods apply a map function on the edge and the input data set values. Note that if the input dataset contains a key multiple times, all Gelly join methods will only consider the first value encountered.<br> For example, if we want to update the vertex values in our <em>'twitter graph'</em> (refer to <a href="./tut1.html"><em>tutorial#1</em></a>), with the number of followers for each user, then first we calculate the indegree of every Vertex and then we perform a join with the resulting DataSet. In this way, we can perform filtering to obtain the users 
- with number of followers exceeding some given threshold value N, as we mentioned at the end of our <a href="./tut3.html"><em>last</em></a> tutorial.  </p><br>
+ <br><strong>joinWithEdges</strong> expects an input DataSet of Tuple3 and joins on the composite key of both source and target vertex IDs.
+ <br><strong>joinWithEdgesOnSource</strong> expects a DataSet of Tuple2 and joins on the source key of the edges and the first attribute of the input dataset and applies a user defined function (mapper) on the resulted values.<br><strong>joinWithEdgesOnTarget</strong> expects a DataSet of Tuple2 and joins on the target key of the edges and the first attribute of the input dataset and applies a user defined function on the resulted values.<br> All three methods apply a map function on the edge and the input data set values. Note that if the input dataset contains a key multiple times, all Gelly join methods will only consider the first value encountered.<br><br>For example, if we want to update the vertex values in our <em>'twitter Graph'</em> (created in <a href="./tutorial1.html">Tutorial1</a>), with the number of followers for each user, then first we calculate the indegree of every Vertex and then we perform a join with the resulting DataSet. In this way, we can apply the filter function to obtain users 
+ with number of followers exceeding some given threshold value N, possible filtering we mentioned performing at the end of our <a href="./tutorial3.html">last</a> tutorial.  </p><br>
  
 <pre><code>    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegree = graph.inDegrees();
 
@@ -97,10 +97,10 @@
 		   }
 	   });   
 
-     Long usersAboveN = filteredGraph.numberOfVertices();	   
+     Long usersWithFollowersAboveN = filteredGraph.numberOfVertices();	   
 </code></pre><br>
 
-In case we want to store information regarding how many people a user follows, then instead of inDegree we just need to use the OutDegree. With our sample data set, it can be seen that there are 4 users who are following more than 200 people.<br><br>
+In case we want to store information regarding how many people a user follows, then instead of inDegree we just need to use the OutDegree. With our sample data set, you can write your function and verify that there are 4 users who are following more than 200 people.<br><br>
 <p></p>
 <h4>Union</h4>
 <p>Gelly’s union() method performs a union operation on the vertex and edge sets of the specified graph and current graph. Duplicate vertices are removed from the resulting Graph, while if duplicate edges exists, these will be maintained.</p>
@@ -113,7 +113,7 @@ A union can be used for instance to merge the graphs of two different social net
 <p>Gelly’s difference() method performs a difference on the vertex and edge sets of the current graph and specified graph. So in case we have two graphs and we want to analyse the difference in connectivity or for instance which users are present in one graph and not the other, then we can simply call the difference method.</p>
 <br><p>This concludes our discussion regarding transformations in Gelly. Next, we are going to look at some other advanced topics like neighborhood methods and graph validation.</p><br>
 
-	<p><a style="margin-left: 100px" href="./tutorial3.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial5.html"><em>Next</em></a></p>
+	<p><h4><a style="margin-left: 100px" href="./tutorial3.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial5.html"><em>Next--></em></a></h4></p>
     </div> <!-- /container -->
 
 

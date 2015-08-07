@@ -89,13 +89,14 @@ Gelly provides a simple utility for performing validation checks on input graphs
         static final class InvalidEdgeValidator extends GraphValidator&lt;Long,Double,Double&gt; {
 
             @Override
+	    <em style="color:green">//return valid only if there is no edge with null value</em>
             public boolean validate(Graph&lt;Long, Double, Double&gt; graph)
                     throws Exception {      
                 DataSet&lt;Edge&lt;Long,Double&gt;&gt; edgeIds = graph.getEdges()
                     .flatMap(new CheckEdgeIds&lt;Long,Double&gt;());
                 return edgeIds.count()==0;
             }
-
+            <em style="color:green">//return edges with null values</em>
             private static final class CheckEdgeIds&lt;Long,Double&gt; implements FlatMapFunction&lt;Edge&lt;Long,Double&gt;,
     		Edge&lt;Long,Double&gt;&gt; {
                 public void flatMap(Edge&lt;Long,Double&gt; edge, Collector&lt;Edge&lt;Long,Double&gt;&gt; out) {
@@ -106,7 +107,7 @@ Gelly provides a simple utility for performing validation checks on input graphs
                 }
             }   
 </code></pre></p><br>
-	<p><a style="margin-left: 100px" href="./tutorial5.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial7.html"><em>Next</em></a></p>
+	<p><h4><a style="margin-left: 100px" href="./tutorial5.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial7.html"><em>Next--></em></a></h4></p>
     </div> <!-- /container -->
 
 

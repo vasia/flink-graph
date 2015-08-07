@@ -78,7 +78,7 @@
 <li>Sum: the partial values produced in the Gather phase are aggregated to a single value, using a user-defined reducer.</li>
 <li>Apply: each vertex value is updated by applying a function on the current value and the aggregated value produced by the Sum phase.</li>
 </ol>
-<p>Let us consider again computing <em>PageRank</em> but this time with GSA. During the Gather phase, we calculate the partial rank to be distributed to the neighbor. In Sum, the candidate ranks are grouped by vertex ID and these partial values are summed together. In Apply, the rank value is updated by computing a new one using the dampening formula.</p><br>
+<p>Let us consider again computing <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> but this time with GSA. During the Gather phase, we calculate the partial rank to be distributed to the neighbor. In Sum, the candidate ranks are grouped by vertex ID and these partial values are summed together. In Apply, the rank value is updated by computing a new one using the dampening formula.</p><br><br>
 <p><img src="./images/iter2.jpg"/></p>
 <pre><code>    // Execute the GSA iteration
     Graph&lt;Long, Double, Double&gt; result = graph
@@ -132,7 +132,7 @@ private static final class UpdateRanks extends ApplyFunction&lt;Long, Double, Do
 }
 </code></pre>
 <br>
-<p>So we can achieve the same results but with a different approach. You can also try running the PageRankAlgorithm on the twitter data set using both the approaches. For a complete overview, have a look at the full implementation of the above <a href="https://github.com/apache/flink/blob/master/flink-staging/flink-gelly/src/main/java/org/apache/flink/graph/example/GSAPageRank.java">GSAPageRank</a>.</p>
+<p>So we can achieve the same results but with a different approach. You can also try running the PageRank algorithm on the twitter data set using both the approaches. For a complete overview, have a look at the full implementation of the above <a href="https://github.com/apache/flink/blob/master/flink-staging/flink-gelly/src/main/java/org/apache/flink/graph/example/GSAPageRank.java">GSAPageRank</a>.</p>
 <br>
 <h4>Configuring a Gather-Sum-Apply Iteration</h4>
 <p>As we saw for the Vertex-centric model, a GSA iteration can also be configured using a <strong><em>GSAConfiguration</em></strong> object. Currently, the following parameters can be specified:<em>Name, Parallelism, Solution set in unmanaged memory, Aggregators, Broadcast Variables, Number of Vertices, Neighbor Direction.</em><br>You can find more details regarding these parameters at this <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#configuring-a-gather-sum-apply-iteration">link</a>.</p> 
@@ -173,7 +173,7 @@ long numVertices = getNumberOfVertices();
 }
 </code></pre>
 
-As you can see, also in this case <em>getNumberOfVertices()</em> can be called in all the phases of the superstep.
+As you can see, also in this case, <em>getNumberOfVertices()</em> can be called in all the phases of each superstep.
 <p></p>
 <p><img src="./images/compare.jpg" align="right"/></p>
 <h3>Which model to use??</h3>
@@ -187,7 +187,7 @@ As you can see, also in this case <em>getNumberOfVertices()</em> can be called i
 For a detailed explanation regarding the differences, read <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#vertex-centric-and-gsa-comparison">here</a>.</p><br>
 <p>Finally, we have a complete picture of the iterative models in Gelly. Choose the one most suitable for you and have fun &quot;<em>Gellifying</em>&quot; your iterations! </p>
 
-<p><a style="margin-left: 100px" href="./tutorial7.html"><em>Prev</em></a></p><br><br>
+<p><h4><a style="margin-left: 100px" href="./tutorial7.html"><em><--Previous</em></a><a style="margin-left: 650px" href="#"><em>Done!</em></a></h4></p><br><br>
     </div> <!-- /container -->
 
 

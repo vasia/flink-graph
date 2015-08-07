@@ -73,7 +73,7 @@
       </div>
 <h4>Socialize with your neighbors</h4>
 <p><img src="./images/neighborhood.jpg"/></p>
-<p>This article is a step by step guide to gain familiarity with the neighborhood methods of Gelly. We will study them using the problem of calculating Local Clustering Coefficient as example. In particular, we will get acquaintance with the <strong><em>reduceOnEdges()</em></strong> and <strong><em>reduceOnNeighbors()</em></strong> aggregation methods. Moreover, we will also get to meet our friend from the last tutorial, <strong><em>joinWithVertices()</em></strong>, again.</p>
+<p>This article is a step by step guide to gain familiarity with the neighborhood methods of Gelly. We will study them using the problem of calculating Local Clustering Coefficient as example. In particular, we will get acquaintance with the <strong>reduceOnEdges()</strong> and <strong>reduceOnNeighbors()</strong> aggregation methods. Moreover, we will also get to meet our friend from the last tutorial, <strong>joinWithVertices()</strong>, again.</p>
 <br>
 <h4>Tools at hand</h4>
 <p>Neighborhood methods allow vertices to perform an aggregation on their first-hop neighborhood. <em>reduceOnEdges()</em> can be used to compute an aggregation on the values of the neighboring edges of a vertex and <em>reduceOnNeighbors()</em> can be used to compute an aggregation on the values of the neighboring vertices.
@@ -83,13 +83,13 @@ The neighborhood scope is defined by the <em>EdgeDirection</em> parameter, which
 <p><img src="./images/lcc_formula.jpg" /></p>
 <br>
 <h3>Practical overview</h3>
-<p >We are using the local clustering coefficient calculation as example in this tutorial because as seen from the formula above, each node needs to know the &quot;friendship status&quot; of its neighborhood i.e. for each of it's neighbors, it needs to keep track of how well connected that neighbor is to it's other neighbors. As we will see, this information can be easily retrieved by invoking the aforementioned reduce methods.</p>
+<p >We are using the local clustering coefficient calculation as example in this tutorial, because as seen from the formula above, each node needs to know the &quot;friendship status&quot; of its neighborhood i.e. for each of it's neighbors, it needs to keep track of how well connected that neighbor is to it's other neighbors. As we will see, this information can be easily retrieved by invoking the aforementioned reduce methods.</p>
 <p>To play around with the algorithm, any graph data set will do given that it is read in a manner appropriate for calculating our coefficients. In short, all we need is information regarding directed edges (source and target nodes). Hence, if the input data set has also edge values, that information can be ignored. </p>
 <br>
 <h4>Graph creation</h4>
-<p >For graph creation in Gelly, refer to <a href="./tut2.html">tutorial#1</a>. To avoid repetitions, only code is given below; redundant explanation regarding the first part will be skipped and we will jump straight to the neighborhood methods.
-The only point worth mentioning here from the implementation point of view, is that the vertex value has been allocated as a <em>HashMap&lt;String,HashSet<Long>&gt;</em>. Keys are String objects, named <em>&quot;incoming&quot;</em> and <em>&quot;outgoing&quot;</em>. For each vertex, the incoming key is associated with a Set of neighbors pointing to the node, whereas the outgoing key is associated with a Set of neighbors the node is itself pointing to.</p>
-<pre><code> <em style="color:green">   //read the Edge DataSet from the input file </em><br>
+<p >For graph creation in Gelly, refer to <a href="./tutorial1.html">Tutorial1</a>. To avoid repetitions, only code is given below; redundant explanation regarding the first part will be skipped and we will jump straight to the neighborhood methods.
+The only point worth mentioning from the implementation point of view, is that the Vertex value has been allocated as a <em>HashMap&lt;String,HashSet<Long>&gt;</em>. Keys are String objects, named <em>&quot;incoming&quot;</em> and <em>&quot;outgoing&quot;</em>. For each vertex, the incoming key is associated with a Set of neighbors pointing to the node, whereas the outgoing key is associated with a Set of neighbors the node is itself pointing to.</p>
+<pre><code> <em style="color:green">   //read the Edge DataSet from the input file </em>
     DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; links =  env.readCsvFile(edgeInputPath)
             .fieldDelimiter(&quot;\t&quot;)
             .lineDelimiter(&quot;\n&quot;)
@@ -112,10 +112,11 @@ The only point worth mentioning here from the implementation point of view, is t
 </code></pre>
 <br>
 <h4>Gather neighboorhood info</h4>
-<p >Now that we have a graph, we will use the <strong><em>groupReduceOnEdges()</em></strong> method with a user-defined function acting upon each of the resulting neighborhoods.
+<p >Now that we have a graph, we will use the <strong>groupReduceOnEdges()</strong> method with a user-defined function acting upon each of the resulting neighborhoods.
 A question that may arise here is why did we select <em>groupReduceOnEdges()</em> and not <em>reduceOnEdges()</em>. The reason is that when the aggregation function is not associative and commutative or when it is desirable to return more than one values per vertex, the more general <em>groupReduceOnEdges()</em> and <em>groupReduceOnNeighbors()</em> methods can be used. These methods return zero, one or more values per vertex and provide access to the whole neighborhood.
 The following code will collect the out-edges and in-edges for each vertex and apply the <em>NeighborsSet()</em> function on each of the resulting neighborhoods.
 In order to decide whether to put the neighbor in the incoming Set or the outgoing Set, a check is made on the target vertex of the edge under consideration. If the target vertex is the node itself, it means that the edge is an incoming one.</p>
+<p><img src="./images/lcc_graph1.jpg" /></p>
 <pre><code><em style="color:green">//for each vertex save its incoming and outgoing neighbors </em><br>
 DataSet&lt;Tuple2&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; neighbSet = 
    graph.groupReduceOnEdges(new NeighborsSet(),EdgeDirection.ALL);
@@ -154,9 +155,11 @@ static final class NeighborsSet implements EdgesFunction
 }
 </code></pre>
 <br>
-<p><img src="./images/lcc_graph1.jpg" /></p>
 <h4>Using the gathered info</h4>
-<p>First, we will update the values of the vertices in our graph by performing  a join with the Data set <em>&lt;vertexId, HashMap of neighbors&gt;</em> obtained in the previous step. Then we will call the <strong><em>groupReduceOnNeighbors()</em></strong> with the ad-hoc <em>CoefficientCalc()</em> function. The latter is where the actual formula for calculating the local coefficient is implemented. For each vertex, the for loop as in the code below, is used to check whether a link exists between the neighbor in the current iteration of the loop and the other neighbors in common to the two nodes. The final data set will consist of <em>&lt;vertexId,coefficient&gt;</em>.<br>
+<p>First, we will update the values of the vertices in our graph by performing  a join with the Data set <em>&lt;vertexId, HashMap of neighbors&gt;</em> obtained in the previous step. Then we will call the <strong>groupReduceOnNeighbors()</strong> with the ad-hoc <em>CoefficientCalc()</em> function. The latter is where the actual formula for calculating the local coefficient is implemented. For each vertex, the for loop, as in the code below, is used to check whether a link exists between the neighbor in the current iteration of the loop and the other neighbors in common to the two nodes. The final data set will consist of <em>&lt;vertexId,coefficient&gt;</em>.
+<br>
+<p><img src="./images/lcc_calc.jpg" /></p>
+<br>
 <pre><code><em style="color:green">    //perform a join to update the vertex values with neighbor's info </em>
     Graph&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;, NullValue&gt; graph2 = graph.joinWithVertices(neighbSet,
             new MapFunction&lt;Tuple2&lt;HashMap&lt;String,HashSet&lt;Long&gt;&gt;,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;,
@@ -225,14 +228,13 @@ static class CoefficientCalc implements NeighborsFunctionWithVertexValue
 
     }}
 </code></pre>
-<br>
-<p><img src="./images/lcc_calc.jpg" /></p>
+
 <br>
 <h4>And we are done</h4>
-<p>That was our quick introduction to Gelly's neighborhood methods. Play with them and take advantage of your neighborhoods to the max!</p>
-<p>Following is the link to the full code of the clustering coefficient example we have discussed in this tutorial:<br><a href="https://github.com/vasia/gelly-school/blob/gelly-tutorials/src/main/java/flink/gelly/school/LocalClusteringCoefficient.java">LCC Solution</a></p>
+<p>That was our quick introduction to Gelly's neighborhood methods. Play with them and "take advantage" of your neighborhood to the max!</p>
+<p>Following is the link to the full code of the clustering coefficient example that we have discussed in this tutorial:<a href="https://github.com/vasia/gelly-school/blob/gelly-tutorials/src/main/java/flink/gelly/school/LocalClusteringCoefficient.java">LCC Solution</a></p>
 
-	<p><a style="margin-left: 100px" href="./tutorial4.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial6.html"><em>Next</em></a></p>
+	<p><h4><a style="margin-left: 100px" href="./tutorial4.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial6.html"><em>Next--></em></a></h4></p>
 	<br><br>
     </div> <!-- /container -->
 

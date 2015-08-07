@@ -74,7 +74,7 @@
 <h4>Fidget with your Graph</h4>
 <p>In this tutorial, we will see some simple transformations which can be performed on a Graph in Gelly.</p><br>
 <h4>Map</h4> <img src="./images/mapping.jpg" align="right" />
-<p>Gelly provides specialized methods for applying a map transformation on the <em>Vertex</em> values or <em>Edge</em> values. <strong><em>mapVertices</em></strong> and <strong><em>mapEdges</em></strong> return a new Graph, where the IDs of the vertices (or edges) remain unchanged, while the values are transformed according to the provided user-defined map function. The map functions also allow changing the type of the vertex or edge values.
+<p>Gelly provides specialized methods for applying a map transformation on the Vertex values or Edge values. <strong>mapVertices()</strong> and <strong>mapEdges()</strong> return a new Graph, where the IDs of the vertices (or edges) remain unchanged, while the values are transformed according to the provided user-defined map function. The map functions also allow changing the type of the vertex or edge values.
 In the simple example below, the first map function is used to increment the value of all the vertices by one while the second one updates the Edge values from NullValue type to Double with value 1.0.</p><br>
 <pre><code>    Graph&lt;Long, Double, NullValue&gt; updatedVerticesGraph = graph.mapVertices(
                     new MapFunction&lt;Vertex&lt;Long, Double&gt;, Double&gt;() {
@@ -93,14 +93,14 @@ In the simple example below, the first map function is used to increment the val
 
 <h4>Reverse</h4>
 <p>This is a very handy transformation which allows us to easily reverse all the links in our Graph. The reverse() method returns a new Graph where the direction of all edges has been reversed. It can be called as follows:	</p>
-<pre><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.reverse();
-</code></pre><br>
-				<p><img src="./images/reverse.jpg" /></p>
+<p><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.reverse();
+</code></p><br>
+<p><img src="./images/reverse.jpg" /></p>
 For example, by calling this method on our twitter data set, the 'follows' relation among users gets reversed.<br><br><br>
 
 <h4>Filter</h4>
 <img src="./images/filtering.jpg" align="right" />
-<p>A filter transformation applies a user-defined filter function on the vertices or edges of the Graph. <strong><em>filterOnEdges</em></strong> will create a sub-graph of the original graph, keeping only the edges that satisfy the provided predicate. Note that the vertex dataset will not be modified. Respectively, <strong><em>filterOnVertices</em></strong> applies a filter on the vertices of the graph. Edges whose source and/or target do not satisfy the vertex predicate are removed from the resulting edge dataset.</p><br><br><br>
+<p>A filter transformation applies a user-defined filter function on the vertices or edges of the Graph. <strong>filterOnEdges</strong> will create a sub-graph of the original graph, keeping only the edges that satisfy the provided predicate. Note that the vertex dataset will not be modified. Respectively, <strong>filterOnVertices</strong> applies a filter on the vertices of the graph. Edges whose source and/or target do not satisfy the vertex predicate are removed from the resulting edge dataset.</p><br>
 <pre><code> Graph&lt;Long, Double, NullValue&gt; filtered =graph.filterOnVertices(new FilterFunction
   &lt;Vertex&lt;Long, Double&gt;&gt;() {
         public boolean filter(Vertex&lt;Long, Double&gt; vertex) {
@@ -121,7 +121,7 @@ For example, by calling this method on our twitter data set, the 'follows' relat
    });
 </code></pre>
 <br><br>
-<p>The <strong><em>subgraph</em></strong> method can be used to apply a filter function to the vertices and the edges at the same time as shown in the code snippet below:</p>
+<p>The <strong>subgraph</strong> method can be used to apply a filter function to the vertices and the edges at the same time as shown in the code snippet below:</p>
 <pre><code>graph.subgraph(
     new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
             public boolean filter(Vertex&lt;Long, Long&gt; vertex) {
@@ -139,10 +139,10 @@ For example, by calling this method on our twitter data set, the 'follows' relat
 <p>
 If we continue our discussion with the twitter data set, then we could for example, use this filter method to obtain users with number of followers
 exceeding a certain threshold. However, in order to do this filtering, we would need to store the indegree information of every user (Vertex) as it's 
-vertex value. Once we have the follower information as for every Vertex, then it is straightforward to apply the filter by changing the threshold from zero
-to the desired value in return (vertex.getValue() &gt; 0).  We are going to see how to update the vertex values in a graph with information retrieved from some other DataSet in the next tutorial.
-</p>
-	<p><a style="margin-left: 100px" href="./tutorial2.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial4.html"><em>Next</em></a></p>
+vertex value. Once we have the follower information for every Vertex, then it is straightforward to apply the filter function by changing the threshold from zero
+to the desired value in return (vertex.getValue() &gt; 0).  We are going to see how to update the vertex values in a graph, with information retrieved from some other DataSet, in the next tutorial.
+</p><br>
+	<p><h4><a style="margin-left: 100px" href="./tutorial2.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial4.html"><em>Next--></em></a></h4></p>
 	<br><br>
     </div> <!-- /container -->
 
