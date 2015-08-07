@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Tutorial7</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Gelly</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./home.html">Home</a></li>
+            <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly's SourceCode">GitHub</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+			  	<li><a href="./tutorial0.html" title="Introduction to Gelly">Tutorial0</a></li>
+				<li><a href="./tutorial1.html" title="Load public data and create a graph and run a library method">Tutorial1</a></li>
+				<li><a href="./tutorial2.html" title="Know your graph">Tutorial2</a></li>
+				<li><a href="./tutorial3.html" title="Simple transformations">Tutorial3</a></li>
+				<li><a href="./tutorial4.html" title="Advanced transofrmations">Tutorial4</a></li>
+				<li><a href="./tutorial5.html" title="Neighborhood methods">Tutorial5</a></li>
+				<li><a href="./tutorial6.html" title="Implement a graph validator">Tutorial6</a></li>
+				<li><a href="./tutorial7.html" title="Vertex-centric iterations">Tutorial7</a></li>
+				<li><a href="./tutorial8.html" title="Gather-sum-apply iterations">Tutorial8</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+    <!-- Begin page content -->
+    <div class="container">
+      <div class="page-header">
+        <h1>Iterative Graph Processing</h1>
+      </div>
+<h2>Vertex-centric iterations</h2>
+<p>In this <em>long</em> tutorial, we are going to talk about how Gelly exploits Flink’s efficient iteration operators to support large-scale iterative graph processing. Currently, it provides implementations of the popular <strong><em>vertex-centric</em></strong> iterative model and a variation of <strong><em>Gather-Sum-Apply</em></strong>. In this and the following tutorial, we will see the details of these models and how you can use them in Gelly. We are going to start with the vertex-centic approach.</p>
+<p>The <strong>vertex-centric model</strong>, also known as “think like a vertex” model, expresses computation from the perspective of a vertex in the graph. The computation proceeds in synchronized iteration steps, called <em>supersteps</em>. In each superstep, a vertex produces messages for other vertices and updates its value based on the messages it receives. To use vertex-centric iterations in Gelly, the user only needs to define how a vertex behaves in each superstep:</p>
+<ul>
+<li><strong><em>Messaging</em></strong>: produce the messages that a vertex will send to other vertices.</li>
+<li><strong><em>Value Update</em></strong>: update the vertex value using the received messages.</li>
+</ul><br>
+<p>The user only needs to implement two functions, corresponding to the phases above: a <strong><em>VertexUpdateFunction</em></strong>, which defines how a vertex will update its value based on the received messages and a <strong><em>MessagingFunction</em></strong>, which allows a vertex to send out messages for the next superstep. These functions and the maximum number of iterations to run are given as parameters to Gelly’s <strong><em>runVertexCentricIteration</em></strong>. This method will execute the vertex-centric iteration on the input Graph and return a new Graph, with updated vertex values.</p>
+<p>Let's understand this better with an example. We are going to consider a simplified implementation of the <a href="https://en.wikipedia.org/wiki/PageRank"><strong>PageRank</strong></a> algorithm.</p><br>
+<h4>A few words about PageRank</h4>
+<p><em>PageRank</em> is a numeric value that represents the important of a page on the web and is used by Google to rank websites in their search engine results.
+In short, the output of the algorithm is a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. For details, have a good read of the wikipedia article.</p><br>
+<h4>Hands on</h4>
+<p>In each superstep, each vertex sends a rank message to all of its neighbors. The message value is part of the rank that the vertex is going to assign to the neighbor according to the edge weight connecting this vertex with its neighbor. Upon receiving the rank messages, each vertex sums the partial ranks, calculates its new ranking according to the dampening formula and updates its own PageRank value. The algorithm converges when there are no value updates.If the value of a vertex does not change during a superstep, it will not send any messages in the superstep. This allows to do incremental updates to the hot (changing) parts of the graph, while leaving cold (steady) parts untouched. The computation terminates after a specified maximum number of supersteps or when convergence is reached.</p>
+<p><img src="./images/iter1.jpg"/></p><br>
+<pre><code>public class PageRankAlgorithm&lt;K extends Comparable&lt;K&gt; &amp; Serializable&gt; implements
+    GraphAlgorithm&lt;K, Double, Double&gt; {
+
+private double beta;
+private int maxIterations;
+
+public PageRankAlgorithm(double beta, int maxIterations) {
+    this.beta = beta;
+    this.maxIterations = maxIterations;
+}
+
+@Override
+public Graph&lt;K, Double, Double&gt; run(Graph&lt;K, Double, Double&gt; network) throws Exception {
+
+    final long numberOfVertices = network.numberOfVertices();
+    return network.runVertexCentricIteration(new VertexRankUpdater&lt;K&gt;(beta, numberOfVertices),
+     	new RankMessenger&lt;K&gt;(numberOfVertices),
+            maxIterations);
+}
+<em style="color:green">
+/**
+ * Function that updates the rank of a vertex by summing up the partial
+ * ranks from all incoming messages and then applying the dampening formula.
+ */</em>
+@SuppressWarnings(&quot;serial&quot;)
+public static final class VertexRankUpdater&lt;K&gt; extends VertexUpdateFunction&lt;K, Double, Double&gt; {
+
+    private final double beta;
+    private final long numVertices;
+
+    public VertexRankUpdater(double beta, long numberOfVertices) {
+        this.beta = beta;
+        this.numVertices = numberOfVertices;
+    }
+
+    @Override
+    public void updateVertex(Vertex&lt;K, Double&gt; vertex, MessageIterator&lt;Double&gt; inMessages) {
+        double rankSum = 0.0;
+        for (double msg : inMessages) {
+            rankSum += msg;
+        }
+
+        // apply the dampening factor / random jump
+        double newRank = (beta * rankSum) + (1 - beta) / numVertices;
+        setNewVertexValue(newRank);
+    }
+}
+<em style="color:green">
+/**
+ * Distributes the rank of a vertex among all target vertices according to
+ * the transition probability, which is associated with an edge as the edge
+ * value.
+ */</em>
+@SuppressWarnings(&quot;serial&quot;)
+public static final class RankMessenger&lt;K&gt; extends MessagingFunction&lt;K, Double, Double, Double&gt; {
+
+    private final long numVertices;
+
+    public RankMessenger(long numberOfVertices) {
+        this.numVertices = numberOfVertices;
+    }
+
+    @Override
+    public void sendMessages(Vertex&lt;K, Double&gt; vertex) {
+        if (getSuperstepNumber() == 1) {
+            // initialize vertex ranks
+            vertex.setValue(new Double(1.0 / numVertices));
+        }
+
+        for (Edge&lt;K, Double&gt; edge : getEdges()) {
+            sendMessageTo(edge.getTarget(), vertex.getValue() * edge.getValue());
+        }
+    }
+}
+}
+</code></pre>
+<br>
+<p>The above vertex-centric iteration can be executed as follows:</p>
+<p><code>    DataSet&lt;Vertex&lt;String, Double&gt;&gt; pageRanks = graph.run(
+            new PageRankAlgorithm&lt;String&gt;(DAMPENING_FACTOR, maxIterations))
+            .getVertices();
+</code></p>
+<br>
+<p>The output is a DataSet of vertices, where the Vertex value is the rank of the given Vertex.
+You can find the full implementation <a href="https://github.com/apache/flink/blob/master/flink-staging/flink-gelly/src/main/java/org/apache/flink/graph/library/PageRankAlgorithm.java">here</a>.
+<br>
+It is to be noted that in our simple implementation, it is assumed that all the nodes have at least an incoming and an outgoing edge. Why this? Well, because as you can notice, a node updates its rank value according to the dampening formula only when it receives a message from a neighbor. So if a node never receives a message, it's final rank will not be compliant with the theoretical value.<br><br>
+If we run the PageRankAlgorithm using the graph obtained from the twitter data set, then we obtain the output as shown in the figure below: </p>
+<p><img src="./images/screenshot7_1.PNG" /></p><br>
+<h4>Configuring a Vertex-Centric Iteration</h4>
+<p>A vertex-centric iteration can be extended with information such as the total number of vertices, the in degree and out degree. Additionally, the neighborhood type (in/out/all) over which to run the vertex-centric iteration can be specified. By default, the updates from the in-neighbors are used to modify the current vertex’s state and messages are sent to out-neighbors.</p>
+<p>A vertex-centric iteration can be configured using a <strong><em>VertexCentricConfiguration</em></strong> object. Currently, the following parameters can be specified:<em> Name,Parallelism, Aggregators, Broadcast Variables, Number of Vertices, Degrees, Messaging Direction</em>. You can find more details regarding these parameters at this <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#configuring-a-vertex-centric-iteration">link</a>.<br>
+<p>For example, if we want to access the total number of vertices and the degree information of a node within an iteration, then we need to set these options to true and pass the updated parameter to the vertex-centric iteration. This allows us to retrieve the required information both within the VertexUpdateFunction and the MessagingFunction.</p>
+
+<pre><code>Graph&lt;Long, Double, Double&gt; graph = ...
+
+<em style="color:green">// configure the iteration</em>
+VertexCentricConfiguration parameters = new VertexCentricConfiguration();
+
+<em style="color:green">// set the number of vertices option to true</em>
+parameters.setOptNumVertices(true);
+
+<em style="color:green">// set the degree option to true</em>
+parameters.setOptDegrees(true);
+
+<em style="color:green">// run the vertex-centric iteration, also passing the configuration parameters</em>
+Graph&lt;Long, Double, Double&gt; result =
+        graph.runVertexCentricIteration(
+        new VertexUpdater(), new Messenger(), maxIterations, parameters);
+		
+<em style="color:green">// user-defined functions</em>
+public static final class VertexUpdater {
+    <em style="color:green">// get the number of vertices</em>
+	long numVertices = getNumberOfVertices();
+	<em style="color:green">// retrieve the vertex out-degree</em>
+	outDegree = getOutDegree();
+	.....
+}
+
+
+}
+</code></pre>
+<br><br>
+<h4>What's next?</h4>
+<p>That was quite a lot of information! Isn't it?! To not overload you with more, we will consider the Gather-sum-apply model in the next tutorial. But before moving on, try your hand at this vertex-centric model.</p>
+
+<p><a style="margin-left: 100px" href="./tutorial6.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial8.html"><em>Next</em></a></p>
+<br><br>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

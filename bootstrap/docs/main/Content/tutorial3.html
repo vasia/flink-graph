@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Tutorial3</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Gelly</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./home.html">Home</a></li>
+            <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly's SourceCode">GitHub</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+			  	<li><a href="./tutorial0.html" title="Introduction to Gelly">Tutorial0</a></li>
+				<li><a href="./tutorial1.html" title="Load public data and create a graph and run a library method">Tutorial1</a></li>
+				<li><a href="./tutorial2.html" title="Know your graph">Tutorial2</a></li>
+				<li><a href="./tutorial3.html" title="Simple transformations">Tutorial3</a></li>
+				<li><a href="./tutorial4.html" title="Advanced transofrmations">Tutorial4</a></li>
+				<li><a href="./tutorial5.html" title="Neighborhood methods">Tutorial5</a></li>
+				<li><a href="./tutorial6.html" title="Implement a graph validator">Tutorial6</a></li>
+				<li><a href="./tutorial7.html" title="Vertex-centric iterations">Tutorial7</a></li>
+				<li><a href="./tutorial8.html" title="Gather-sum-apply iterations">Tutorial8</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+    <!-- Begin page content -->
+    <div class="container">
+      <div class="page-header">
+        <h1>Simple Transformations</h1>
+      </div>
+<h4>Fidget with your Graph</h4>
+<p>In this tutorial, we will see some simple transformations which can be performed on a Graph in Gelly.</p><br>
+<h4>Map</h4> <img src="./images/mapping.jpg" align="right" />
+<p>Gelly provides specialized methods for applying a map transformation on the <em>Vertex</em> values or <em>Edge</em> values. <strong><em>mapVertices</em></strong> and <strong><em>mapEdges</em></strong> return a new Graph, where the IDs of the vertices (or edges) remain unchanged, while the values are transformed according to the provided user-defined map function. The map functions also allow changing the type of the vertex or edge values.
+In the simple example below, the first map function is used to increment the value of all the vertices by one while the second one updates the Edge values from NullValue type to Double with value 1.0.</p><br>
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; updatedVerticesGraph = graph.mapVertices(
+                    new MapFunction&lt;Vertex&lt;Long, Double&gt;, Double&gt;() {
+                        public Double map(Vertex&lt;Long, Double&gt; value) {
+                            return value.getValue() + 1;
+                        }
+                    });
+
+    Graph&lt;Long, Double, Double&gt; updatedEdgesGraph = updatedVerticesGraph.mapEdges(
+            new MapFunction&lt;Edge&lt;Long, NullValue&gt;, Double&gt;() {
+                public Double map(Edge&lt;Long, NullValue&gt; value) {
+                    return 1.0;
+                }
+            });
+</code></pre><br>
+
+<h4>Reverse</h4>
+<p>This is a very handy transformation which allows us to easily reverse all the links in our Graph. The reverse() method returns a new Graph where the direction of all edges has been reversed. It can be called as follows:	</p>
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.reverse();
+</code></pre><br>
+				<p><img src="./images/reverse.jpg" /></p>
+For example, by calling this method on our twitter data set, the 'follows' relation among users gets reversed.<br><br><br>
+
+<h4>Filter</h4>
+<img src="./images/filtering.jpg" align="right" />
+<p>A filter transformation applies a user-defined filter function on the vertices or edges of the Graph. <strong><em>filterOnEdges</em></strong> will create a sub-graph of the original graph, keeping only the edges that satisfy the provided predicate. Note that the vertex dataset will not be modified. Respectively, <strong><em>filterOnVertices</em></strong> applies a filter on the vertices of the graph. Edges whose source and/or target do not satisfy the vertex predicate are removed from the resulting edge dataset.</p><br><br><br>
+<pre><code> Graph&lt;Long, Double, NullValue&gt; filtered =graph.filterOnVertices(new FilterFunction
+  &lt;Vertex&lt;Long, Double&gt;&gt;() {
+        public boolean filter(Vertex&lt;Long, Double&gt; vertex) {
+            // keep only vertices with positive values
+            return (vertex.getValue() &gt; 0);
+       }
+   });
+
+
+
+    Graph&lt;Long, Double, Double&gt; filteredE =updatedEdgesGraph.filterOnEdges(new FilterFunction
+     &lt;Edge&lt;Long, Double&gt;&gt;() {
+        public boolean filter(Edge&lt;Long, Double&gt; e) {
+        // keep only edges with positive values
+            return (e.getValue() &gt; 0);
+       }
+
+   });
+</code></pre>
+<br><br>
+<p>The <strong><em>subgraph</em></strong> method can be used to apply a filter function to the vertices and the edges at the same time as shown in the code snippet below:</p>
+<pre><code>graph.subgraph(
+    new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
+            public boolean filter(Vertex&lt;Long, Long&gt; vertex) {
+                // keep only vertices with positive values
+                return (vertex.getValue() &gt; 0);
+           }
+       },
+    new FilterFunction&lt;Edge&lt;Long, Long&gt;&gt;() {
+            public boolean filter(Edge&lt;Long, Long&gt; edge) {
+                // keep only edges with negative values
+                return (edge.getValue() &lt; 0);
+            }
+    })
+</code></pre><br>
+<p>
+If we continue our discussion with the twitter data set, then we could for example, use this filter method to obtain users with number of followers
+exceeding a certain threshold. However, in order to do this filtering, we would need to store the indegree information of every user (Vertex) as it's 
+vertex value. Once we have the follower information as for every Vertex, then it is straightforward to apply the filter by changing the threshold from zero
+to the desired value in return (vertex.getValue() &gt; 0).  We are going to see how to update the vertex values in a graph with information retrieved from some other DataSet in the next tutorial.
+</p>
+	<p><a style="margin-left: 100px" href="./tutorial2.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial4.html"><em>Next</em></a></p>
+	<br><br>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

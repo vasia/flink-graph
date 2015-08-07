@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Tutorial0</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Gelly</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./home.html">Home</a></li>
+            <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly's SourceCode">GitHub</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+			  	<li><a href="./tutorial0.html" title="Introduction to Gelly">Tutorial0</a></li>
+				<li><a href="./tutorial1.html" title="Load public data and create a graph and run a library method">Tutorial1</a></li>
+				<li><a href="./tutorial2.html" title="Know your graph">Tutorial2</a></li>
+				<li><a href="./tutorial3.html" title="Simple transformations">Tutorial3</a></li>
+				<li><a href="./tutorial4.html" title="Advanced transofrmations">Tutorial4</a></li>
+				<li><a href="./tutorial5.html" title="Neighborhood methods">Tutorial5</a></li>
+				<li><a href="./tutorial6.html" title="Implement a graph validator">Tutorial6</a></li>
+				<li><a href="./tutorial7.html" title="Vertex-centric iterations">Tutorial7</a></li>
+				<li><a href="./tutorial8.html" title="Gather-sum-apply iterations">Tutorial8</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+    <!-- Begin page content -->
+    <div class="container">
+      <div class="page-header">
+        <h1>Introduction - To be completed</h1>
+		<h3> What else should go here if intro is on welcome page? Feel free to add what you like!:P</h3>
+      </div>
+			<p>
+				<img src="./images/started.jpg" align="right" />
+			</p>
+			<h4>What you need to get started</h4>
+             <p>All you need to start with a Gelly project, is to
+				add the following dependency to your <code>pom.xml</code>:</p>
+			<p>
+				<code>&lt;dependency&gt;</code></br>
+				<code>&lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</code><br>
+				<code>&lt;artifactId&gt;flink-gelly&lt;/artifactId&gt;</code><br>
+				<code>&lt;version&gt;0.10-SNAPSHOT&lt;/version&gt;</code><br>
+				<code>&lt;/dependency&gt;</code>
+			</p><br>
+
+			<h4>General overview</h4>
+			<p>Flink programs look like regular
+				Java programs with a main() method. Each program consists of the
+				same basic parts:</p>
+			<ol>
+				<li>Obtain an ExecutionEnvironment,</li>
+				<li>Load/create the initial data,</li>
+				<li>Specify transformations on this data,</li>
+				<li>Specify where to put the results of your computations, and</li>
+				<li>Trigger the program execution</li>
+			</ol>
+			<p>
+				The <em>ExecutionEnvironment</em> is the basis for all Flink
+				programs. If you are executing your program inside an IDE or as a
+				regular Java program it will create a local environment that will
+				execute your program on your local machine. If you created a JAR
+				file from you program, and invoke it through the command line or the
+				web interface, the Flink cluster manager will execute your main
+				method and getExecutionEnvironment() will return an execution
+				environment for executing your program on a cluster.
+			</p>
+			<p>
+				For specifying data sources the execution environment has several
+				methods to read from files using various methods: you can just read
+				them line by line, as CSV files, or using completely custom data
+				input formats. Once you have a DataSet you can apply transformations
+				to create a new DataSet which you can then write to a file,
+				transform again, or combine with other DataSets. For more details,
+				refer to the <a
+					href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html">DataSet
+					API</a> as our focus in this tutorial is going to be <a
+					href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html">Gelly</a>.
+				To be noted that mixing DataSet API and Gelly is seamless.
+			</p>
+				<p><a style="margin-left: 900px" href="./tutorial1.html"><em>Next</em></a></p>
+	<br><br><br>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

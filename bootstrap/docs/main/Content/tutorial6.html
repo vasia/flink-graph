@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Gelly</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Gelly</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./home.html">Home</a></li>
+            <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly's SourceCode">GitHub</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+			  	<li><a href="./tutorial0.html" title="Introduction to Gelly">Tutorial0</a></li>
+				<li><a href="./tutorial1.html" title="Load public data and create a graph and run a library method">Tutorial1</a></li>
+				<li><a href="./tutorial2.html" title="Know your graph">Tutorial2</a></li>
+				<li><a href="./tutorial3.html" title="Simple transformations">Tutorial3</a></li>
+				<li><a href="./tutorial4.html" title="Advanced transofrmations">Tutorial4</a></li>
+				<li><a href="./tutorial5.html" title="Neighborhood methods">Tutorial5</a></li>
+				<li><a href="./tutorial6.html" title="Implement a graph validator">Tutorial6</a></li>
+				<li><a href="./tutorial7.html" title="Vertex-centric iterations">Tutorial7</a></li>
+				<li><a href="./tutorial8.html" title="Gather-sum-apply iterations">Tutorial8</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+    <!-- Begin page content -->
+    <div class="container">
+      <div class="page-header">
+        <h1>Implement a graph validator</h1>
+      </div>
+<img src="./images/validation.jpg" align="right"/>
+<h4>Don't trust your Graph</h4>
+<p>Now that we know how to define a Graph in Gelly and to perform a good amount of transformations on it, we might want to check the Graph validity. 
+Gelly provides a simple utility for performing validation checks on input graphs. Depending on the application context, a graph may or may not be valid according to certain criteria. For example, a user might need to validate whether their graph contains duplicate edges or whether its structure is bipartite. In order to validate a graph, one can define a custom <strong>GraphValidator</strong> and implement its <strong>validate()</strong> method. 
+<br><strong>InvalidVertexIdsValidator</strong> is Gelly’s pre-defined validator. It checks that the edge set contains valid vertex IDs, i.e. that all edge IDs also exist in the vertex IDs set.</p>
+<p><code>    Boolean validGraph;<br>
+    validGraph = graph.validate(new InvalidVertexIdsValidator&lt;Long,Double,Double&gt;());
+</code></p><br>
+
+<p>Below is an example of a custom validator. It shows how the validate method can be defined. In this example, the method checks whether all the edges have been assigned a value or not. In case there exists an edge with null value, the validator returns false. You can implement any desired check by just modifying the validate method.</p>
+<p><img src="./images/valid.jpg" /></p>
+<p><pre><code>    validGraph= graph.validate(new InvalidEdgeValidator());
+
+
+        @SuppressWarnings(&quot;serial&quot;)
+        static final class InvalidEdgeValidator extends GraphValidator&lt;Long,Double,Double&gt; {
+
+            @Override
+            public boolean validate(Graph&lt;Long, Double, Double&gt; graph)
+                    throws Exception {      
+                DataSet&lt;Edge&lt;Long,Double&gt;&gt; edgeIds = graph.getEdges()
+                    .flatMap(new CheckEdgeIds&lt;Long,Double&gt;());
+                return edgeIds.count()==0;
+            }
+
+            private static final class CheckEdgeIds&lt;Long,Double&gt; implements FlatMapFunction&lt;Edge&lt;Long,Double&gt;,
+    		Edge&lt;Long,Double&gt;&gt; {
+                public void flatMap(Edge&lt;Long,Double&gt; edge, Collector&lt;Edge&lt;Long,Double&gt;&gt; out) {
+                    if(edge.getValue() == null){ 
+                    out.collect(new Edge&lt;Long,Double&gt;(edge.f0,edge.f1,edge.f2));
+                    }
+
+                }
+            }   
+</code></pre></p><br>
+	<p><a style="margin-left: 100px" href="./tutorial5.html"><em>Prev</em></a> <a style="margin-left: 650px" href="./tutorial7.html"><em>Next</em></a></p>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
