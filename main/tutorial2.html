@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="./favicon.ico">
+
+    <title>Tutorial2</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="./assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Gelly</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./home.html">Home</a></li>
+            <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly's SourceCode">GitHub</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+			  	<li><a href="./tutorial0.html" title="Introduction to Gelly">Tutorial0</a></li>
+				<li><a href="./tutorial1.html" title="Load public data and create a graph and run a library method">Tutorial1</a></li>
+				<li><a href="./tutorial2.html" title="Know your graph">Tutorial2</a></li>
+				<li><a href="./tutorial3.html" title="Simple transformations">Tutorial3</a></li>
+				<li><a href="./tutorial4.html" title="Advanced transofrmations">Tutorial4</a></li>
+				<li><a href="./tutorial5.html" title="Neighborhood methods">Tutorial5</a></li>
+				<li><a href="./tutorial6.html" title="Implement a graph validator">Tutorial6</a></li>
+				<li><a href="./tutorial7.html" title="Vertex-centric iterations">Tutorial7</a></li>
+				<li><a href="./tutorial8.html" title="Gather-sum-apply iterations">Tutorial8</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+    <!-- Begin page content -->
+    <div class="container">
+		      <div class="page-header">
+        <h1>Know your Graph</h1>
+      </div>
+			<p>In this very short tutorial, we will see how to get some statistical
+				information out of our graph. Gelly includes built-in methods
+				for retrieving various graph properties and metrics.</p>
+			<p>
+				Suppose that we want to retrieve information regarding the number of
+				vertices and number of edges. Then, we can simply do as follows:
+			</p>
+			<p><code>    Long numVertices = graph.numberOfVertices();<br>
+	Long numEdges = graph.numberOfEdges();</code></p><br>
+	<p>In a directed graph, the indegree of a node is the number of edges pointing towards that node
+	while the outdegree is the number of edges going out of it. The total degree is the sum of both in and out degrees.
+	Gelly allows to  get the degree information (<em>IN</em>,<em>OUT<em>,</em>ALL
+				</em>) of every node by it's easy to use built in methods:</p>
+				<p>			<img
+				src="./images/degrees.jpg" /></p>
+	<p><code>
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.outDegrees();<br>
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.inDegrees();<br>
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.getDegrees();
+	</code></p><br>
+
+			<p> In the  <a href="./tut1.html">last</a> tutorial, we had learnt how to create 
+			a graph using three different approaches.
+				Here is a snapshot of some statistics obtained by calling the
+				<strong>numberOfVertices</strong> and <strong>numberOfEdges</strong> methods for all the three approaches.
+				The same statistical methods were called for the different ways of graph creation, just to show the consistency
+				among them; results are dependent upon the data set used and not on the chosen approach. Our statistics
+				confirm that the used <a href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter</a>
+				data set consists of 23370 users (vertices) and 33101 edges (follows) as 
+				mentioned on the download site.
+			</p><br>
+			<img src="./images/screenshot2_1.PNG" /><img src="./images/stats.jpg" align="right" />
+			<p /> <br><br>
+			<p><strong>A piece of cake,isn't it?!</strong><br>
+			Below is a full list of methods that can be
+			used to retrieve metrics and statistics in Gelly.
+			</p>
+			<pre>
+	<code><em style="color:green">// get the Vertex DataSet</em>
+	DataSet&lt;Vertex&lt;K, VV&gt;&gt; getVertices()
+
+	<em style="color:green">// get the Edge DataSet</em>
+	DataSet&lt;Edge&lt;K, EV&gt;&gt; getEdges()
+
+	<em style="color:green">// get the IDs of the vertices as a DataSet</em>
+	DataSet&lt;K&gt; getVertexIds()
+
+	<em style="color:green">// get the source-target pairs of the edge IDs as a DataSet</em>
+	DataSet&lt;Tuple2&lt;K, K&gt;&gt; getEdgeIds()
+
+	<em style="color:green">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</em>
+	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; inDegrees()
+
+	<em style="color:green">// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices</em>
+	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; outDegrees()
+
+	<em style="color:green">// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree 
+	//is the sum of in- and out- degrees</em>
+	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; getDegrees()
+
+	<em style="color:green">// get the number of vertices</em>
+	long numberOfVertices()
+
+	<em style="color:green">// get the number of edges</em>
+	long numberOfEdges()
+	</code></pre>	<br>
+			
+	<p><h4><a style="margin-left: 100px" href="./tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial3.html"><em>Next--></em></a></h4></p>
+	</div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="./dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

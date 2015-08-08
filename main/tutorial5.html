@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="./favicon.ico">
+
+    <title>Tutorial5</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="./assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Gelly</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./home.html">Home</a></li>
+            <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly's SourceCode">GitHub</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+			  	<li><a href="./tutorial0.html" title="Introduction to Gelly">Tutorial0</a></li>
+				<li><a href="./tutorial1.html" title="Load public data and create a graph and run a library method">Tutorial1</a></li>
+				<li><a href="./tutorial2.html" title="Know your graph">Tutorial2</a></li>
+				<li><a href="./tutorial3.html" title="Simple transformations">Tutorial3</a></li>
+				<li><a href="./tutorial4.html" title="Advanced transofrmations">Tutorial4</a></li>
+				<li><a href="./tutorial5.html" title="Neighborhood methods">Tutorial5</a></li>
+				<li><a href="./tutorial6.html" title="Implement a graph validator">Tutorial6</a></li>
+				<li><a href="./tutorial7.html" title="Vertex-centric iterations">Tutorial7</a></li>
+				<li><a href="./tutorial8.html" title="Gather-sum-apply iterations">Tutorial8</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+    <!-- Begin page content -->
+    <div class="container">
+	      <div class="page-header">
+        <h1>Neighborhood methods</h1>
+      </div>
+<h4>Socialize with your neighbors</h4>
+<p><img src="./images/neighborhood.jpg"/></p>
+<p>This article is a step by step guide to gain familiarity with the neighborhood methods of Gelly. We will study them using the problem of calculating Local Clustering Coefficient as example. In particular, we will get acquaintance with the <strong>reduceOnEdges()</strong> and <strong>reduceOnNeighbors()</strong> aggregation methods. Moreover, we will also get to meet our friend from the last tutorial, <strong>joinWithVertices()</strong>, again.</p>
+<br>
+<h4>Tools at hand</h4>
+<p>Neighborhood methods allow vertices to perform an aggregation on their first-hop neighborhood. <em>reduceOnEdges()</em> can be used to compute an aggregation on the values of the neighboring edges of a vertex and <em>reduceOnNeighbors()</em> can be used to compute an aggregation on the values of the neighboring vertices.
+The neighborhood scope is defined by the <em>EdgeDirection</em> parameter, which takes the values <em>IN</em>, <em>OUT</em> or <em>ALL</em>. IN will gather all in-coming edges (neighbors) of a vertex, <em>OUT</em> will gather all out-going edges (neighbors), while <em>ALL</em> will gather all edges (neighbors).</p> <br>
+<h4>What is this Local Clustering Coefficient?</h4>
+<p>A <a href="https://en.wikipedia.org/wiki/Clustering_coefficient">clustering coefficient</a> tells us the degree to which nodes in a graph tend to cluster together. There are two versions of it: local and global. The global coefficient gives an overall indication of the clustering in the whole network, whereas the local one gives an insight into the local density. For a node, this is the number of links present over the total number of possible links between it's neighbors. Thus, the local clustering coefficient quantifies how close the node's neighbors are to being a complete graph and it can be calculated by the formula given below:</p><br>
+<p><img src="./images/lcc_formula.jpg" /></p>
+<br>
+<h3>Practical overview</h3>
+<p >We are using the local clustering coefficient calculation as example in this tutorial, because as seen from the formula above, each node needs to know the &quot;friendship status&quot; of its neighborhood i.e. for each of it's neighbors, it needs to keep track of how well connected that neighbor is to it's other neighbors. As we will see, this information can be easily retrieved by invoking the aforementioned reduce methods.</p>
+<p>To play around with the algorithm, any graph data set will do given that it is read in a manner appropriate for calculating our coefficients. In short, all we need is information regarding directed edges (source and target nodes). Hence, if the input data set has also edge values, that information can be ignored. </p>
+<br>
+<h4>Graph creation</h4>
+<p >For graph creation in Gelly, refer to <a href="./tutorial1.html">Tutorial1</a>. To avoid repetitions, only code is given below; redundant explanation regarding the first part will be skipped and we will jump straight to the neighborhood methods.
+The only point worth mentioning from the implementation point of view, is that the Vertex value has been allocated as a <em>HashMap&lt;String,HashSet<Long>&gt;</em>. Keys are String objects, named <em>&quot;incoming&quot;</em> and <em>&quot;outgoing&quot;</em>. For each vertex, the incoming key is associated with a Set of neighbors pointing to the node, whereas the outgoing key is associated with a Set of neighbors the node is itself pointing to.</p>
+<pre><code> <em style="color:green">   //read the Edge DataSet from the input file </em>
+    DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; links =  env.readCsvFile(edgeInputPath)
+            .fieldDelimiter(&quot;\t&quot;)
+            .lineDelimiter(&quot;\n&quot;)
+            .types(Long.class, Long.class)
+            .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
+                public Edge&lt;Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; value) {
+                    return new Edge&lt;Long, NullValue&gt;(value.f0, value.f1,
+                            NullValue.getInstance());
+                    }
+                });
+
+   <em style="color:green"> //create a graph initializing vertex values</em>
+    Graph&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;, NullValue&gt; graph = 
+	      Graph.fromDataSet(links, new MapFunction&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;() {
+
+        public HashMap&lt;String, HashSet&lt;Long&gt;&gt; map(Long value) throws Exception {
+            return  new HashMap&lt;String,HashSet&lt;Long&gt;&gt;();
+        }
+    }, env);
+</code></pre>
+<br>
+<h4>Gather neighboorhood info</h4>
+<p >Now that we have a graph, we will use the <strong>groupReduceOnEdges()</strong> method with a user-defined function acting upon each of the resulting neighborhoods.
+A question that may arise here is why did we select <em>groupReduceOnEdges()</em> and not <em>reduceOnEdges()</em>. The reason is that when the aggregation function is not associative and commutative or when it is desirable to return more than one values per vertex, the more general <em>groupReduceOnEdges()</em> and <em>groupReduceOnNeighbors()</em> methods can be used. These methods return zero, one or more values per vertex and provide access to the whole neighborhood.
+The following code will collect the out-edges and in-edges for each vertex and apply the <em>NeighborsSet()</em> function on each of the resulting neighborhoods.
+In order to decide whether to put the neighbor in the incoming Set or the outgoing Set, a check is made on the target vertex of the edge under consideration. If the target vertex is the node itself, it means that the edge is an incoming one.</p>
+<p><img src="./images/lcc_graph1.jpg" /></p>
+<pre><code><em style="color:green">//for each vertex save its incoming and outgoing neighbors </em><br>
+DataSet&lt;Tuple2&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; neighbSet = 
+   graph.groupReduceOnEdges(new NeighborsSet(),EdgeDirection.ALL);
+
+
+@SuppressWarnings(&quot;serial&quot;)
+static final class NeighborsSet implements EdgesFunction
+         &lt;Long,NullValue,Tuple2&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; {
+
+
+    @Override
+    public void iterateEdges(
+            Iterable&lt;Tuple2&lt;Long, Edge&lt;Long, NullValue&gt;&gt;&gt; edges,
+            Collector&lt;Tuple2&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; out) throws Exception {
+
+        Long vertexId = null;
+        HashMap&lt;String,HashSet&lt;Long&gt;&gt; neighbList= new HashMap&lt;String,HashSet&lt;Long&gt;&gt;();
+        neighbList.put(&quot;incoming&quot;, new HashSet&lt;Long&gt;());
+        neighbList.put(&quot;outgoing&quot;, new HashSet&lt;Long&gt;());
+
+
+        for(Tuple2&lt;Long, Edge&lt;Long, NullValue&gt;&gt; e: edges){
+
+            vertexId= e.f0;
+            if(e.f1.getTarget().equals(vertexId))
+                neighbList.get(&quot;incoming&quot;).add(e.f1.getSource());
+            else
+                neighbList.get(&quot;outgoing&quot;).add(e.f1.getTarget());
+
+
+        }
+        out.collect(new Tuple2&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;(vertexId,neighbList));
+
+    }
+
+}
+</code></pre>
+<br>
+<h4>Using the gathered info</h4>
+<p>First, we will update the values of the vertices in our graph by performing  a join with the Data set <em>&lt;vertexId, HashMap of neighbors&gt;</em> obtained in the previous step. Then we will call the <strong>groupReduceOnNeighbors()</strong> with the ad-hoc <em>CoefficientCalc()</em> function. The latter is where the actual formula for calculating the local coefficient is implemented. For each vertex, the for loop, as in the code below, is used to check whether a link exists between the neighbor in the current iteration of the loop and the other neighbors in common to the two nodes. The final data set will consist of <em>&lt;vertexId,coefficient&gt;</em>.
+<br>
+<p><img src="./images/lcc_calc.jpg" /></p>
+<br>
+<pre><code><em style="color:green">    //perform a join to update the vertex values with neighbor's info </em>
+    Graph&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;, NullValue&gt; graph2 = graph.joinWithVertices(neighbSet,
+            new MapFunction&lt;Tuple2&lt;HashMap&lt;String,HashSet&lt;Long&gt;&gt;,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;,
+			     HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;(){
+                @Override
+                public HashMap&lt;String,HashSet&lt;Long&gt;&gt; map(Tuple2&lt;HashMap&lt;String,HashSet&lt;Long&gt;&gt;,
+				        HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt; value) throws Exception {
+                    return value.f1;
+                }});
+
+    <em style="color:green">//calculate the local coeff for each vertex</em>
+    DataSet&lt;Tuple2&lt;Long,Double&gt;&gt; coefficients = 
+	    graph2.groupReduceOnNeighbors(new CoefficientCalc(),EdgeDirection.ALL);
+
+    coefficients.print();
+
+}
+
+
+@SuppressWarnings(&quot;serial&quot;)
+static class CoefficientCalc implements NeighborsFunctionWithVertexValue
+&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;,NullValue, Tuple2&lt;Long,Double&gt;&gt; {
+
+    @Override
+    public void iterateNeighbors(
+            Vertex&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt; vertex,
+            Iterable&lt;Tuple2&lt;Edge&lt;Long, NullValue&gt;, Vertex&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt;&gt; neighbors,
+            Collector&lt;Tuple2&lt;Long, Double&gt;&gt; out) throws Exception {
+
+        double coefficient;
+        double numerator = 0;
+
+        HashSet&lt;Long&gt; neighbCount= new HashSet&lt;Long&gt;();
+        neighbCount.addAll(vertex.f1.get(&quot;incoming&quot;));
+        neighbCount.addAll(vertex.f1.get(&quot;outgoing&quot;));
+
+        <em style="color:green">//Set has been used to remove duplicate neighbors: 
+        //those present both in incoming and outgoing are to be counted only once</em>
+        int denominator =neighbCount.size()*(neighbCount.size()-1);
+
+        <em style="color:green">//to store links amongst neighbors</em>
+        HashSet&lt;String&gt; links = new HashSet&lt;String&gt;();
+
+        for(Tuple2&lt;Edge&lt;Long,NullValue&gt;,Vertex&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; n : neighbors){
+            for(Long id : n.f1.getValue().get(&quot;incoming&quot;)){
+                if(vertex.f1.get(&quot;incoming&quot;).contains(id)||vertex.f1.get(&quot;outgoing&quot;).contains(id)){
+                    links.add(&quot;&quot;+id+&quot; &quot;+n.f1.f0);
+                }
+            }
+            for(Long id : n.f1.getValue().get(&quot;outgoing&quot;)){
+                if(vertex.f1.get(&quot;incoming&quot;).contains(id)||vertex.f1.get(&quot;outgoing&quot;).contains(id)){
+                    links.add(&quot;&quot;+n.f1.f0+&quot; &quot;+id);
+                }
+            }
+        }
+
+        <em style="color:green">//number of connections amongst neighbors</em>
+        numerator=links.size();
+
+        if(denominator&lt;1)
+            coefficient=0.0;
+        else
+            coefficient=(double)numerator/(double)denominator;
+
+        out.collect(new Tuple2&lt;Long,Double&gt;(vertex.f0,coefficient));
+
+    }}
+</code></pre>
+
+<br>
+<h4>And we are done</h4>
+<p>That was our quick introduction to Gelly's neighborhood methods. Play with them and "take advantage" of your neighborhood to the max!</p>
+<p>Following is the link to the full code of the clustering coefficient example that we have discussed in this tutorial:<a href="https://github.com/vasia/gelly-school/blob/gelly-tutorials/src/main/java/flink/gelly/school/LocalClusteringCoefficient.java">LCC Solution</a></p>
+
+	<p><h4><a style="margin-left: 100px" href="./tutorial4.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial6.html"><em>Next--></em></a></h4></p>
+	<br><br>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="./dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
