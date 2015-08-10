@@ -72,40 +72,51 @@
         <h1>Iterative Graph Processing</h1>
       </div>
 <h2>Vertex-centric iterations</h2>
-<p>In this <em>long</em> tutorial, we are going to talk about how Gelly exploits Flink’s efficient iteration operators to support large-scale iterative graph processing. Currently, Gelly provides implementations of the popular <strong>vertex-centric</strong> iterative model and a variation of <strong>Gather-Sum-Apply</strong>. In this and the following tutorial, we will see the details of these two models and how you can use them in Gelly. We are going to start with the vertex-centic approach.</p>
-<p>The <strong>vertex-centric model</strong>, also known as “think like a vertex” model, expresses computation from the perspective of a vertex in the graph. The computation proceeds in synchronized iteration steps, called <em>supersteps</em>. In each superstep, a vertex produces messages for other vertices and updates its value based on the messages it receives. To use vertex-centric iterations in Gelly, the user only needs to define how a vertex behaves in each superstep:</p>
+<p>In this tutorial, we are going to discuss the <strong>vertex-centric</strong> iterative model provided by Gelly.</p>
+<p>In the <em>vertex-centric model</em> computations proceed in synchronized iteration steps, called <em>supersteps</em>. In each superstep, a vertex produces messages for other vertices and updates its value based on the messages it receives. To use vertex-centric iterations in Gelly, you only needs to define two functions that determine the behaviour of a Vertex in each superstep:</p>
 <ul>
-<li><strong><em>Messaging</em></strong>: produce the messages that a vertex will send to other vertices.</li>
-<li><strong><em>Value Update</em></strong>: update the vertex value using the received messages.</li>
+<li><strong><em>MessagingFunction()</em></strong>: produces the messages that a vertex will send to other vertices.</li>
+<li><strong><em>VertexUpdateFunction()</em></strong>: updates the vertex value using the received messages.</li>
 </ul><br>
-<p>The user only needs to implement two functions, corresponding to the phases above: a <strong><em>VertexUpdateFunction</em></strong>, which defines how a vertex will update its value based on the received messages and a <strong><em>MessagingFunction</em></strong>, which allows a vertex to send out messages for the next superstep. These functions and the maximum number of iterations to run are given as parameters to Gelly’s <strong><em>runVertexCentricIteration</em></strong>. This method will execute the vertex-centric iteration on the input Graph and return a new Graph, with updated vertex values.</p>
+The above two functions and the maximum number of iterations to run, are given as parameters to Gelly’s <strong><em>runVertexCentricIteration()</em></strong>. This method will execute the vertex-centric iteration on the input Graph and return a new Graph, with updated vertex values.</p>
 <p>Let's understand this better with an example. We are going to consider a simplified implementation of the <a href="https://en.wikipedia.org/wiki/PageRank"><strong>PageRank</strong></a> algorithm.</p><br>
 <h4>A few words about PageRank</h4>
 <p><em>PageRank</em> is a numeric value that represents the importance of a page on the web and is used by Google to rank websites in their search engine results.
 In short, the output of the algorithm is a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. For details, have a good read of the <a href="https://en.wikipedia.org/wiki/PageRank">wikipedia</a> article.</p><br>
 <h4>Hands on</h4>
-<p>In each superstep, each vertex sends a rank message to all of its neighbors. The message value is part of the rank that the vertex is going to assign to the neighbor according to the edge weight connecting this vertex with that neighbor. Upon receiving the rank messages, each vertex sums the partial ranks, calculates its new ranking according to the dampening formula and updates its own PageRank value. The algorithm converges when there are no value updates. If the value of a vertex does not change during a superstep, it will not send any messages in the superstep. This allows to do incremental updates to the hot (changing) parts of the graph, while leaving cold (steady) parts untouched. The computation terminates after a specified maximum number of supersteps or when convergence is reached.</p>
-<p><img src="./images/iter1.jpg"/></p><br>
-<pre><code>public class PageRankAlgorithm&lt;K extends Comparable&lt;K&gt; &amp; Serializable&gt; implements
-    GraphAlgorithm&lt;K, Double, Double&gt; {
+<p>In each superstep:<ul>
+<li> Each vertex sends a rank message to all of its neighbors, distributing the rank according to edge weights.</li><br>
+<pre><code><em style="color:green">
+/**
+ * Distributes the rank of a vertex among all target vertices according to
+ * the transition probability, which is associated with an edge as the edge
+ * value.
+ */</em>
+@SuppressWarnings(&quot;serial&quot;)
+public static final class RankMessenger&lt;K&gt; extends MessagingFunction&lt;K, Double, Double, Double&gt; {
 
-private double beta;
-private int maxIterations;
+    private final long numVertices;
 
-public PageRankAlgorithm(double beta, int maxIterations) {
-    this.beta = beta;
-    this.maxIterations = maxIterations;
+    public RankMessenger(long numberOfVertices) {
+        this.numVertices = numberOfVertices;
+    }
+
+    @Override
+    public void sendMessages(Vertex&lt;K, Double&gt; vertex) {
+        if (getSuperstepNumber() == 1) {
+            <em style="color:green">// initialize vertex values during the first superstep</em>
+            vertex.setValue(new Double(1.0 / numVertices));
+        }
+
+        for (Edge&lt;K, Double&gt; edge : getEdges()) {
+            sendMessageTo(edge.getTarget(), vertex.getValue() * edge.getValue());
+        }
+    }
 }
+</code></pre><br>
 
-@Override
-public Graph&lt;K, Double, Double&gt; run(Graph&lt;K, Double, Double&gt; network) throws Exception {
-
-    final long numberOfVertices = network.numberOfVertices();
-    return network.runVertexCentricIteration(new VertexRankUpdater&lt;K&gt;(beta, numberOfVertices),
-     	new RankMessenger&lt;K&gt;(numberOfVertices),
-            maxIterations);
-}
-<em style="color:green">
+<li> Upon receiving the rank messages, each Vertex sums the partial ranks, calculates its new ranking according to the dampening formula, and updates its own PageRank value.</li></ul>
+<pre><code><em style="color:green">
 /**
  * Function that updates the rank of a vertex by summing up the partial
  * ranks from all incoming messages and then applying the dampening formula.
@@ -124,50 +135,21 @@ public static final class VertexRankUpdater&lt;K&gt; extends VertexUpdateFunctio
     @Override
     public void updateVertex(Vertex&lt;K, Double&gt; vertex, MessageIterator&lt;Double&gt; inMessages) {
         double rankSum = 0.0;
+        <em style="color:green">// sum the incoming partial ranks</em>
         for (double msg : inMessages) {
             rankSum += msg;
         }
-
-        // apply the dampening factor / random jump
+         <em style="color:green">// apply the dampening formula</em>
         double newRank = (beta * rankSum) + (1 - beta) / numVertices;
+		
+	<em style="color:green">// update Vertex value</em>
         setNewVertexValue(newRank);
     }
 }
-<em style="color:green">
-/**
- * Distributes the rank of a vertex among all target vertices according to
- * the transition probability, which is associated with an edge as the edge
- * value.
- */</em>
-@SuppressWarnings(&quot;serial&quot;)
-public static final class RankMessenger&lt;K&gt; extends MessagingFunction&lt;K, Double, Double, Double&gt; {
-
-    private final long numVertices;
-
-    public RankMessenger(long numberOfVertices) {
-        this.numVertices = numberOfVertices;
-    }
-
-    @Override
-    public void sendMessages(Vertex&lt;K, Double&gt; vertex) {
-        if (getSuperstepNumber() == 1) {
-            // initialize vertex ranks
-            vertex.setValue(new Double(1.0 / numVertices));
-        }
-
-        for (Edge&lt;K, Double&gt; edge : getEdges()) {
-            sendMessageTo(edge.getTarget(), vertex.getValue() * edge.getValue());
-        }
-    }
-}
-}
 </code></pre>
 <br>
-<p>The above vertex-centric iteration can be executed as follows:</p>
-<p><code>    DataSet&lt;Vertex&lt;String, Double&gt;&gt; pageRanks = graph.run(
-            new PageRankAlgorithm&lt;String&gt;(DAMPENING_FACTOR, maxIterations))
-            .getVertices();
-</code></p>
+ The algorithm converges when there are no value updates. If the value of a Vertex does not change during a superstep, it will not send any messages in the superstep. This allows to do incremental updates to the changing parts of the graph, while leaving steady parts untouched. The computation terminates after a specified maximum number of supersteps or when convergence is reached.</p>
+<p><img src="./images/iter1.jpg"/></p><br>
 <br>
 <p>The output is a DataSet of vertices, where the Vertex value is the rank of the given Vertex.
 You can find the full implementation <strong><a href="https://github.com/apache/flink/blob/master/flink-staging/flink-gelly/src/main/java/org/apache/flink/graph/library/PageRankAlgorithm.java">here</a></strong>.
@@ -176,13 +158,10 @@ It is to be noted that in our simple implementation, it is assumed that all the 
 If we run the PageRankAlgorithm using the Graph obtained from the twitter data set, then we obtain the output as shown in the figure below: </p>
 <p><img src="./images/screenshot7_1.PNG" /></p><br>
 <h4>Configuring a Vertex-Centric Iteration</h4>
-<p>A vertex-centric iteration can be extended with information such as the total number of vertices, the in degree and out degree. Additionally, the neighborhood type (in/out/all) over which to run the vertex-centric iteration can be specified. By default, the updates from the in-neighbors are used to modify the current vertex’s state and messages are sent to out-neighbors.</p>
 <p>A vertex-centric iteration can be configured using a <strong><em>VertexCentricConfiguration</em></strong> object. Currently, the following parameters can be specified:<em> Name,Parallelism, Aggregators, Broadcast Variables, Number of Vertices, Degrees, Messaging Direction</em>. You can find more details regarding these parameters at this <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#configuring-a-vertex-centric-iteration">link</a>.<br>
-<p>For example, if we want to access the total number of vertices and the degree information of a node within an iteration, then we need to set these options to true and pass the updated parameter to the vertex-centric iteration. This allows us to retrieve the required information both within the VertexUpdateFunction and the MessagingFunction.</p>
+<p>For example, if we want to access the total number of vertices and the degree information of a node within an iteration, then we need to set these options to true and pass the updated parameter to the vertex-centric iteration. This allows us to retrieve the required information both within the VertexUpdateFunction and the MessagingFunction as shown below.</p>
 
-<pre><code>Graph&lt;Long, Double, Double&gt; graph = ...
-
-<em style="color:green">// configure the iteration</em>
+<pre><code><em style="color:green">// configure the iteration</em>
 VertexCentricConfiguration parameters = new VertexCentricConfiguration();
 
 <em style="color:green">// set the number of vertices option to true</em>
@@ -198,7 +177,7 @@ Graph&lt;Long, Double, Double&gt; result =
 		
 <em style="color:green">// user-defined functions</em>
 public static final class VertexUpdater {
-    <em style="color:green">// get the number of vertices</em>
+       <em style="color:green">// get the number of vertices</em>
 	long numVertices = getNumberOfVertices();
 	<em style="color:green">// retrieve the vertex out-degree</em>
 	outDegree = getOutDegree();
@@ -210,7 +189,7 @@ public static final class VertexUpdater {
 </code></pre>
 <br><br>
 <h4>What's next?</h4>
-<p>That was quite a lot of information! Isn't it?! To not overload you with more, we will consider the Gather-sum-apply model in the next tutorial. But before moving on, try your hand at this vertex-centric model.</p>
+<p> To not overload you with information, we will consider the Gather-sum-apply iterative model in the next tutorial. But before moving on, try your hand at the vertex-centric iterations.</p>
 
 <p><h4><a style="margin-left: 100px" href="./tutorial6.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial8.html"><em>Next--></em></a></h4></p>
 <br><br>

@@ -69,15 +69,38 @@
     <!-- Begin page content -->
     <div class="container">
       <div class="page-header">
-        <h1>Introduction - To be completed</h1>
-		<h3> What else should go here if intro is on welcome page? Feel free to add what you like!:P</h3>
-      </div>
-			<p>
-				<img src="./images/started.jpg" align="right" />
+        <h1>Introduction</h1>
+      </div>	        <p>
+				<img src="./images/intro.jpg" align="right" />
 			</p>
-			<h4>What you need to get started</h4>
-             <p>All you need to start with a Gelly project, is to
-				add the following dependency to your <code>pom.xml</code>:</p>
+	        <h3>Graphs? Graphs!</h3>
+            <p>Graphs are data structures that capture relationships between entities:
+			<ul>
+            <li>connections, interactions, purchases</li>
+			<li>“Steve follows Wendy”, “Emily bought item42"</li>
+            </ul>
+            We call the entities “nodes” or “vertices” and the relationships “edges”.<br>
+			<img src="./images/tut0_1.jpg" />
+			</p><br>
+            <p>Egdes might have a cost associated with them, resulting in the so called weighted graph. Weighted graphs capture the strength of the relationship, e.g. similarity, importance, social proximity.<br>
+            <img src="./images/tut0_2.jpg" /></p><br>
+			
+			<p>An edge can be either directed or undirected. An undirected edge means that there is no restriction on the direction travelled along the edge, while a directed edge is a one way relationship. The "follows" relationship can be represented by a directed graph while connectivity among users by an undirected graph: if user A is connected to user B then user B is also connected to user A but if user A follows user B then it does not mean that user B also follows user A.<br>
+			<img src="./images/tut0_3.jpg" /></p>
+			
+            <h3>So what?</h3>
+            <p>Analyzing graphs allows us to answer many interesting questions!
+            <ul>
+            <li>Who is the most influential user on Twitter?</li>
+			<li>Which webpage should appear first for a particular web query?</li>
+			<li>What is the optimal path to propagate information in a computer network?</li>
+			<li>How many hops do I need to go from A to B?</li>
+			<li>How similar are the nodes in my network?</li>
+			</ul>
+			All of these questions and the algorithms we use to answer them allow us to build applications that exploit the graph structure for social network analysis, web graph analysis, machine learning, recommenders and more.</p>
+			
+			<h3>How?</h3> 
+             <p>Gelly provides methods to create, transform and modify graphs, as well as a library of graph algorithms. It can be used to easily build graph processing applications in Flink. All you need to start with a Gelly project, is to add the following dependency to your <code>pom.xml</code> and follow the rest of the tutorials.</p>
 			<p>
 				<code>&lt;dependency&gt;</code></br>
 				<code>&lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</code><br>
@@ -85,41 +108,9 @@
 				<code>&lt;version&gt;0.10-SNAPSHOT&lt;/version&gt;</code><br>
 				<code>&lt;/dependency&gt;</code>
 			</p><br>
+			
+			<h4><em>Good Luck!</em></h4>
 
-			<h4>General overview</h4>
-			<p>Flink programs look like regular
-				Java programs with a main() method. Each program consists of the
-				same basic parts:</p>
-			<ol>
-				<li>Obtain an ExecutionEnvironment,</li>
-				<li>Load/create the initial data,</li>
-				<li>Specify transformations on this data,</li>
-				<li>Specify where to put the results of your computations, and</li>
-				<li>Trigger the program execution</li>
-			</ol>
-			<p>
-				The <em>ExecutionEnvironment</em> is the basis for all Flink
-				programs. If you are executing your program inside an IDE or as a
-				regular Java program it will create a local environment that will
-				execute your program on your local machine. If you created a JAR
-				file from you program, and invoke it through the command line or the
-				web interface, the Flink cluster manager will execute your main
-				method and getExecutionEnvironment() will return an execution
-				environment for executing your program on a cluster.
-			</p>
-			<p>
-				For specifying data sources the execution environment has several
-				methods to read from files using various methods: you can just read
-				them line by line, as CSV files, or using completely custom data
-				input formats. Once you have a DataSet you can apply transformations
-				to create a new DataSet which you can then write to a file,
-				transform again, or combine with other DataSets. For more details,
-				refer to the <a
-					href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html">DataSet
-					API</a> as our focus in this tutorial is going to be <a
-					href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html">Gelly</a>.
-				To be noted that mixing DataSet API and Gelly is seamless.
-			</p><br>
 				<p><h4><a style="margin-left: 100px" href="./home.html"><em><--Home</em></a> <a style="margin-left: 650px" href="./tutorial1.html">Next--></a></h4></p>
     </div> <!-- /container -->
 

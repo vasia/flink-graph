@@ -113,9 +113,8 @@ The only point worth mentioning from the implementation point of view, is that t
 <br>
 <h4>Gather neighboorhood info</h4>
 <p >Now that we have a graph, we will use the <strong>groupReduceOnEdges()</strong> method with a user-defined function acting upon each of the resulting neighborhoods.
-A question that may arise here is why did we select <em>groupReduceOnEdges()</em> and not <em>reduceOnEdges()</em>. The reason is that when the aggregation function is not associative and commutative or when it is desirable to return more than one values per vertex, the more general <em>groupReduceOnEdges()</em> and <em>groupReduceOnNeighbors()</em> methods can be used. These methods return zero, one or more values per vertex and provide access to the whole neighborhood.
-The following code will collect the out-edges and in-edges for each vertex and apply the <em>NeighborsSet()</em> function on each of the resulting neighborhoods.
-In order to decide whether to put the neighbor in the incoming Set or the outgoing Set, a check is made on the target vertex of the edge under consideration. If the target vertex is the node itself, it means that the edge is an incoming one.</p>
+The following code will collect the out-edges and in-edges for each Vertex and apply the <em>NeighborsSet()</em> function on each of the resulting neighborhoods.
+In order to decide whether to put the neighbor in the incoming Set or the outgoing Set, a check is made on the target Vertex of the edge under consideration. If the target Vertex is the node itself, it means that the edge is an incoming one.</p>
 <p><img src="./images/lcc_graph1.jpg" /></p>
 <pre><code><em style="color:green">//for each vertex save its incoming and outgoing neighbors </em><br>
 DataSet&lt;Tuple2&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; neighbSet = 
@@ -156,7 +155,7 @@ static final class NeighborsSet implements EdgesFunction
 </code></pre>
 <br>
 <h4>Using the gathered info</h4>
-<p>First, we will update the values of the vertices in our graph by performing  a join with the Data set <em>&lt;vertexId, HashMap of neighbors&gt;</em> obtained in the previous step. Then we will call the <strong>groupReduceOnNeighbors()</strong> with the ad-hoc <em>CoefficientCalc()</em> function. The latter is where the actual formula for calculating the local coefficient is implemented. For each vertex, the for loop, as in the code below, is used to check whether a link exists between the neighbor in the current iteration of the loop and the other neighbors in common to the two nodes. The final data set will consist of <em>&lt;vertexId,coefficient&gt;</em>.
+<p>First, we will update the values of the vertices in our graph by performing  a join with the Data set <em>&lt;VertexId, HashMap of neighbors&gt;</em> obtained in the previous step. Then we will call the <strong>groupReduceOnNeighbors()</strong> with the ad-hoc <em>CoefficientCalc()</em> function. The latter is where the actual formula for calculating the local coefficient is implemented. For each Vertex, the for loop, as in the code below, is used to check whether a link exists between the neighbor in the current iteration of the loop and the other neighbors in common to the two nodes. The final data set will consist of <em>&lt;VertexId,coefficient&gt;</em>.
 <br>
 <p><img src="./images/lcc_calc.jpg" /></p>
 <br>

@@ -72,20 +72,16 @@
         <h1>Iterative Graph Processing</h1>
       </div>
 <h2>Gather-sum-apply iterations</h2>
-<p>We proceed with our discussion of iterative processing in Gelly. Like in the vertex-centric model, Gather-Sum-Apply also proceeds in synchronized iterative steps, called supersteps. Each <em>superstep</em> consists of the following three phases:</p>
+<p>We proceed with our discussion of iterative processing in Gelly. Like in the vertex-centric model, Gather-Sum-Apply also proceeds in synchronized iterative steps, called supersteps. The three functions that need to be implemented for each superstep are:
+<ul>
+<li><strong>GatherFunction:</strong> this function is invoked in parallel on the edges and neighbors of each vertex and it produces a partial value.</li>
+<li><strong>SumFunction:</strong> reducer that aggregates the partial values produced in the Gather phase to a single value</li>
+<li><strong>ApplyFunction:</strong> it updates the Vertex value based on the current value and the aggregated value produced by the Sum phase.</li>
+</ul><br>
+<p>Let us consider again computing <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> but this time with GSA.
 <ol>
-<li>Gather: a user-defined function is invoked in parallel on the edges and neighbors of each vertex, producing a partial value.</li>
-<li>Sum: the partial values produced in the Gather phase are aggregated to a single value, using a user-defined reducer.</li>
-<li>Apply: each vertex value is updated by applying a function on the current value and the aggregated value produced by the Sum phase.</li>
-</ol>
-<p>Let us consider again computing <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> but this time with GSA. During the Gather phase, we calculate the partial rank to be distributed to the neighbor. In Sum, the candidate ranks are grouped by vertex ID and these partial values are summed together. In Apply, the rank value is updated by computing a new one using the dampening formula.</p><br><br>
-<p><img src="./images/iter2.jpg"/></p>
-<pre><code>    // Execute the GSA iteration
-    Graph&lt;Long, Double, Double&gt; result = graph
-            .runGatherSumApplyIteration(new GatherRanks(numberOfVertices), new SumRanks(),
-                    new UpdateRanks(numberOfVertices), maxIterations);
-
-
+<li><strong>Gather phase:</strong> we calculate the partial rank to be distributed to the neighbor.</li><br>
+<pre><code>
 @SuppressWarnings(&quot;serial&quot;)
 private static final class GatherRanks extends GatherFunction&lt;Double, Double, Double&gt; {
 
@@ -106,17 +102,18 @@ private static final class GatherRanks extends GatherFunction&lt;Double, Double,
         return neighborRank * neighbor.getEdgeValue();
     }
 }
-
-@SuppressWarnings(&quot;serial&quot;)
-private static final class SumRanks extends SumFunction&lt;Double, Double, Double&gt; {
+</pre></code><br>
+<li><strong>Sum phase:</strong> candidate ranks are grouped by vertex ID and these partial values are summed together.</li><br>
+<pre><code>private static final class SumRanks extends SumFunction&lt;Double, Double, Double&gt; {
 
     @Override
     public Double sum(Double newValue, Double currentValue) {
         return newValue + currentValue;
     }
 }
-
-@SuppressWarnings(&quot;serial&quot;)
+</pre></code><br>
+<li><strong>Apply phase:</strong> the rank value is updated by computing a new one using the dampening formula.</li><br>
+<pre><code>
 private static final class UpdateRanks extends ApplyFunction&lt;Long, Double, Double&gt; {
 
     long numberOfVertices;
@@ -131,15 +128,14 @@ private static final class UpdateRanks extends ApplyFunction&lt;Long, Double, Do
     }
 }
 </code></pre>
+</ol></p><br>
+<p><img src="./images/iter2.jpg"/></p>
 <br>
 <p>So we can achieve the same results but with a different approach. You can also try running the PageRank algorithm on the twitter data set using both the approaches. For a complete overview, have a look at the full implementation of the above <a href="https://github.com/apache/flink/blob/master/flink-staging/flink-gelly/src/main/java/org/apache/flink/graph/example/GSAPageRank.java">GSAPageRank</a>.</p>
 <br>
 <h4>Configuring a Gather-Sum-Apply Iteration</h4>
-<p>As we saw for the Vertex-centric model, a GSA iteration can also be configured using a <strong><em>GSAConfiguration</em></strong> object. Currently, the following parameters can be specified:<em>Name, Parallelism, Solution set in unmanaged memory, Aggregators, Broadcast Variables, Number of Vertices, Neighbor Direction.</em><br>You can find more details regarding these parameters at this <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#configuring-a-gather-sum-apply-iteration">link</a>.</p> 
-<p>In the vertex-centric approach we saw how to use the number of vertices option, so let's look at it again but this time for the GSA iterations.</p>
-<pre><code>Graph&lt;Long, Double, Double&gt; graph = ...
-
-<em style="color:green">// configure the iteration</em>
+<p>As we saw for the Vertex-centric model, a GSA iteration can also be configured using a <strong><em>GSAConfiguration</em></strong> object. In the vertex-centric approach we saw how to use the number of vertices option, so let's look at it again but this time for the GSA iterations.</p>
+<pre><code><em style="color:green">// configure the iteration</em>
 GSAConfiguration parameters = new GSAConfiguration();
 
 <em style="color:green">// set the number of vertices option to true</em>
@@ -178,10 +174,9 @@ As you can see, also in this case, <em>getNumberOfVertices()</em> can be called 
 <p><img src="./images/compare.jpg" align="right"/></p>
 <h3>Which model to use??</h3>
 <h4>Vertex-centric vs GSA</h4>
-<p>By now you would have realized that Gather-Sum-Apply iterations are quite similar to vertex-centric iterations. In fact, <strong>any algorithm which can be expressed as a GSA iteration can also be written in the vertex-centric model</strong>. The messaging phase of the vertex-centric model is equivalent to the Gather and Sum steps of GSA: Gather can be seen as the phase where the messages are produced and Sum as the phase where they are routed to the target vertex. Similarly, the value update phase corresponds to the Apply step.</p>
-<p>The main difference between the two implementations are: <ul>
+<p>By now you would have realized that Gather-Sum-Apply iterations are quite similar to vertex-centric iterations. In fact, <strong>any algorithm which can be expressed as a GSA iteration can also be written in the vertex-centric model</strong>. The messaging phase of the vertex-centric model is equivalent to the Gather and Sum steps of GSA: Gather can be seen as the phase where the messages are produced and Sum as the phase where they are sent to the target vertex. Similarly, the value update phase corresponds to the Apply step.</p>
+<p>Some of the difference between the two implementations are: <ul>
 <li>Gather phase of GSA parallelizes the computation over the edges, while the messaging phase distributes the computation over the vertices.</li>
-<li>Vertex-centric implementation uses a coGroup operator internally, while GSA uses a reduce.</li>
 <li>GSA works strictly on neighborhoods, while in the vertex-centric model, a vertex can send a message to any vertex, given that it knows its vertex ID.</li>
 <li>In the vertex-centric implementation, one can choose the messaging direction.</li></ul>
 For a detailed explanation regarding the differences, read <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#vertex-centric-and-gsa-comparison">here</a>.</p><br>

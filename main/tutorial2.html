@@ -70,7 +70,7 @@
     <div class="container">
 		      <div class="page-header">
         <h1>Know your Graph</h1>
-      </div>
+      </div><img src="./images/stats.jpg" align="right" />
 			<p>In this very short tutorial, we will see how to get some statistical
 				information out of our graph. Gelly includes built-in methods
 				for retrieving various graph properties and metrics.</p>
@@ -78,66 +78,42 @@
 				Suppose that we want to retrieve information regarding the number of
 				vertices and number of edges. Then, we can simply do as follows:
 			</p>
-			<p><code>    Long numVertices = graph.numberOfVertices();<br>
-	Long numEdges = graph.numberOfEdges();</code></p><br>
+			<pre><code>        <em style="color:green">// get the number of vertices</em>
+	Long numVertices = graph.numberOfVertices();
+			
+	<em style="color:green">// get the number of edges</em>
+	Long numEdges = graph.numberOfEdges();</code></pre><br>
+				<p> In the  <a href="./tutorial1.html">last</a> tutorial, we had learnt how to create 
+				a Graph using the FromDataSet() method. Here is a snapshot of some statistics obtained by calling the
+				<strong>numberOfVertices()</strong> and <strong>numberOfEdges()</strong> methods for that Graph. Our statistics
+				confirm that the used <a href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter</a>
+				data set consists of 23370 vertices(users) and 33101 edges (follows relationships) as 
+				mentioned on the download site.
+			</p><br>
+			<img src="./images/screenshot2_1.PNG" />
+			<p /> 
+	
+	<br><br>
 	<p>In a directed graph, the indegree of a node is the number of edges pointing towards that node
 	while the outdegree is the number of edges going out of it. The total degree is the sum of both in and out degrees.
 	Gelly allows to  get the degree information (<em>IN</em>,<em>OUT<em>,</em>ALL
 				</em>) of every node by it's easy to use built in methods:</p>
 				<p>			<img
 				src="./images/degrees.jpg" /></p>
-	<p><code>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.outDegrees();<br>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.inDegrees();<br>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.getDegrees();
-	</code></p><br>
-
-			<p> In the  <a href="./tut1.html">last</a> tutorial, we had learnt how to create 
-			a graph using three different approaches.
-				Here is a snapshot of some statistics obtained by calling the
-				<strong>numberOfVertices</strong> and <strong>numberOfEdges</strong> methods for all the three approaches.
-				The same statistical methods were called for the different ways of graph creation, just to show the consistency
-				among them; results are dependent upon the data set used and not on the chosen approach. Our statistics
-				confirm that the used <a href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter</a>
-				data set consists of 23370 users (vertices) and 33101 edges (follows) as 
-				mentioned on the download site.
-			</p><br>
-			<img src="./images/screenshot2_1.PNG" /><img src="./images/stats.jpg" align="right" />
-			<p /> <br><br>
-			<p><strong>A piece of cake,isn't it?!</strong><br>
-			Below is a full list of methods that can be
-			used to retrieve metrics and statistics in Gelly.
-			</p>
-			<pre>
-	<code><em style="color:green">// get the Vertex DataSet</em>
-	DataSet&lt;Vertex&lt;K, VV&gt;&gt; getVertices()
-
-	<em style="color:green">// get the Edge DataSet</em>
-	DataSet&lt;Edge&lt;K, EV&gt;&gt; getEdges()
-
-	<em style="color:green">// get the IDs of the vertices as a DataSet</em>
-	DataSet&lt;K&gt; getVertexIds()
-
-	<em style="color:green">// get the source-target pairs of the edge IDs as a DataSet</em>
-	DataSet&lt;Tuple2&lt;K, K&gt;&gt; getEdgeIds()
-
-	<em style="color:green">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; inDegrees()
-
+	<pre><code>
 	<em style="color:green">// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; outDegrees()
-
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.outDegrees();<br>
+	
+	<em style="color:green">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</em>
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.inDegrees();<br>
+	
 	<em style="color:green">// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree 
 	//is the sum of in- and out- degrees</em>
-	DataSet&lt;Tuple2&lt;K, Long&gt;&gt; getDegrees()
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.getDegrees();
+	</code></pre><br>
 
-	<em style="color:green">// get the number of vertices</em>
-	long numberOfVertices()
+	<p>For a full list of available methods, refer to the corresponding section in the <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#graph-properties">documentation</a>.</p>
 
-	<em style="color:green">// get the number of edges</em>
-	long numberOfEdges()
-	</code></pre>	<br>
-			
 	<p><h4><a style="margin-left: 100px" href="./tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial3.html"><em>Next--></em></a></h4></p>
 	</div> <!-- /container -->
 

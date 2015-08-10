@@ -71,171 +71,83 @@
       <div class="page-header">
         <h1>Load public data, create a graph and run a library method</h1>
       </div>
+	        <p>
+				<img src="./images/started.jpg" align="right" />
+			</p>
 			<h3>Here comes Gelly</h3>
 			<p>We start delving into Gelly by focusing on the following three concepts in this tutorial:
-			basics of a Gelly-Graph, reading input data set and Graph creation using the different available methods. We will
-			finish by showing how to run a library method on our Graph.					
+			<ul>
+			<li>Graph representation</li>
+			<li>Graph creation from public data</li>
+			<li>Running a Gelly library method</li>
+			</ul>
 			<h4>Some Basics</h4>
 			<p>
-				In Gelly, a Graph is represented by a DataSet of vertices and a
-				DataSet of edges. Graph nodes are represented by the <em>Vertex</em>
-				type. A Vertex is defined by a unique ID and an optional value.
-				Vertices without value can be represented by setting the value type to NullValue.
-				Graph edges are represented by the <em>Edge</em> type. An Edge is defined
-				by a source ID (the ID of the source Vertex), a target ID (the ID of
-				the target Vertex) and an optional value. The source and target IDs
-				should be of the same type as the Vertex IDs. Edges with no value
-				have a NullValue value type. For example, let's create two arbitrary vertices 
-				and an edge connecting them:
+			A Graph is represented by two DataSets: Vertices and Edges. Vertices and edges might or might not have associated values.
+			Let’s see some examples:
 			</p><br>
-		      <pre><code>                Vertex&lt;Long, String&gt; v1 = new Vertex&lt;Long, String&gt;(1L, &quot;foo&quot;);
-                Vertex&lt;Long, String&gt; v2 = new Vertex&lt;Long, String&gt;(2L, &quot;goo&quot;);
-                Edge&lt;Long, Double&gt; e = new Edge&lt;Long, Double&gt;(1L, 2L, 0.5);</code></pre><br>
+		      <pre><code><em style="color:green">  //creates a vertex with long Id and String value</em>
+   Vertex&lt;Long, String&gt; v1 = new Vertex&lt;Long, String&gt;(1L, &quot;foo&quot;);<br>
+ <em style="color:green"> //creates an edge with double value</em>
+   Vertex&lt;Long, String&gt; v2 = new Vertex&lt;Long, String&gt;(2L, &quot;goo&quot;);<br>
+ <em style="color:green"> //creates an edge without a value</em>
+   Edge&lt;Long, Double&gt; e = new Edge&lt;Long, Double&gt;(1L, 2L, NullValue);</code></pre><br>
+   
+			<p>Graph datasets are often available as a single list of edges. In this case, Gelly can read only the edge input and automatically infer the graph vertices.</p>
 			<p>
-			So we have created two vertices v1 and v2 with Long IDs '1L' and '2L' and String values
-			"foo" and "goo" respectively, connected by an Edge with Double value of 0.5.
-			Once we have our complete data set of edges and vertices, a Graph can be defined
-			by passing them as parameters to the graph creation methods, as we will see next.<br> 
-			The first attribute of a Gelly-Graph is the type for 
-			Vertex/Edge ID, the second is the value type for vertices,
-		    followed by the value type for edges. For example, the definition of our Graph representing the
-			two vertices (v1,v2) and Edge (e), would be:</p>
-			<p>
-				<img src="./images/graphRep.jpg"/>
-			</p>
+				<img src="./images/tut1_1.jpg"/>
+			</p><br>
 		
 
-			<h4>Reading input data and Graph creation</h4>	
-            <p>Now that we know the fundamental blocks of a graph, we will see how to create one starting from 
-			a real data set.</p>			
-				<ol>
-				<li>Read data from input file as a DataSet of Edges, DataSet of Tuple3 or as a Collection.</li>
-                <li>Depending on the choice in step one, use the appropriate graph creation method:</li>
-                </ol>
-	    <br>
-		<p><code>Graph.fromDataSet(vertices, edges, env);<br>
-         Graph.fromTupleDataSet(vertexTuples, edgeTuples, env);<br>
-         Graph.fromCollection(vertexList, edgeList, env);
-        </code></p><br>
+			<h3>Create a graph from public data</h3>	
+            <p>Let’s see how to create a graph in practice! For this series of tutorials, we are going to use the twitter dataset from<a href="http://konect.uni-koblenz.de/networks/ego-twitter">konect</a>. In the network page, you can find several properties and measurements about this dataset. It is a directed, unweighted network with 23370 vertices and 33101 edges. Let’s get the dataset and try to reproduce some of these results with Gelly!</p>			
 
-			<p>
-				For practising, you can start with any publicly available
-				graph data set (e.g. SNAP or Konnect) to read a file of edges,
-				create and initialize a Gelly-Graph. For our tutorials, we are going
-				to use the &quot;<em><a
-					href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter
-						list</a></em>&quot; data set from Konnect, where a node represent a user
-				and an edge the &quot;follow relation&quot; among users. We will see how three different 
-				graph creation methods can be used starting from this twitter data set. The purpose is to show the different 
-				approaches that can be adopted depending on whether you are given a data set of edges, tuples or a collection.<br><br>
-				
-				In the sample data set that we have used for these examples, the user is given as
-				input only information regarding edges. However, if in your input data, vertices'
-				information is also present, then an approach similar to the 
-				one used for parsing the edges-file can be used for vertices as well.
-				The optional DataSet of vertices can be passed as first parameter to the Graph creation methods. If no
-				vertex input is provided, then during graph creation, Gelly will
-				automatically produce the Vertex DataSet from edges input. In
-				this case, vertices will have no values. Alternatively, as we will
-				see in the example below, even if vertex input data set is missing, 
-				you can provide an ad-hoc <em>MapFunction</em> to initialize vertex values. <br>
-
-
-			</p><br>
-			<p>
-				<strong style="color: #002182"><em>fromDataSet:</em></strong> method used to create a Graph 
-				from a DataSet of edges and an optional DataSet of vertices
-			</p>
-			<pre><code>ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+			<h4>Step1: Go to the webpage and download the TSV edges file</h4>
+			<p>Go to the webpage and download the TSV edges file. The file is quite small and you can easily open it and check it out on your laptop. You will see that the first two lines start with “%” and contain information about the data. Next, each line represents an edge and Ids are separated by a space character:<br><br><em>
+			 % asym unweighted<br>
+             % 33101 938 22964<br>
+             1 2 <br>
+             1 3 <br>
+             1 4 <br>
+             1 5 <br>
+             ...</em></p>
 			
-	    <em style="color:green">//get the DataSet of edges. Edges in our example have no values</em>
-            DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; links = getLinksDataSet(env);
-
-	    <em style="color:green">//use the edges DataSet to create a Graph</em>
-            Graph&lt;Long, Double, NullValue&gt; graph = Graph.fromDataSet(links, new MapFunction&lt;Long, Double&gt;() {
-
-                <em style="color:green">//mapping function to initialize vertex values to 1.0</em>
-                public Double map(Long value) throws Exception {
-                    return 1.0;
-                }
-            }, env);
-
-
-
-        @SuppressWarnings(&quot;serial&quot;)
-        private static DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; getLinksDataSet(
-                ExecutionEnvironment env) {
-
-        <em style="color:green">//Input data format: &lt;srcEdgeId&gt;\t&lt;targetEdgeId&gt;\n
-        //Since the output has to be a data set of edges while a Tuple2 has been read from the CSV file,
-	//a mapper is used to create an edge from a Tuple2, with edge values set to null</em>
-                return env.readCsvFile(edgeInputPath)
-                        .fieldDelimiter(&quot; &quot;)
-                        .lineDelimiter(&quot;\n&quot;)
-                        .types(Long.class, Long.class)
-                        .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
-                            public Edge&lt;Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; value) {
-                                return new Edge&lt;Long, NullValue&gt;(value.f0, value.f1,
-                                        NullValue.getInstance());
-                                }
-                            });
-        }
-        </code>
-			</pre>
-		<p>	
-        To use this method, we used a mapper to convert a Tuple2 to an Edge. However, if you have as input a Tuple3, then you can create
-		edges with values as follows:</p>
-		
-		<pre><code>
-        private static DataSet&lt;Edge&lt;Long, Double&gt;&gt; getLinksDataSet(
-                ExecutionEnvironment env) {
-
-        <em style="color:green">//in case your input is of type: &lt;srcEdgeId&gt;\t&lt;targetEdgeId&gt;\t&lt;EdgeValue&gt;\n,</em>
-                return env.readCsvFile(edgeInputPath)
-                        .fieldDelimiter(&quot; &quot;)
-                        .lineDelimiter(&quot;\n&quot;)
-                        .types(Long.class, Long.class, Double.class)
-                        .map(new Tuple3ToEdgeMap&lt;Long, Double&gt;());
-                }
-        }
-        </code>
-			</pre><br>
-		
-		
-			<p>
-				<strong style="color: #002182"><em>fromTupleDataSet:</em></strong> from a DataSet of Tuple3 and an optional DataSet of Tuple2. In this case, Gelly will convert each Tuple3 to an Edge, where the first field will be the source ID, the second field will be the target ID and the third field will be the edge value. Equivalently, each Tuple2 will be converted to a Vertex, where the first field will be the vertex ID and the second field will be the vertex value.<br>
-				From our sample input we can retrieve only a Tuple2 as no edge values have been provided. In order to use this method of Graph creation 
-				which requires a Tuple3 to create edges, we use a mapper function to convert a Tuple2 to a Tuple3.
-			</p>
-			<pre>           <code><em style="color:green">//read a DataSet of Tuple2</em>
+			<h4>Step2:Load the data in a Flink DataSet</h4>
+			<p>We will use Flink’s readAsCsv method to read the edge data and create an edges DataSet. 
+			Flink’s CSV reader has convenient methods that let us:
+			<ul>
+			<li>Define the line delimiter. In our this is the delimiter that separated edges, ‘\n’.</li>
+            <li>Define the field delimiter. In our case this is the space character ‘ ’ that separates the edge Ids.</li>
+            <li>Ignore comments; lines that start with a certain character. Using this feature, we can instruct Flink to ignore the first 2 lines of the file.
+			Define the field types. We will read the edge Ids as Longs.</li></p>
+						<pre>           <code><em style="color:green">//read a file and creates a DataSet of Tuple2</em>
 	    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; edgeTuples = env.readCsvFile(args[0])
                     .fieldDelimiter(&quot; &quot;)
                     .lineDelimiter(&quot;\n&quot;)
-                    .types(Long.class, Long.class);
+                    .types(Long.class, Long.class);</pre></code>
 
-            <em style="color:green">
-            //This Graph creation method takes as input edges as a Tuple3 DataSet.
-            //In case, input is a Tuple2 use a mapper function to initializes edge values:</em>
-            Graph&lt;Long, NullValue, NullValue&gt; graph2 = Graph.fromTupleDataSet(edgeTuples
-                    .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Tuple3&lt;Long, Long, NullValue&gt;&gt;() {
-                        public Tuple3&lt;Long, Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; input) {
-                            return new Tuple3&lt;Long, Long, NullValue&gt;(input.f0, input.f1, null);
-                        }
-                    }), env);
-        </code>
-			</pre>
+		    <h4>Step3: Create a Graph</h4>
+			<p>Since the Twitter graph has no edge values, we are going to set them to NullValue when creating the edges DataSet. We can easily do this by applying a map function to the DataSet we have just read:</p>
+			
+			<pre><code>DataSet&lt;Edge&lt;Long, NullValue&gt;&gt= edgeTuples.map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
+                        public Edge&lt;Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; value) {
+                            return new Edge&lt;Long, NullValue&gt;(value.f0, value.f1,
+                                    NullValue.getInstance());
+                                }
+                            });
+			</pre></code>
+			<p>Now we are ready to create the Graph! We are going to use Gelly’s fromDataSet method, which will induce the vertices directly from the edges. In this method, we can also provide a mapper to create the vertex values. The mapper gives us the vertex Id as a parameter and lets us set the vertex value to an arbitrary value. This allows us to create the graph and initialize the vertex values in one step! For our example, we will set the vertex values to 1.0, in order to later run the PageRank algorithm on the graph.</p>
+			
+		<pre><code><em style="color:green">//use the edges DataSet to create a Graph</em>
+ Graph&lt;Long, Double, NullValue&gt; graph = Graph.fromDataSet(links, new MapFunction&lt;Long, Double&gt;() {
+    <em style="color:green">//mapping function to initialize vertex values to 1.0</em>
+     public Double map(Long value) throws Exception {
+           return 1.0;
+          }
+       }, env);
+        </code></pre><br>
 
-			<p>
-				<strong style="color: #002182"><em>fromCollection:</em></strong> from a Collection of edges and an optional Collection of vertices.<br>Just to show that a Graph can be created also from a Collection of edges, collect() has been called to obtain a List of edges from the Edge DataSet
-				obtained as in case 1.
-			</p>
-			<pre>           <code><em style="color:green">//getLinksDataSet() method is the same as for method 1</em>
-            List&lt;Edge&lt;Long, NullValue&gt;&gt; edgeList = getLinksDataSet(env).collect();
-            Graph&lt;Long, NullValue, NullValue&gt; graph3 = Graph.fromCollection(edgeList, env);
-        </code>
-			</pre>
-
-			<br>
+	
 			<h4>Running a library method</h4><p><img src="./images/running.jpg" align="right"/></p>
 			<p>
 			Gelly provides a collection of graph algorithms for easily analyzing large-scale Graphs. 
@@ -251,8 +163,7 @@
 			<br>
 			<h4>It was that easy</h4>
 			<p>
-				We have learnt how to create a Graph in Gelly from virtually any sort
-				of input data set. In the next tutorial, we will get to know some
+				We have learnt how to create a Graph in Gelly from a given input data set. In the next tutorial, we will get to know some
 				details regarding the Graph we have just created. </p><br>
 
 	<p><h4><a style="margin-left: 100px" href="./tutorial0.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial2.html"><em>Next--></em></a></h4></p>
