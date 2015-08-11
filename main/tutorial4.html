@@ -77,11 +77,11 @@
 <p>Gelly provides specialized methods for joining the vertex and edge datasets with other input datasets. We are going to see how to use the <strong>joinWithVertices()</strong> method. <em>joinWithVertices()</em>joins the vertices with a Tuple2 input data set. The join is performed using the vertex ID and the first field of the Tuple2 input as the join keys. The method returns a new Graph where the vertex values have been updated according to a provided user-defined map function. 
 <br><br>For example, if we want to update the vertex values in our <em>'twitter Graph'</em> (created in <a href="./tutorial1.html">Tutorial1</a>) with the number of followers for each user, then we proceed follows: 
 <ul><li>Calculate the indegree of every Vertex </li>
-<pre><code>    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegree = graph.inDegrees();</pre></code><br>
+<pre><code>    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegree = graph.<em style="color:blue">inDegrees()</em>;</pre></code><br>
 <li>Perform a join with the DataSet of <vertex ID, in-degree> obtained in the previous step.</li>
-<pre><code>    Graph&lt;Long, Long, NullValue&gt; updatedGraph = graph.joinWithVertices(vertexInDegree ,
+<pre><code>    Graph&lt;Long, Long, NullValue&gt; updatedGraph = graph.<em style="color:blue">joinWithVertices</em>(vertexInDegree ,
 		new MapFunction&lt;Tuple2&lt;Long,Long&gt;, Long&gt;() {
-			 public Long map(Tuple2&lt;Long, Long&gt; value) {
+			 public Long <em style="color:brown">map</em>(Tuple2&lt;Long, Long&gt; value) {
 				return value.f1;
 			  }
 			});	</pre></code><br>
@@ -89,15 +89,15 @@
  
 <pre><code>   
 		
-    Graph&lt;Long, Long, NullValue&gt; filteredGraph = updatedGraph.filterOnVertices(new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
-		public boolean filter(Vertex&lt;Long, Long&gt; vertex) {
+    Graph&lt;Long, Long, NullValue&gt; filteredGraph = updatedGraph.<em style="color:blue">filterOnVertices</em>(new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
+		public boolean <em style="color:brown">filter</em>(Vertex&lt;Long, Long&gt; vertex) {
                    <em style="color:green">// keep only users with followers above N</em>
 			return (vertex.getValue() &gt; N);
 		   }
 	   });  
 	   
      <em style="color:green">// get the number of users with followers above N</em>
-     Long usersWithFollowersAboveN = filteredGraph.numberOfVertices();	   
+     Long usersWithFollowersAboveN = filteredGraph.<em style="color:blue">numberOfVertices()</em>;	   
 </code></pre><br></p>
 
 In case we want to store information regarding how many people a user follows, then instead of inDegree we just need to use the OutDegree. With our sample data set, you can write your function and verify that there are 4 users who are following more than 200 people.<br><br>

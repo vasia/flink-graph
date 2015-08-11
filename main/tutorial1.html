@@ -87,11 +87,11 @@
 			Let’s see some examples:
 			</p><br>
 		      <pre><code><em style="color:green">  //creates a vertex with long Id and String value</em>
-   Vertex&lt;Long, String&gt; v1 = new Vertex&lt;Long, String&gt;(1L, &quot;foo&quot;);<br>
+   Vertex&lt;Long, String&gt; v1 = new <em style="color:brown">Vertex</em>&lt;Long, String&gt;(1L, &quot;foo&quot;);<br>
  <em style="color:green"> //creates an edge with double value</em>
-   Vertex&lt;Long, String&gt; v2 = new Vertex&lt;Long, String&gt;(2L, &quot;goo&quot;);<br>
+   Vertex&lt;Long, String&gt; v2 = new <em style="color:brown">Vertex</em>&lt;Long, String&gt;(2L, &quot;goo&quot;);<br>
  <em style="color:green"> //creates an edge without a value</em>
-   Edge&lt;Long, Double&gt; e = new Edge&lt;Long, Double&gt;(1L, 2L, NullValue);</code></pre><br>
+   Edge&lt;Long, Double&gt; e = new <em style="color:brown">Edge</em>&lt;Long, Double&gt;(1L, 2L, NullValue);</code></pre><br>
    
 			<p>Graph datasets are often available as a single list of edges. In this case, Gelly can read only the edge input and automatically infer the graph vertices.</p>
 			<p>
@@ -121,7 +121,7 @@
             <li>Ignore comments; lines that start with a certain character. Using this feature, we can instruct Flink to ignore the first 2 lines of the file.
 			Define the field types. We will read the edge Ids as Longs.</li></p>
 						<pre>           <code><em style="color:green">//read a file and creates a DataSet of Tuple2</em>
-	    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; edgeTuples = env.readCsvFile(args[0])
+	    DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; edgeTuples = env.<em style="color:blue">readCsvFile</em>(args[0])
                     .fieldDelimiter(&quot; &quot;)
                     .lineDelimiter(&quot;\n&quot;)
                     .types(Long.class, Long.class);</pre></code>
@@ -129,8 +129,9 @@
 		    <h4>Step3: Create a Graph</h4>
 			<p>Since the Twitter graph has no edge values, we are going to set them to NullValue when creating the edges DataSet. We can easily do this by applying a map function to the DataSet we have just read:</p>
 			
-			<pre><code>DataSet&lt;Edge&lt;Long, NullValue&gt;&gt= edgeTuples.map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
-                        public Edge&lt;Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; value) {
+			<pre><code>DataSet&lt;Edge&lt;Long, NullValue&gt;&gt= edgeTuples.<em style="color:blue">map</em>(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
+			
+                        public Edge&lt;Long, NullValue&gt;<em style="color:brown"> map</em>(Tuple2&lt;Long, Long&gt; value) {
                             return new Edge&lt;Long, NullValue&gt;(value.f0, value.f1,
                                     NullValue.getInstance());
                                 }
@@ -139,12 +140,13 @@
 			<p>Now we are ready to create the Graph! We are going to use Gelly’s fromDataSet method, which will induce the vertices directly from the edges. In this method, we can also provide a mapper to create the vertex values. The mapper gives us the vertex Id as a parameter and lets us set the vertex value to an arbitrary value. This allows us to create the graph and initialize the vertex values in one step! For our example, we will set the vertex values to 1.0, in order to later run the PageRank algorithm on the graph.</p>
 			
 		<pre><code><em style="color:green">//use the edges DataSet to create a Graph</em>
- Graph&lt;Long, Double, NullValue&gt; graph = Graph.fromDataSet(links, new MapFunction&lt;Long, Double&gt;() {
-    <em style="color:green">//mapping function to initialize vertex values to 1.0</em>
-     public Double map(Long value) throws Exception {
-           return 1.0;
-          }
-       }, env);
+ Graph&lt;Long, Double, NullValue&gt; graph = Graph.<em style="color:blue">fromDataSet</em>(links, new MapFunction&lt;Long, Double&gt;() {
+ 
+		<em style="color:green">//mapping function to initialize vertex values to 1.0</em>
+		public Double <em style="color:brown">map</em>(Long value) throws Exception {
+			return 1.0;
+			}
+		}, env);
         </code></pre><br>
 
 	

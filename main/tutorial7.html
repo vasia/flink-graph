@@ -93,7 +93,7 @@ In short, the output of the algorithm is a probability distribution used to repr
  * value.
  */</em>
 @SuppressWarnings(&quot;serial&quot;)
-public static final class RankMessenger&lt;K&gt; extends MessagingFunction&lt;K, Double, Double, Double&gt; {
+public static final class RankMessenger&lt;K&gt; extends <em style="color:brown">MessagingFunction</em>&lt;K, Double, Double, Double&gt; {
 
     private final long numVertices;
 
@@ -102,7 +102,7 @@ public static final class RankMessenger&lt;K&gt; extends MessagingFunction&lt;K,
     }
 
     @Override
-    public void sendMessages(Vertex&lt;K, Double&gt; vertex) {
+    public void <em style="color:blue">sendMessages</em>(Vertex&lt;K, Double&gt; vertex) {
         if (getSuperstepNumber() == 1) {
             <em style="color:green">// initialize vertex values during the first superstep</em>
             vertex.setValue(new Double(1.0 / numVertices));
@@ -122,7 +122,7 @@ public static final class RankMessenger&lt;K&gt; extends MessagingFunction&lt;K,
  * ranks from all incoming messages and then applying the dampening formula.
  */</em>
 @SuppressWarnings(&quot;serial&quot;)
-public static final class VertexRankUpdater&lt;K&gt; extends VertexUpdateFunction&lt;K, Double, Double&gt; {
+public static final class VertexRankUpdater&lt;K&gt; extends <em style="color:brown">VertexUpdateFunction</em>&lt;K, Double, Double&gt; {
 
     private final double beta;
     private final long numVertices;
@@ -133,7 +133,7 @@ public static final class VertexRankUpdater&lt;K&gt; extends VertexUpdateFunctio
     }
 
     @Override
-    public void updateVertex(Vertex&lt;K, Double&gt; vertex, MessageIterator&lt;Double&gt; inMessages) {
+    public void <em style="color:blue">updateVertex</em>(Vertex&lt;K, Double&gt; vertex, MessageIterator&lt;Double&gt; inMessages) {
         double rankSum = 0.0;
         <em style="color:green">// sum the incoming partial ranks</em>
         for (double msg : inMessages) {
@@ -165,22 +165,22 @@ If we run the PageRankAlgorithm using the Graph obtained from the twitter data s
 VertexCentricConfiguration parameters = new VertexCentricConfiguration();
 
 <em style="color:green">// set the number of vertices option to true</em>
-parameters.setOptNumVertices(true);
+parameters.<em style="color:blue">setOptNumVertices</em>(true);
 
 <em style="color:green">// set the degree option to true</em>
-parameters.setOptDegrees(true);
+parameters.<em style="color:blue">setOptDegrees</em>(true);
 
 <em style="color:green">// run the vertex-centric iteration, also passing the configuration parameters</em>
 Graph&lt;Long, Double, Double&gt; result =
-        graph.runVertexCentricIteration(
+        graph.<em style="color:blue">runVertexCentricIteration</em>(
         new VertexUpdater(), new Messenger(), maxIterations, parameters);
 		
 <em style="color:green">// user-defined functions</em>
 public static final class VertexUpdater {
        <em style="color:green">// get the number of vertices</em>
-	long numVertices = getNumberOfVertices();
+	long numVertices = <em style="color:brown">getNumberOfVertices()</em>;
 	<em style="color:green">// retrieve the vertex out-degree</em>
-	outDegree = getOutDegree();
+	outDegree = <em style="color:brown">getOutDegree()</em>;
 	.....
 }
 

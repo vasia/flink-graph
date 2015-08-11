@@ -79,10 +79,10 @@
 				vertices and number of edges. Then, we can simply do as follows:
 			</p>
 			<pre><code>        <em style="color:green">// get the number of vertices</em>
-	Long numVertices = graph.numberOfVertices();
+	Long numVertices = graph.<em style="color:blue">numberOfVertices()</em>;
 			
 	<em style="color:green">// get the number of edges</em>
-	Long numEdges = graph.numberOfEdges();</code></pre><br>
+	Long numEdges = graph.<em style="color:blue">numberOfEdges()</em>;</code></pre><br>
 				<p> In the  <a href="./tutorial1.html">last</a> tutorial, we had learnt how to create 
 				a Graph using the FromDataSet() method. Here is a snapshot of some statistics obtained by calling the
 				<strong>numberOfVertices()</strong> and <strong>numberOfEdges()</strong> methods for that Graph. Our statistics
@@ -102,14 +102,14 @@
 				src="./images/degrees.jpg" /></p>
 	<pre><code>
 	<em style="color:green">// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.outDegrees();<br>
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.<em style="color:blue">outDegrees()</em>;<br>
 	
 	<em style="color:green">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.inDegrees();<br>
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.<em style="color:blue">inDegrees()</em>;<br>
 	
 	<em style="color:green">// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree 
 	//is the sum of in- and out- degrees</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.getDegrees();
+	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.<em style="color:blue">getDegrees()</em>;
 	</code></pre><br>
 
 	<p>For a full list of available methods, refer to the corresponding section in the <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#graph-properties">documentation</a>.</p>

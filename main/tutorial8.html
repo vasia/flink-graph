@@ -83,7 +83,7 @@
 <li><strong>Gather phase:</strong> we calculate the partial rank to be distributed to the neighbor.</li><br>
 <pre><code>
 @SuppressWarnings(&quot;serial&quot;)
-private static final class GatherRanks extends GatherFunction&lt;Double, Double, Double&gt; {
+private static final class GatherRanks extends <em style="color:brown">GatherFunction</em>&lt;Double, Double, Double&gt; {
 
     long numberOfVertices;
 
@@ -92,7 +92,7 @@ private static final class GatherRanks extends GatherFunction&lt;Double, Double,
     }
 
     @Override
-    public Double gather(Neighbor&lt;Double, Double&gt; neighbor) {
+    public Double <em style="color:blue">gather</em>(Neighbor&lt;Double, Double&gt; neighbor) {
         double neighborRank = neighbor.getNeighborValue();
 
         if(getSuperstepNumber() == 1) {
@@ -104,17 +104,17 @@ private static final class GatherRanks extends GatherFunction&lt;Double, Double,
 }
 </pre></code><br>
 <li><strong>Sum phase:</strong> candidate ranks are grouped by vertex ID and these partial values are summed together.</li><br>
-<pre><code>private static final class SumRanks extends SumFunction&lt;Double, Double, Double&gt; {
+<pre><code>private static final class SumRanks extends <em style="color:brown">SumFunction</em>&lt;Double, Double, Double&gt; {
 
     @Override
-    public Double sum(Double newValue, Double currentValue) {
+    public Double <em style="color:blue">sum</em>(Double newValue, Double currentValue) {
         return newValue + currentValue;
     }
 }
 </pre></code><br>
 <li><strong>Apply phase:</strong> the rank value is updated by computing a new one using the dampening formula.</li><br>
 <pre><code>
-private static final class UpdateRanks extends ApplyFunction&lt;Long, Double, Double&gt; {
+private static final class UpdateRanks extends <em style="color:brown">ApplyFunction</em>&lt;Long, Double, Double&gt; {
 
     long numberOfVertices;
 
@@ -123,7 +123,7 @@ private static final class UpdateRanks extends ApplyFunction&lt;Long, Double, Do
     }
 
     @Override
-    public void apply(Double rankSum, Double currentValue) {
+    public void <em style="color:blue">apply</em>(Double rankSum, Double currentValue) {
         setResult((1-DAMPENING_FACTOR)/numberOfVertices + DAMPENING_FACTOR * rankSum);
     }
 }
@@ -139,32 +139,32 @@ private static final class UpdateRanks extends ApplyFunction&lt;Long, Double, Do
 GSAConfiguration parameters = new GSAConfiguration();
 
 <em style="color:green">// set the number of vertices option to true</em>
-parameters.setOptNumVertices(true);
+parameters.<em style="color:blue">setOptNumVertices</em>(true);
 
 <em style="color:green">// run the gather-sum-apply iteration, also passing the configuration parameters</em>
-Graph&lt;Long, Long, Long&gt; result = graph.runGatherSumApplyIteration(
+Graph&lt;Long, Long, Long&gt; result = graph.<em style="color:blue">runGatherSumApplyIteration</em>(
             new Gather(), new Sum(), new Apply(),
             maxIterations, parameters);
 
 // user-defined functions
-public static final class Gather {
+public static final class <em style="color:blue">Gather</em> {
 ...
 // get the number of vertices
-long numVertices = getNumberOfVertices();
+long numVertices = <em style="color:brown">getNumberOfVertices()</em>;
 ...
 }
 
-public static final class Sum {
+public static final class <em style="color:blue">Sum </em>{
 ...
 // get the number of vertices
-long numVertices = getNumberOfVertices();
+long numVertices = <em style="color:brown">getNumberOfVertices()</em>;
 ...
 }
 
-public static final class Apply {
+public static final class <em style="color:blue">Apply</em> {
 ...
 // get the number of vertices
-long numVertices = getNumberOfVertices();
+long numVertices = <em style="color:brown">getNumberOfVertices()</em>;
 ...
 }
 </code></pre>

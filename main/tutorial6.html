@@ -79,20 +79,20 @@ Validity checks can be performed in two ways: </p>
 <ul>
 <li>Use <strong>InvalidVertexIdsValidator()</strong> which is Gelly’s pre-defined validator. It checks that the edge set contains valid vertex IDs, i.e. that all edge IDs also exist in the vertex IDs set.</li><br>
 <pre><code>    Boolean validGraph;
-    validGraph = graph.validate(new InvalidVertexIdsValidator&lt;Long,Double,Double&gt;());
+    validGraph = graph.<em style="color:blue">validate</em>(new InvalidVertexIdsValidator&lt;Long,Double,Double&gt;());
 </code></pre><br>
 
 <li>Define a custom <strong>GraphValidator</strong> and implement its <strong>validate()</strong> method. </li>
 <p>Below is an example of a custom validator which shows how the validate method can be defined. In this example, the method checks whether all the edges have been assigned a value or not. In case there exists an edge with null value, the <em> CheckEdgeIds()</em> returns a non null set of edges, so the validate method returns false. You can implement any desired check by just modifying the validate method.</p><br>
-<p><pre><code>    validGraph= graph.validate(new InvalidEdgeValidator());
+<p><pre><code>    validGraph= graph.<em style="color:blue">validate</em>(new InvalidEdgeValidator());
 
 
         @SuppressWarnings(&quot;serial&quot;)
-        static final class InvalidEdgeValidator extends GraphValidator&lt;Long,Double,Double&gt; {
+        static final class InvalidEdgeValidator extends <em style="color:brown">GraphValidator</em>&lt;Long,Double,Double&gt; {
 
             @Override
 	    <em style="color:green">//return valid only if there is no edge with null value</em>
-            public boolean validate(Graph&lt;Long, Double, Double&gt; graph)
+            public boolean <em style="color:brown">validate</em>(Graph&lt;Long, Double, Double&gt; graph)
                     throws Exception {      
                 DataSet&lt;Edge&lt;Long,Double&gt;&gt; edgeIds = graph.getEdges()
                     .flatMap(new CheckEdgeIds&lt;Long,Double&gt;());

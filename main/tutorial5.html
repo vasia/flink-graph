@@ -90,12 +90,12 @@ The neighborhood scope is defined by the <em>EdgeDirection</em> parameter, which
 <p >For graph creation in Gelly, refer to <a href="./tutorial1.html">Tutorial1</a>. To avoid repetitions, only code is given below; redundant explanation regarding the first part will be skipped and we will jump straight to the neighborhood methods.
 The only point worth mentioning from the implementation point of view, is that the Vertex value has been allocated as a <em>HashMap&lt;String,HashSet<Long>&gt;</em>. Keys are String objects, named <em>&quot;incoming&quot;</em> and <em>&quot;outgoing&quot;</em>. For each vertex, the incoming key is associated with a Set of neighbors pointing to the node, whereas the outgoing key is associated with a Set of neighbors the node is itself pointing to.</p>
 <pre><code> <em style="color:green">   //read the Edge DataSet from the input file </em>
-    DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; links =  env.readCsvFile(edgeInputPath)
+    DataSet&lt;Edge&lt;Long, NullValue&gt;&gt; links =  env.<em style="color:blue">readCsvFile</em>(edgeInputPath)
             .fieldDelimiter(&quot;\t&quot;)
             .lineDelimiter(&quot;\n&quot;)
             .types(Long.class, Long.class)
-            .map(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
-                public Edge&lt;Long, NullValue&gt; map(Tuple2&lt;Long, Long&gt; value) {
+            .<em style="color:brown">map</em>(new MapFunction&lt;Tuple2&lt;Long, Long&gt;, Edge&lt;Long, NullValue&gt;&gt;() {
+                public Edge&lt;Long, NullValue&gt; <em style="color:brown">map</em>(Tuple2&lt;Long, Long&gt; value) {
                     return new Edge&lt;Long, NullValue&gt;(value.f0, value.f1,
                             NullValue.getInstance());
                     }
@@ -103,9 +103,9 @@ The only point worth mentioning from the implementation point of view, is that t
 
    <em style="color:green"> //create a graph initializing vertex values</em>
     Graph&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;, NullValue&gt; graph = 
-	      Graph.fromDataSet(links, new MapFunction&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;() {
+	      Graph.<em style="color:blue">fromDataSet</em>(links, new MapFunction&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;() {
 
-        public HashMap&lt;String, HashSet&lt;Long&gt;&gt; map(Long value) throws Exception {
+        public HashMap&lt;String, HashSet&lt;Long&gt;&gt; <em style="color:brown">map</em>(Long value) throws Exception {
             return  new HashMap&lt;String,HashSet&lt;Long&gt;&gt;();
         }
     }, env);
@@ -118,16 +118,16 @@ In order to decide whether to put the neighbor in the incoming Set or the outgoi
 <p><img src="./images/lcc_graph1.jpg" /></p>
 <pre><code><em style="color:green">//for each vertex save its incoming and outgoing neighbors </em><br>
 DataSet&lt;Tuple2&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; neighbSet = 
-   graph.groupReduceOnEdges(new NeighborsSet(),EdgeDirection.ALL);
+   graph.<em style="color:blue">groupReduceOnEdges</em>(new NeighborsSet(),EdgeDirection.ALL);
 
 
 @SuppressWarnings(&quot;serial&quot;)
-static final class NeighborsSet implements EdgesFunction
+static final class NeighborsSet implements <em style="color:brown">EdgesFunction</em>
          &lt;Long,NullValue,Tuple2&lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; {
 
 
     @Override
-    public void iterateEdges(
+    public void <em style="color:brown">iterateEdges</em>(
             Iterable&lt;Tuple2&lt;Long, Edge&lt;Long, NullValue&gt;&gt;&gt; edges,
             Collector&lt;Tuple2&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt; out) throws Exception {
 
@@ -160,18 +160,18 @@ static final class NeighborsSet implements EdgesFunction
 <p><img src="./images/lcc_calc.jpg" /></p>
 <br>
 <pre><code><em style="color:green">    //perform a join to update the vertex values with neighbor's info </em>
-    Graph&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;, NullValue&gt; graph2 = graph.joinWithVertices(neighbSet,
+    Graph&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;, NullValue&gt; graph2 = graph.<em style="color:blue">joinWithVertices</em>(neighbSet,
             new MapFunction&lt;Tuple2&lt;HashMap&lt;String,HashSet&lt;Long&gt;&gt;,HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;,
 			     HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;(){
                 @Override
-                public HashMap&lt;String,HashSet&lt;Long&gt;&gt; map(Tuple2&lt;HashMap&lt;String,HashSet&lt;Long&gt;&gt;,
+                public HashMap&lt;String,HashSet&lt;Long&gt;&gt; <em style="color:brown">map</em>(Tuple2&lt;HashMap&lt;String,HashSet&lt;Long&gt;&gt;,
 				        HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt; value) throws Exception {
                     return value.f1;
                 }});
 
     <em style="color:green">//calculate the local coeff for each vertex</em>
     DataSet&lt;Tuple2&lt;Long,Double&gt;&gt; coefficients = 
-	    graph2.groupReduceOnNeighbors(new CoefficientCalc(),EdgeDirection.ALL);
+	    graph2.<em style="color:blue">groupReduceOnNeighbors</em>(new CoefficientCalc(),EdgeDirection.ALL);
 
     coefficients.print();
 
@@ -179,11 +179,11 @@ static final class NeighborsSet implements EdgesFunction
 
 
 @SuppressWarnings(&quot;serial&quot;)
-static class CoefficientCalc implements NeighborsFunctionWithVertexValue
+static class CoefficientCalc implements <em style="color:brown">NeighborsFunctionWithVertexValue</em>
 &lt;Long,HashMap&lt;String,HashSet&lt;Long&gt;&gt;,NullValue, Tuple2&lt;Long,Double&gt;&gt; {
 
     @Override
-    public void iterateNeighbors(
+    public void <em style="color:brown">iterateNeighbors</em>(
             Vertex&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt; vertex,
             Iterable&lt;Tuple2&lt;Edge&lt;Long, NullValue&gt;, Vertex&lt;Long, HashMap&lt;String,HashSet&lt;Long&gt;&gt;&gt;&gt;&gt; neighbors,
             Collector&lt;Tuple2&lt;Long, Double&gt;&gt; out) throws Exception {

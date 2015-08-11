@@ -77,9 +77,9 @@
 <p>Gelly allows us to apply map transformation on the Vertex values or Edge values. <strong>mapVertices()</strong> and <strong>mapEdges()</strong> return a new Graph, where the IDs of the vertices (or edges) remain unchanged, while the values are transformed according to the provided user-defined map function. The map functions also allow changing the type of the vertex or edge values.<br><br> Let's see this with some examples.<br>
 <strong>Changing Vertex value:</strong> To increment the value of all the vertices by one, call the <em>mapVertices()</em> method with a MapFunction which returns the input Vertex value incremented by one.</p>
 
-<pre><code>    Graph&lt;Long, Double, NullValue&gt; updatedVerticesGraph = graph.mapVertices(
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; updatedVerticesGraph = graph.<em style="color:blue">mapVertices</em>(
                     new MapFunction&lt;Vertex&lt;Long, Double&gt;, Double&gt;() {
-                        public Double map(Vertex&lt;Long, Double&gt; value) {
+                        public Double <em style="color:brown">map</em>(Vertex&lt;Long, Double&gt; value) {
                             return value.getValue() + 1;
                         }
 			});
@@ -88,9 +88,9 @@
                     
 <p><strong>Changing Edge type:</strong> Call the <em>mapEdges()</em> method with a MapFunction that takes as input an Edge with value of type NullValue and  returns a Double value initialised to 1.0. 					
 <pre><code>
-    Graph&lt;Long, Double, Double&gt; updatedEdgesGraph = updatedVerticesGraph.mapEdges(
+    Graph&lt;Long, Double, Double&gt; updatedEdgesGraph = updatedVerticesGraph.<em style="color:blue">mapEdges</em>(
             new MapFunction&lt;Edge&lt;Long, NullValue&gt;, Double&gt;() {
-                public Double map(Edge&lt;Long, NullValue&gt; value) {
+                public Double <em style="color:brown">map</em>(Edge&lt;Long, NullValue&gt; value) {
                     return 1.0;
                 }
             });
@@ -98,7 +98,7 @@
 
 <h4>Reverse</h4>
 <p>This is a very handy transformation which allows us to easily reverse all the links in our Graph. It returns a new Graph where the direction of all edges has been reversed. It can can be called simply as follows:	</p>
-<pre><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.reverse();
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.<em style="color:blue">reverse()</em>;
 </code></pre><br>
 For example, by calling this method on our twitter data set, the 'follows' relation among users gets reversed.<br>
 <p><img src="./images/reverse.jpg" /></p>
@@ -108,18 +108,18 @@ For example, by calling this method on our twitter data set, the 'follows' relat
 <img src="./images/filtering.jpg" align="right" />
 <p>A filter transformation applies a user-defined filter function on the vertices or edges of the Graph. <strong>filterOnEdges()</strong> creates a sub-graph of the original graph, keeping only the edges that satisfy the provided predicate. <strong>filterOnVertices()</strong> applies a filter on the vertices of the graph removing edges whose source and/or target do not satisfy the vertex predicate.</p><br>
 <p><strong>Keep only vertices with positive values:</strong> Call the <em>filterOnVertices()</em> method with a filter function which returns true only if the Vertex value is greater than zero.
-<pre><code> Graph&lt;Long, Double, Double&gt; filtered =graph.filterOnVertices(new FilterFunction
+<pre><code> Graph&lt;Long, Double, Double&gt; filtered =graph.<em style="color:blue">filterOnVertices</em>(new FilterFunction
   &lt;Vertex&lt;Long, Double&gt;&gt;() {
-        public boolean filter(Vertex&lt;Long, Double&gt; vertex) {
+        public boolean <em style="color:brown">filter</em>(Vertex&lt;Long, Double&gt; vertex) {
             return (vertex.getValue() &gt; 0);
        }
    });</pre></code>
 </p><br>
 <p><strong>Keep only edges with positive values:</strong> Call the <em>filterOnVertices()</em> method with a filter function which returns true only if the Edge value is greater than zero.
 <pre><code>
-    Graph&lt;Long, Double, Double&gt; filteredE =graph.filterOnEdges(new FilterFunction
+    Graph&lt;Long, Double, Double&gt; filteredE =graph.<em style="color:blue">filterOnEdges</em>(new FilterFunction
      &lt;Edge&lt;Long, Double&gt;&gt;() {
-        public boolean filter(Edge&lt;Long, Double&gt; e) {
+        public boolean <em style="color:brown">filter</em>(Edge&lt;Long, Double&gt; e) {
             return (e.getValue() &gt; 0);
        }
 
@@ -127,15 +127,15 @@ For example, by calling this method on our twitter data set, the 'follows' relat
 </code></pre>
 <br><br>
 <p>If we want to apply the filter function to the vertices and edges at the same time then we can use the  <strong>subgraph()</strong> method as shown in the code snippet below:</p>
-<pre><code>graph.subgraph(
+<pre><code>graph.<em style="color:blue">subgraph</em>(
     new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
-            public boolean filter(Vertex&lt;Long, Long&gt; vertex) {
+            public boolean <em style="color:brown">filter</em>(Vertex&lt;Long, Long&gt; vertex) {
                 // keep only vertices with positive values
                 return (vertex.getValue() &gt; 0);
            }
        },
     new FilterFunction&lt;Edge&lt;Long, Long&gt;&gt;() {
-            public boolean filter(Edge&lt;Long, Long&gt; edge) {
+            public boolean <em style="color:brown">filter</em>(Edge&lt;Long, Long&gt; edge) {
                 // keep only edges with positive values
                 return (edge.getValue() &gt; 0);
             }
