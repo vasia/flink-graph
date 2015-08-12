@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="./favicon.ico">
 
-    <title>Tutorial2</title>
+    <title>Gelly</title>
 
     <!-- Bootstrap core CSS -->
     <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
@@ -44,7 +44,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="./home.html">Home</a></li>
+            <li class="active"><a href="./index.html">Home</a></li>
             <li><a href="https://github.com/apache/flink/tree/master/flink-staging/flink-gelly" title="Gelly's SourceCode">GitHub</a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
@@ -68,54 +68,49 @@
 
     <!-- Begin page content -->
     <div class="container">
-		      <div class="page-header">
-        <h1>Know your Graph</h1>
-      </div><img src="./images/stats.jpg" align="right" />
-			<p>In this very short tutorial, we will see how to get some statistical
-				information out of our graph. Gelly includes built-in methods
-				for retrieving various graph properties and metrics.</p>
-			<p>
-				Suppose that we want to retrieve information regarding the number of
-				vertices and number of edges. Then, we can simply do as follows:
-			</p>
-			<pre><code>        <em style="color:green">// get the number of vertices</em>
-	Long numVertices = graph.<em style="color:blue">numberOfVertices()</em>;
-			
-	<em style="color:green">// get the number of edges</em>
-	Long numEdges = graph.<em style="color:blue">numberOfEdges()</em>;</code></pre><br>
-				<p> In the  <a href="./tutorial1.html">last</a> tutorial, we had learnt how to create 
-				a Graph using the FromDataSet() method. Here is a snapshot of some statistics obtained by calling the
-				<strong>numberOfVertices()</strong> and <strong>numberOfEdges()</strong> methods for that Graph. Our statistics
-				confirm that the used <a href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter</a>
-				data set consists of 23370 vertices(users) and 33101 edges (follows relationships) as 
-				mentioned on the download site.
-			</p><br>
-			<img src="./images/screenshot2_1.PNG" />
-			<p /> 
-	
-	<br><br>
-	<p>In a directed graph, the indegree of a node is the number of edges pointing towards that node
-	while the outdegree is the number of edges going out of it. The total degree is the sum of both in and out degrees.
-	Gelly allows to  get the degree information (<em>IN</em>,<em>OUT<em>,</em>ALL
-				</em>) of every node by it's easy to use built in methods:</p>
-				<p>			<img
-				src="./images/degrees.jpg" /></p>
-	<pre><code>
-	<em style="color:green">// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.<em style="color:blue">outDegrees()</em>;<br>
-	
-	<em style="color:green">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.<em style="color:blue">inDegrees()</em>;<br>
-	
-	<em style="color:green">// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree 
-	//is the sum of in- and out- degrees</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.<em style="color:blue">getDegrees()</em>;
-	</code></pre><br>
+      <div class="page-header">
+        <h1>Implement a graph validator</h1>
+      </div>
+<img src="./images/valid.jpg" align="right"/>
+<h4>Don't trust your Graph</h4>
+<p>Now that we know how to define a Graph in Gelly and to perform a good amount of transformations on it, we might want to check the Graph validity. 
+Gelly provides a simple utility for performing validation checks on input graphs. Depending on the application context, a graph may or may not be valid according to certain criteria e.g., a user might need to validate whether their graph contains duplicate edges.<br>
+Validity checks can be performed in two ways: </p>
+<ul>
+<li>Use <strong>InvalidVertexIdsValidator()</strong> which is Gelly’s pre-defined validator. It checks that the edge set contains valid vertex IDs, i.e. that all edge IDs also exist in the vertex IDs set.</li><br>
+<pre><code>    Boolean validGraph;
+    validGraph = graph.<em style="color:blue">validate</em>(new InvalidVertexIdsValidator&lt;Long,Double,Double&gt;());
+</code></pre><br>
 
-	<p>For a full list of available methods, refer to the corresponding section in the <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#graph-properties">documentation</a>.</p>
+<li>Define a custom <strong>GraphValidator</strong> and implement its <strong>validate()</strong> method. </li>
+<p>Below is an example of a custom validator which shows how the validate method can be defined. In this example, the method checks whether all the edges have been assigned a value or not. In case there exists an edge with null value, the <em> CheckEdgeIds()</em> returns a non null set of edges, so the validate method returns false. You can implement any desired check by just modifying the validate method.</p><br>
+<p><pre><code>    validGraph= graph.<em style="color:blue">validate</em>(new InvalidEdgeValidator());
 
-	<p><h4><a style="margin-left: 100px" href="./tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial3.html"><em>Next--></em></a></h4></p>
-	</div> <!-- /container -->
+
+        @SuppressWarnings(&quot;serial&quot;)
+        static final class InvalidEdgeValidator extends <strong>GraphValidator</strong>&lt;Long,Double,Double&gt; {
+
+            @Override
+	    <em style="color:green">//return valid only if there is no edge with null value</em>
+            public boolean <em style="color:brown">validate</em>(Graph&lt;Long, Double, Double&gt; graph)
+                    throws Exception {      
+                DataSet&lt;Edge&lt;Long,Double&gt;&gt; edgeIds = graph.getEdges()
+                    .flatMap(new CheckEdgeIds&lt;Long,Double&gt;());
+                return edgeIds.count()==0;
+            }
+            <em style="color:green">//return edges with null values</em>
+            private static final class CheckEdgeIds&lt;Long,Double&gt; implements FlatMapFunction&lt;Edge&lt;Long,Double&gt;,
+    		Edge&lt;Long,Double&gt;&gt; {
+                public void flatMap(Edge&lt;Long,Double&gt; edge, Collector&lt;Edge&lt;Long,Double&gt;&gt; out) {
+                    if(edge.getValue() == null){ 
+                    out.collect(new Edge&lt;Long,Double&gt;(edge.f0,edge.f1,edge.f2));
+                    }
+
+                }
+            }   
+</code></pre></p><br>
+	<p><h4><a style="margin-left: 100px" href="./tutorial5.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial7.html"><em>Next--></em></a></h4></p>
+    </div> <!-- /container -->
 
 
     <!-- Bootstrap core JavaScript
