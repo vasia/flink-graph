@@ -54,6 +54,7 @@
 				<li><a href="./tutorial8.html">Tutorial8: Gather-sum-apply iterations</a></li>
               </ul>
             </li>
+			<li><a href="./library.html" title="Gelly's Library Methods">Library</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -82,7 +83,7 @@
 	  <h4>Overview</h4>
 	  <p style="color:black">Graphs in real systems are not regular or random. Their vertices tend to form clusters or communities with high density of within-group edges and lower density of between-group edges. This library method allows to detect community structures. It's applications range from social networks to metabolic networks.</p><br>
 	  <h4>Details</h4>
-	  <p style="color:black">The implementation is based on vertex-centric iterations.  Initially, each vertex is assigned a tuple formed of its own id along with a score equal to 1.0, as value. During each iteration, the vertices propagate their labels and max scores, each time adopting the label with the highest score from the list of received messages. The chosen label is afterwards re-scored using the fraction delta/the superstep number so that the score associated with a label decreases as it traverses from the origin. The value delta determines how far a label can spread and is passed as a parameter. It's default value is set to 0.5.<br>
+	  <p style="color:black">The implementation is based on vertex-centric iterations.  Initially, each vertex is assigned a tuple formed of its own id along with a score equal to 1.0, as value. During each iteration, the vertices propagate their labels and maximum scores in the messaging phase, and adopt the label with the highest score from the list of received messages in the update phase. The chosen label is afterwards re-scored using the fraction delta/the superstep number so that the score associated with a label decreases as it traverses from the origin. The value delta determines how far a label can spread and is passed as a parameter. It's default value is set to 0.5.<br>
 	  The algorithm converges when vertices no longer update their value or when the maximum number of iterations is reached.</p><br>
 	  <h4>How to run</h4>
 	  <p style="color:black">Call the run method on your input graph passing as parameters the number of iterations and delta as follows:<br>
