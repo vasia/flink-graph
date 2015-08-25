@@ -70,24 +70,27 @@
 	  
 	  <p>Gelly provides a collection of graph algorithms for easily analysing large-scale Graphs. So far, the following library methods are implemented:
 	  <ul>
-	  <li>Simple Community Detection</li>
+	  <li>Community Detection</li>
 	  <li>Label Propagation</li>
 	  <li>PageRank</li>
+	  <li>GSA-PageRank</li>
 	  <li>Connected Components</li>
+	  <li>GSA-Connected Components</li>
 	  <li>Single-Source Shortest Paths</li>
+	  <li>GSA-Single-Source Shortest Paths</li>
       </ul></p>
 	  <br>
 	  
 	 <div class="alert alert-success" role="alert" >
-	  <h2>Simple Community Detection</h2><br>
+	  <h2>Community Detection</h2><br>
 	  <h4>Overview</h4>
 	  <p style="color:black">Graphs in real systems are not regular or random. Their vertices tend to form clusters or communities with high density of within-group edges and lower density of between-group edges. This library method allows to detect community structures. It's applications range from social networks to metabolic networks.</p><br>
 	  <h4>Details</h4>
-	  <p style="color:black">The implementation is based on vertex-centric iterations.  Initially, each vertex is assigned a tuple formed of its own id along with a score equal to 1.0, as value. During each iteration, the vertices propagate their labels and maximum scores in the messaging phase, and adopt the label with the highest score from the list of received messages in the update phase. The chosen label is afterwards re-scored using the fraction delta/the superstep number so that the score associated with a label decreases as it traverses from the origin. The value delta determines how far a label can spread and is passed as a parameter. It's default value is set to 0.5.<br>
+	  <p style="color:black">The implementation is based on vertex-centric iterations.  Initially, each vertex is assigned a tuple formed of its own id along with a score equal to 1.0, as value. During each iteration, the vertices propagate their labels and maximum scores in the Messaging phase, and adopt the label with the highest score from the list of received messages in the Update phase. The chosen label is afterwards re-scored using the fraction delta/the superstep number so that the score associated with a label decreases as it traverses from the origin. The value <em><strong>delta</strong></em> determines how far a label can spread and is passed as a parameter. It's default value is set to 0.5.<br>
 	  The algorithm converges when vertices no longer update their value or when the maximum number of iterations is reached.</p><br>
 	  <h4>How to run</h4>
 	  <p style="color:black">Call the run method on your input graph passing as parameters the number of iterations and delta as follows:<br>
-	  <code>graph.run(new CommunityDetectionAlgorithm(maxIterations, delta));</code><br><br>
+	  <code>graph.run(new CommunityDetection(maxIterations, delta));</code><br><br>
 	  Output is a graph with each Vertex having as value the ID of the community it converged to.</p><br>
 	  <a href="http://arxiv.org/pdf/0808.2633.pdf">Reference paper</a>
 	  </div>
@@ -103,7 +106,7 @@
 	  This implementation uses the vertex-centric iterative model. Vertices propagate their labels to their neighbors during each Messaging phase and adopt the most frequent label among their neighbors in the Update phase. The algorithm converges when no vertex changes value or the maximum number of iterations have been reached.</p><br>
 	  <h4>How to run</h4>
 	  <p style="color:black">Call the run method on your input graph passing as parameters the number of iterations and delta as follows:<br>
-	  <code>graph.run(new LabelPropagationAlgorithm<Long>(maxIterations));</code><br><br>
+	  <code>graph.run(new LabelPropagation<Long>(maxIterations));</code><br><br>
 	  Output is a graph with each Vertex having as value the ID of the community it converged to.</p>
 	  </div>
 
@@ -116,10 +119,29 @@
 	  <p style="color:black">Page Rank is a numeric value that represents the importance of a page on the web and is used by Google to rank websites in their search engine results.<br>The output of the PageRank algorithm is a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. However, the mathematics of the algorithm are general, making it applicable to graphs or networks in different domains.</p><br>
 	  <h4>Details</h4>
 	  <p style="color:black">During the Messaging phase, of each iteration, the rank of a vertex is distributed among all target vertices according to the transition probability, which is associated with an edge as the edge value. In the Update phase, first the partial ranks from all incoming messages are summed up and then the dampening formula is applied to calculate the new rank and store it as vertex value.<br>
-	  The dampening factor, to be passed as parameter, is the probability, at any step, that a surfer will continue clicking on links randomly. It is generally assumed to be around 0.85. The algorithm converges when no vertex changes value or the maximum number of iterations have been reached.</p><br>
+	  The <em><strong>dampening factor</strong></em>, to be passed as parameter, is the probability, at any step, that a surfer will continue clicking on links randomly. It is generally assumed to be around 0.85. The algorithm converges when no vertex changes value or the maximum number of iterations have been reached.</p><br>
 	  <h4>How to run</h4>
 	  <p style="color:black">Call the run method on a weighted graph passing as parameters the dampening factor and maximum number of iterations.<br>
-	  <code>graph.run(new PageRankAlgorithm<Long>(DAMPENING_FACTOR, maxIterations));</code><br><br>
+	  <code>graph.run(new PageRank<Long>(DAMPENING_FACTOR, maxIterations));</code><br><br>
+	  In case, the <em><strong>number of vertices</strong></em> is known a priori, then in order to save computation steps, it is suggested to run it with this information as an additional parameter:
+	  <code>graph.run(new PageRank<Long>(DAMPENING_FACTOR, numberOfVertices, maxIterations));</code><br><br>
+	  Output is a graph with each Vertex having as value its associated PageRank.</p>
+	  </div>
+	  
+	  <br>
+
+	 <div class="alert alert-success" role="alert" >
+	  <h2>GSAPageRank</h2><br>
+	  <h4>Overview</h4>
+	  <p style="color:black">Page Rank is a numeric value that represents the importance of a page on the web and is used by Google to rank websites in their search engine results.<br>The output of the PageRank algorithm is a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. However, the mathematics of the algorithm are general, making it applicable to graphs or networks in different domains.</p><br>
+	  <h4>Details</h4>
+	  <p style="color:black">This implementation is based on gather-sum-apply iterations. In Gather, the partial ranks to be distributed to the neighbors of each Vertex are calculated. In Sum, partial ranks are summed up based upon the Vertex ID. Finally, in Apply, the dampening formula is applied to the value obtained in the previous step and the result is used to update the vertex value.<br>
+	  The <em><strong>dampening factor</strong></em>, to be passed as parameter, is the probability, at any step, that a surfer will continue clicking on links randomly. It is generally assumed to be around 0.85. If the <em><strong>number of vertices</strong></em> of the input graph is known, it should be provided as a parameter to speed up computations. Otherwise, the algorithm will first execute a job to count vertices. The algorithm converges when no vertex changes value or the maximum number of iterations have been reached. </p><br>
+	  <h4>How to run</h4>
+	  <p style="color:black">Call the run method on a weighted graph passing as parameters the dampening factor and maximum number of iterations.<br>
+	  <code>graph.run(new GSAPageRank<Long>(DAMPENING_FACTOR, maxIterations));</code><br>
+	  or<br>
+	  <code>graph.run(new GSAPageRank<Long>(DAMPENING_FACTOR, numberOfVertices, maxIterations));</code><br><br>
 	  Output is a graph with each Vertex having as value its associated PageRank.</p>
 	  </div>
 	  
@@ -133,7 +155,21 @@
 	  <p style="color:black">Initially, each vertex has its own ID as a value (it is its own component). Vertices propagate their current component ID in iterations, each time adopting a new value from the received neighbor IDs, provided that the value is smaller than the current minimum. To this end, in the Messaging phase, the minimum ID associated with a given vertex is distributed among all the target vertices while in the Update phase, the value of a vertex is updated by picking the minimum neighbor ID out of all the incoming messages. The computation terminates after the specified maximum number of supersteps or when the vertex states stop changing.</p><br>
 	  <h4>How to run</h4>
 	  <p style="color:black">
-	  <code>graph.run(new ConnectedComponentsAlgorithm(maxIterations));</code><br><br>
+	  <code>graph.run(new ConnectedComponents(maxIterations));</code><br><br>
+	  Output is a graph with each Vertex having as value the minimum ID among all the connected neighbors.</p>
+	  </div>
+
+	  <br>
+	  
+	  <div class="alert alert-success" role="alert" >
+	  <h2>GSA Connected Components</h2><br>
+	  <h4>Overview</h4>
+	  <p style="color:black">A connected component of an undirected graph is a subgraph in which any two vertices are connected to each other by paths, and which is connected to no additional vertices in the supergraph.</p><br>
+	  <h4>Details</h4>
+	  <p style="color:black">This is a gather-sum-apply based implementation. Vertices propagate their current component ID in iterations, adopting a new value from the received neighbor IDs, provided that the value is smaller than the current minimum. To this end, in the Gather phase, the IDs from all the neighbors are collected and these are used to select the minimum during the Sum phase. During the Apply phase, the current minimum is updated by comparing it with the received minimum. The computation terminates after the specified maximum number of supersteps or when the vertex states stop changing.</p><br>
+	  <h4>How to run</h4>
+	  <p style="color:black">
+	  <code>graph.run(new GSAConnectedComponents(maxIterations));</code><br><br>
 	  Output is a graph with each Vertex having as value the minimum ID among all the connected neighbors.</p>
 	  </div>
 
@@ -147,10 +183,23 @@
 	  <p style="color:black">In each superstep, each vertex sends a candidate distance message to all its neighbors. The message value is the sum of the current value of the vertex and the edge weight connecting this vertex with its neighbor. Upon receiving candidate distance messages, each vertex calculates the minimum distance and, if a shorter path has been discovered, it updates its value. If a vertex does not change its value during a superstep, then it does not produce messages for its neighbors for the next superstep. The computation terminates after the specified maximum number of supersteps or when there are no value updates.</p><br>
 	  <h4>How to run</h4>
 	  <p style="color:black">Call the run method on a weighted graph, passing as parameters the ID of the source vertex and maximum number of iterations.<br>
-	  <code>graph.run(new SingleSourceShortestPathsAlgorithm<K>(srcVertexId, maxIterations));</code><br><br>
+	  <code>graph.run(new SingleSourceShortestPaths<K>(sourceVertexId, maxIterations));</code><br><br>
 	  Output is a graph with each vertex having as value the minimum distance with respect to the source vertex.</p>
 	  </div>
 
+	  <br>
+
+	 <div class="alert alert-success" role="alert" >
+	  <h2>GSA Single-Source Shortest Paths</h2><br>
+	  <h4>Overview</h4>
+	  <p style="color:black">This algorithm is used to find a path between two vertices in a graph such that the sum of the weights of its constituent edges is minimized.</p><br>
+	  <h4>Details</h4>
+	  <p style="color:black">This implementation is based on gather-sum-apply iterations. In each superstep, during the Gather phase, new candidate distances are calculated, by adding each vertex value with the edge weight. In the Sum phase, the candidate distances are grouped by vertex ID and the minimum distance is chosen. Finally, in the Apply phase, the newly calculated distance is compared to the current vertex value and the minimum of the two is assigned as the new value of the vertex. The computation terminates after the specified maximum number of supersteps or when there are no value updates.</p><br>
+	  <h4>How to run</h4>
+	  <p style="color:black">Call the run method on a weighted graph, passing as parameters the ID of the source vertex and maximum number of iterations.<br>
+	  <code>graph.run(new GSASingleSourceShortestPaths<K>(sourceVertexId, maxIterations));</code><br><br>
+	  Output is a graph with each vertex having as value the minimum distance with respect to the source vertex.</p>
+	  </div>
 	  <br><br>
 	  
     </div> <!-- /container -->
