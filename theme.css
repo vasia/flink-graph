@@ -16,3 +16,79 @@ body {
 .theme-showcase .navbar .container {
   width: auto;
 }
+
+.panel-zero {
+  border-color: #ddd;
+}
+.panel-zero > .panel-heading {
+  color: #333;
+  background-color: #bf73f2;
+  border-color: #ddd;
+}
+.panel-zero > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #ddd;
+}
+.panel-zero > .panel-heading .badge {
+  color: #bf73f2;
+  background-color: #333;
+}
+.panel-zero > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #ddd;
+}
+
+.panel-one {
+  border-color: #ddd;
+}
+.panel-one > .panel-heading {
+  color: #333;
+  background-color: #e5eaf4;
+  border-color: #ddd;
+}
+.panel-one > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #ddd;
+} 
+.panel-one > .panel-heading .badge {
+  color: #e5eaf4;
+  background-color: #333;
+} 
+.panel-one > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #ddd; 
+}
+
+.panel-two {
+  border-color: #ddd;
+}
+.panel-two > .panel-heading {
+  color: #333;
+  background-color: #f5a030;
+  border-color: #ddd;
+}
+.panel-two > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #ddd;
+} 
+.panel-two > .panel-heading .badge {
+  color: #f5a030;
+  background-color: #333;
+} 
+.panel-two > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #ddd;
+}  
+
+.panel-three {
+  border-color: #ddd;
+}
+.panel-three > .panel-heading {
+  color: #fff;
+  background-color: #e6526f;
+  border-color: #ddd;
+}
+.panel-three > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #ddd;
+} 
+.panel-three > .panel-heading .badge {
+  color: #e6526f;
+  background-color: #333;
+} 
+.panel-three > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #ddd;
+} 
