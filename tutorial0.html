@@ -66,23 +66,36 @@
       </div>	        <p>
 				<img src="./images/intro.jpg" align="right" />
 			</p>
+      <br>
 	        <h3>Graphs? Graphs!</h3>
-            <p>Graphs are data structures that capture relationships between entities:
+            <p><strong>Graphs</strong>, also known as <strong>Networks</strong>, are data structures that capture relationships between entities:
+            connections, interactions, purchases, similarities, geographic proximity, etc.
+      Some examples of such relationshipas could be the following:
 			<ul>
-            <li>connections, interactions, purchases</li>
-			<li>“Steve follows Wendy”, “Emily bought item42"</li>
-            </ul>
-            We call the entities “nodes” or “vertices” and the relationships “edges”.<br>
-			<img src="./images/tut0_1.jpg" />
-			</p><br>
-            <p>Egdes might have a cost associated with them, resulting in the so called weighted graph. Weighted graphs capture the strength of the relationship, e.g. similarity, importance, social proximity.<br>
-            <img src="./images/tut0_2.jpg" /></p><br>
+         <li>Steve follows Wendy</li>
+			   <li>Emily likes Tim’s photo</li>
+         <li>Tom Cruise plays in the same movie as Ken Watanabe</li>
+         <li>The APC protein interacts with Catenin</li>
+      </ul>
+      We call the entities <strong>nodes</strong> or <strong>vertices</strong> and the relationships <strong>edges</strong>.<br>
+In the above examples, Steve, Wendy, Emily, Tim, Tom Cruise, Ken Watanabe, the APC protein and Catenin are nodes. "Follows", "likes, plays in the same movie as" and "interacts" describe edges between these nodes.</p>
+
+<p>We usually draw a Graph using circles for the nodes and arrows connecting these circles to depict the edges.
+We can attach optional labels on the nodes and edges to show their values:</p>
+			<p><img src="./images/graph_example_1.png" />	</p><br>
+      <p><strong>Weighted</strong> graphs lets us capture the <i>strength</i> of the relationship, by associating a value (also referred to as <i>weight</i>) with each edge.
+        These values can refer to similarity, importance, rating, social proximity, distance or other metrics relevant to the data and the application.
+        On the left graph below, the edge value corresponds to the rating that a user has assigned to a movie. On the graph on the right, the edge values tell us how many times a Twitter user has re-tweeted another user.</p>
+      <p><img src="./images/graph_example_2.png" hspace="20"/> <img src="./images/graph_example_3.png" hspace="20"/></p>
+      <br>
 			
-			<p>An edge can be either directed or undirected. An undirected edge means that there is no restriction on the direction travelled along the edge, while a directed edge is a one way relationship. The "follows" relationship can be represented by a directed graph while connectivity among users by an undirected graph: if user A is connected to user B then user B is also connected to user A but if user A follows user B then it does not mean that user B also follows user A.<br>
-			<img src="./images/tut0_3.jpg" /></p>
+			<p>Graphs can be either <b>directed</b> or <b>undirected</b>. In directed graphs, edges (and the relationships that they represent) have a pre-defined direction.
+        We call the node where the edge starts from the <b>source</b> and the node where it ends the <b>target</b> node.
+        The relationships "follows" and "likes" that we saw before define directed edges. Undirected edges have no direction. This usually means that the relationship is present in both directions. For example, "Tom Cruise plays in the same movie as Ken Watanabe" defines an undirected edge (Ken Watanabe also plays in the same movie as Tom Cruise).</p>
 			
-            <h3>So what?</h3>
-            <p>Analyzing graphs allows us to answer many interesting questions!
+      <br>
+            <h3>What can you do with Graphs?</h3>
+            <p>By analyzing graphs we can answer many interesting questions!
             <ul>
             <li>Who is the most influential user on Twitter?</li>
 			<li>Which webpage should appear first for a particular web query?</li>
@@ -90,17 +103,28 @@
 			<li>How many hops do I need to go from A to B?</li>
 			<li>How similar are the nodes in my network?</li>
 			</ul>
-			All of these questions and the algorithms we use to answer them allow us to build applications that exploit the graph structure for social network analysis, web graph analysis, machine learning, recommenders and more.</p>
+			All of these questions and the algorithms we use to answer help us build applications that exploit the graph structure for social network analysis, web graph analysis, machine learning, recommenders and more.</p>
 			
-			<h3>How?</h3> 
-             <p>Gelly provides methods to create, transform and modify graphs, as well as a library of graph algorithms. It can be used to easily build graph processing applications in Flink. All you need to start with a Gelly project, is to add the following dependency to your <code>pom.xml</code> and follow the rest of the tutorials.</p>
-			<p>
-				<code>&lt;dependency&gt;</code></br>
-				<code>&lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</code><br>
-				<code>&lt;artifactId&gt;flink-gelly&lt;/artifactId&gt;</code><br>
-				<code>&lt;version&gt;0.10-SNAPSHOT&lt;/version&gt;</code><br>
-				<code>&lt;/dependency&gt;</code>
-			</p><br>
+      <br>
+      <h3>When and why Gelly?</h3>
+      <p>Gelly is designed to deal with large, distributed graphs. Such graphs are usually generated as intermediate results of long data-analysis pipelines, built with tools like <a href="https://flink.apache.org/">Apache Flink</a> and <a href="https://hadoop.apache.org/"> Hadoop</a>. Gelly is meant to seamlessly integrate with Flink’s <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html">DataSet API</a> code to let you easily build long and complex data processing pipelines like the following:</p>
+      <p><img src="./images/gelly_pipeline.png" /> </p>
+
+      <p>If this is the kind of problems you are dealing with, then you're in the right place! Even though all tutorials here use datasets that are small enough to be processed on a commodity laptop, the same methods and algorithms can be applied to large distributed graphs.</p>
+
+      <p>If you are looking to process medium-sized graphs on a single machine, we would suggest you take a look into the following tools:
+        <ul>
+          <li><a href="http://snap.stanford.edu/">SNAP</a>
+          <li><a href="https://gephi.github.io/">Gephi</a>
+          <li><a href="https://networkx.github.io/">NetworkX</a>
+        </ul>
+      </p>
+
+      <p>If you are looking to efficiently process billion-edge graphs on a single machine, then you might want to follow <a href="http://www.frankmcsherry.org/">Frank McSherry’s blog</a>.</p>
+
+<br>
+			<h3>Now what?</h3> 
+             <p>For the rest of the tutorials you are going to have to do some coding with Gelly! Open your favorite IDE and create a Maven project, adding Gelly as dependency. <br>You can find more details on how to do this in <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#using-gelly">the Gelly docs</a>.</p>
 			
 			<h4><em>Good Luck!</em></h4>
 
