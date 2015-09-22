@@ -56,7 +56,7 @@ public class Tutorial1 {
 		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(...).getVertices();
 
 		// Print the result
-		ranks.print();
+		verticesWithComponents.print();
 	*/
 	}
 
