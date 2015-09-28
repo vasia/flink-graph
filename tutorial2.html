@@ -66,52 +66,138 @@
 		      <div class="page-header">
         <h1>Know your Graph</h1>
       </div>
-      <p>Coming soon...</p>
-      <!--
-			<p>In this very short tutorial, we will see how to get some statistical
-				information out of our graph. Gelly includes built-in methods
-				for retrieving various graph properties and metrics.</p>
-			<p>
-				Suppose that we want to retrieve information regarding the number of
-				vertices and number of edges. Then, we can simply do as follows:
-			</p>
-			<pre><code>        <em style="color:green">// get the number of vertices</em>
-	Long numVertices = graph.<em style="color:blue">numberOfVertices()</em>;
-			
-	<em style="color:green">// get the number of edges</em>
-	Long numEdges = graph.<em style="color:blue">numberOfEdges()</em>;</code></pre><br>
-				<p> In the  <a href="./tutorial1.html">last</a> tutorial, we had learnt how to create 
-				a Graph using the FromDataSet() method. Here is a snapshot of some statistics obtained by calling the
-				<strong>numberOfVertices()</strong> and <strong>numberOfEdges()</strong> methods on that Graph. Our statistics
-				confirm that the used <a href="http://konect.uni-koblenz.de/networks/ego-twitter">twitter</a>
-				data set consists of 23370 vertices (users) and 33101 edges (follows relationships) as 
-				mentioned on the download site.
-			</p><br>
-			<img src="./images/screenshot2_1.PNG" />
-			<p /> 
-	
-	<br><br>
-	<p>In a directed graph, the indegree of a node is the number of edges pointing towards that node
-	while the outdegree is the number of edges going out of it. The total degree is the sum of both in and out degrees.
-	Gelly allows to  get the degree information (<em>IN</em>,<em>OUT<em>,</em>ALL
-				</em>) of every node by it's easy to use built in methods:</p>
-				<p>			<img
-				src="./images/degrees.jpg" /></p>
-	<pre><code>
-	<em style="color:green">// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexOutDegrees = graph.<em style="color:blue">outDegrees()</em>;<br>
-	
-	<em style="color:green">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; vertexInDegrees = graph.<em style="color:blue">inDegrees()</em>;<br>
-	
-	<em style="color:green">// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree 
-	//is the sum of in- and out- degrees</em>
-	DataSet&lt;Tuple2&lt;Long, Long&gt;&gt; totDegrees = graph.<em style="color:blue">getDegrees()</em>;
-	</code></pre><br>
+      <h3>Tell me about you, Gelly!</h3>
+      <p>In this tutorial, we are going to learn how to compute several simple graph properties with Gelly.
+        <br>In particular, you will implement a program that computes
+      <ul>
+      <li>The range of node IDs (maximum and minimum)</li>
+      <li>The degree distribution (the fraction of nodes in the network with a certain degree)</li>
+      </ul>
+      </p>
+         <h4>Graph Properties</h4>
+      <p>Gelly has a set of methods that retrieve basic information from the input Graph. For example, you can calculate the total number of vertices (also known as <i>size</i>) and the total number of edges (also known as <i>volume</i>). If you want to analyze the IDs, you can retrieve the vertex IDs and the edge pair IDs in a DataSet. Finally, Gelly has methods to compute graph degrees. The degree of a vertex is defined as <i>the number of edges incident to this vertex</i>. In Gelly, we differentiate the degree type, depending on the edge direction:
+      <ul>
+        <li><b>In-degree</b> is the number of incident edges for which the vertex is the target.
+        <li><b>Out-degree</b> is the number of incident edges for which the vertex is the source.
+        <li><b>Degree</b> is the number of incident edges, without considering edge direction (both edges where the vertex is the source and edges where the vertex is the target are counted).
+      </ul>
+      </p>
+    <p>The list of available properties methods and their return types is shown below.</p>
 
-	<p>For a full list of available methods, refer to the corresponding section in the <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#graph-properties">documentation</a>.</p>
--->
-	<p><h4><a style="margin-left: 100px" href="./tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial3.html"><em>Next--></em></a></h4></p>
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">
+<span style="color: #008800; font-style: italic">// get the IDs of the vertices as a DataSet</span>
+DataSet<span style="color: #666666">&lt;</span>K<span style="color: #666666">&gt;</span> <span style="color: #BB4444">getVertexIds</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get the source-target pairs of the edge IDs as a DataSet</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> K<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> getEdgeIds</span><span style="color: #666666">()</span> 
+
+<span style="color: #008800; font-style: italic">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> inDegrees</span><span style="color: #666666">()</span> 
+
+<span style="color: #008800; font-style: italic">// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> outDegrees</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree is the sum of in- and out- degrees</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> getDegrees</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get the number of vertices</span>
+<span style="color: #666666; font-weight: bold">long</span> <span style="color: #BB4444">numberOfVertices</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get the number of edges</span>
+<span style="color: #666666; font-weight: bold">long</span> <span style="color: #BB4444 ">numberOfEdges</span><span style="color: #666666">()</span>
+</pre></div>
+
+<p><br>Let's see the results of these methods when applied to the example graph given below:</p>
+<p><img src="./images/tut2_ex1.png" hspace="20"/>
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
+.tg .tg-3tbr{font-family:Arial, Helvetica, sans-serif !important;;text-align:right;vertical-align:top}
+.tg .tg-8fc1{font-weight:bold;font-family:Arial, Helvetica, sans-serif !important;;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-8fc1">Method</th>
+    <th class="tg-8fc1">Result</th>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">getVertexIds()</td>
+    <td class="tg-3tbr">{1, 2, 3, 4, 5}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">getEdgeIds()</td>
+    <td class="tg-3tbr">{(1, 2), (1, 3), (2, 3), (2, 4), (3, 4), (4, 5), (5, 2)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">inDegrees()</td>
+    <td class="tg-3tbr">{(1, 0), (2, 1), (3, 2), (4, 2), (5, 1)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">outDegrees()</td>
+    <td class="tg-3tbr">{(1, 2), (2, 2), (3, 1), (4, 1), (5, 1)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">getDegrees()</td>
+    <td class="tg-3tbr">{(1, 2), (2, 3), (3, 3), (4, 3), (5, 2)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">numberOfVertices()</td>
+    <td class="tg-3tbr">5</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">numberOfEdges()</td>
+    <td class="tg-3tbr">7</td>
+  </tr>
+</table>
+</p>
+
+<p><br>Using the properties methods and by combining them with standard transformations of the Flink DataSet API, one can answer several interesting questions about a graph:
+   <ul>
+    <li>Which is the vertex with the most neighbors?
+    <li>How many out-going edges does a vertex have on average?
+    <li>How many edges are there where the source ID is lower than the target ID?
+   </ul>
+</p>
+<p>Let's see how we can get the answers to these questions with Gelly.</p>
+<p>The vertex with the most neighbors is the vertex with the maximum degree in the graph. In order to find this vertex, we simply have to call <b>getDegrees()</b> and then use a max aggregation function on the degrees DataSet to get the ID of the max-degree vertex:</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/** find the vertex with the maximum degree **/</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple1<span style="color: #666666">&lt;</span>Long<span style="color: #666666">&gt;&gt;</span> maxInDegreeVertex <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">getDegrees</span><span style="color: #666666">().</span><span style="color: #BB4444">maxBy</span><span style="color: #666666">(1).</span><span style="color: #BB4444">project</span><span style="color: #666666">(0);</span>
+</pre></div>
+
+
+<p><br>The answer to the second question is essentially the computation of the average out-degree. In order to compute that, we first retrieve the out-degrees of all vertices in a DataSet using the <b>outDegree()</b> method. Then, we sum up all the out-degrees using the sum aggregation function on the degrees DataSet. Finally, we divide the sum by the total number of vertices, which we retrieve using <b>numberOfVertices()</b>:</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/** get the number of vertices **/</span>
+<span style="color: #666666; font-weight: bold">long</span> numVertices <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">numberOfVertices</span><span style="color: #666666">();</span>
+
+<span style="color: #008800; font-style: italic">/** compute the average node out-degree **/</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> verticesWithDegrees <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">outDegrees</span><span style="color: #666666">();</span>
+
+DataSet<span style="color: #666666">&lt;</span>Double<span style="color: #666666">&gt;</span> avgOutDegree <span style="color: #666666">=</span> verticesWithDegrees<span style="color: #666666">.</span><span style="color: #BB4444">sum</span><span style="color: #666666">(1).</span><span style="color: #BB4444">map</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> AvgNodeDegreeMapper<span style="color: #666666">(</span>numVertices<span style="color: #666666">));</span>
+</pre></div>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF; font-weight: bold">private</span> <span style="color: #AA22FF; font-weight: bold">static</span> <span style="color: #AA22FF; font-weight: bold">final</span> <span style="color: #AA22FF; font-weight: bold">class</span> <span style="color: #0000FF">AvgNodeDegreeMapper</span> <span style="color: #AA22FF; font-weight: bold">implements</span> MapFunction<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;,</span> Double<span style="color: #666666">&gt;</span> <span style="color: #666666">{</span>
+
+    <span style="color: #AA22FF; font-weight: bold">private</span> <span style="color: #00BB00; font-weight: bold">long</span> numberOfVertices<span style="color: #666666">;</span>
+
+    <span style="color: #AA22FF; font-weight: bold">public</span> <span style="color: #00A000">AvgNodeDegreeMapper</span><span style="color: #666666">(</span><span style="color: #666666; font-weight: bold">long</span> numberOfVertices<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+      <span style="color: #AA22FF; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #BB4444">numberOfVertices</span> <span style="color: #666666">=</span> numberOfVertices<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #AA22FF; font-weight: bold">public</span> Double <span style="color: #00A000">map</span><span style="color: #666666">(</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;</span> sumTuple<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+      <span style="color: #AA22FF; font-weight: bold">return</span> <span style="color: #666666">(</span><span style="color: #00BB00; font-weight: bold">double</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>sumTuple<span style="color: #666666">.</span><span style="color: #BB4444">f1</span> <span style="color: #666666">/</span> numberOfVertices<span style="color: #666666">)</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+
+<p><br>We can answer the final question by retrieving the edge ID pairs with <b>getEdgeIds()</b>, applying a simple filter transformation, and counting the elements of the resulting DataSet:</p>
+
+
+<p><h4><a style="margin-left: 100px" href="./tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial3.html"><em>Next--></em></a></h4></p>
 	</div> <!-- /container -->
 
 
