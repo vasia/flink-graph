@@ -212,7 +212,7 @@ DataSet<span style="color: #666666">&lt;</span>Double<span style="color: #666666
 
 <h3>The task</h3>
 <p>Now that you are familiar with Gelly's properties methods, let's try to compute something a little more advanced. Create a graph using the same Twitter data as before.
-Use the sekeleton code we provide below or copy it directly from the <a href="https://github.com/vasia/gelly-school/blob/gelly-tutorials/src/main/java/flink/gelly/school/Tutorial2.java">Github repository</a>.</p>
+Use the skeleton code we provide below or copy it directly from the <a href="https://github.com/vasia/gelly-school/blob/gelly-tutorials/src/main/java/flink/gelly/school/Tutorial2.java">Github repository</a>.</p>
 
 <div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// set up the execution environment</span>
 <span style="color: #AA22FF; font-weight: bold">final</span> ExecutionEnvironment env <span style="color: #666666">=</span> ExecutionEnvironment<span style="color: #666666">.</span><span style="color: #BB4444">getExecutionEnvironment</span><span style="color: #666666">();</span>
@@ -277,7 +277,7 @@ env<span style="color: #666666">.</span><span style="color: #BB4444">execute</sp
 </pre></div>
 
 <br><h4>What does it look like?</h4>
-<p>Trying running your code with the Twitter input data. What do the degree distributions look like? What fraction of nodes has a degree value of 1? Do your findings agree with the degree distribution figures in the network page?
+<p>Try running your code with the Twitter input data. What do the degree distributions look like? What fraction of nodes has a degree value of 1? Do your findings agree with the degree distribution figures in the network page?
 The degree distribution of a network is more interesting information that computing averages, because it can help you figure out whether your graph is <i>skewed</i>, i.e. whether there is a small fraction nodes that have disproportionally higher degrees than the rest of the network. We will revisit this concept of skew, when we will introduce gather-sum-apply iterations in <a href="./tutorial8.html">Tutorial#8</a>.
 
 <p><h4><a style="margin-left: 100px" href="./tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial3.html"><em>Next--></em></a></h4></p>
