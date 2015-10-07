@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="./favicon.ico">
+
+    <title>Tutorial3</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <script src="./assets/js/ie-emulation-modes-warning.js"></script>
+
+
+  </head>
+
+  <body>
+
+   <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="./flink-forward.html">Gellyschool@FF15</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+          <li><a href="./ff15-tutorial0.html">Tutorial#0: Graphs 101</a></li>
+        <li><a href="./ff15-tutorial1.html">Tutorial#1: Degree Distributions</a></li>
+        <li><a href="./ff15-tutorial2.html">Tutorial#2: PageRank on the ReplyGraph</a></li>
+        <li><a href="./ff15-tutorial3.html">Tutorial#3: People You Might Know</a></li>
+              </ul>
+            </li>
+            <li><a href="https://github.com/vasia/gelly-school/tree/ff-solutions">Solutions</a></li>
+            <li><a href="https://ci.apache.org/projects/flink/flink-docs-release-0.9/libs/gelly_guide.html">Gelly Docs</a></li> 
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+    
+<!-- Begin page content -->
+    <div class="container">
+      <div class="page-header">
+        <h1>Simple Transformations</h1>
+      </div>
+      <p>Coming soon...</p>
+      <!-- 
+<h4>Fidget with your Graph</h4>
+<p>In this tutorial, we will see some simple transformations which can be performed on a Graph in Gelly.</p><br>
+<h4>Map</h4> <img src="./images/mapping.jpg" align="right" />
+<p>Gelly allows us to apply map transformation on the Vertex values or Edge values. <strong>mapVertices()</strong> and <strong>mapEdges()</strong> return a new Graph, where the IDs of the vertices (or edges) remain unchanged, while the values are transformed according to the provided user-defined map function. The map functions also allow changing the type of the vertex or edge values.<br><br> Let's see this with some examples.<br>
+<strong>Changing Vertex value:</strong> To increment the value of all the vertices by one, call the <em>mapVertices()</em> method with a MapFunction which returns the input Vertex value incremented by one.</p>
+
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; updatedVerticesGraph = graph.<em style="color:blue">mapVertices</em>(
+                    new MapFunction&lt;Vertex&lt;Long, Double&gt;, Double&gt;() {
+                        public Double <em style="color:brown">map</em>(Vertex&lt;Long, Double&gt; value) {
+                            return value.getValue() + 1;
+                        }
+			});
+</code></pre><br>
+
+                    
+<p><strong>Changing Edge type:</strong> Call the <em>mapEdges()</em> method with a MapFunction that takes as input an Edge with value of type NullValue and  returns a Double value initialised to 1.0. 					
+<pre><code>
+    Graph&lt;Long, Double, Double&gt; updatedEdgesGraph = updatedVerticesGraph.<em style="color:blue">mapEdges</em>(
+            new MapFunction&lt;Edge&lt;Long, NullValue&gt;, Double&gt;() {
+                public Double <em style="color:brown">map</em>(Edge&lt;Long, NullValue&gt; value) {
+                    return 1.0;
+                }
+            });
+</code></pre></p><br><br>
+
+<h4>Reverse</h4>
+<p>This is a very handy transformation which allows us to easily reverse all the links in our Graph. It returns a new Graph where the direction of all edges has been reversed. It can can be called simply as follows:	</p>
+<pre><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.<em style="color:blue">reverse()</em>;
+</code></pre><br>
+For example, by calling this method on our twitter data set, the 'follows' relation among users gets reversed.<br>
+<p><img src="./images/reverse.jpg" /></p>
+<br><br><br>
+
+<h4>Filter</h4>
+<img src="./images/filtering.jpg" align="right" />
+<p>A filter transformation applies a user-defined filter function on the vertices or edges of the Graph. <strong>filterOnEdges()</strong> creates a sub-graph of the original graph, keeping only the edges that satisfy the provided predicate. <strong>filterOnVertices()</strong> applies a filter on the vertices of the graph removing edges whose source and/or target do not satisfy the vertex predicate.</p><br>
+<p><strong>Keep only vertices with positive values:</strong> Call the <em>filterOnVertices()</em> method with a filter function which returns true only if the Vertex value is greater than zero.
+<pre><code> Graph&lt;Long, Double, Double&gt; filtered =graph.<em style="color:blue">filterOnVertices</em>(new FilterFunction
+  &lt;Vertex&lt;Long, Double&gt;&gt;() {
+        public boolean <em style="color:brown">filter</em>(Vertex&lt;Long, Double&gt; vertex) {
+            return (vertex.getValue() &gt; 0);
+       }
+   });</pre></code>
+</p><br>
+<p><strong>Keep only edges with positive values:</strong> Call the <em>filterOnVertices()</em> method with a filter function which returns true only if the Edge value is greater than zero.
+<pre><code>
+    Graph&lt;Long, Double, Double&gt; filteredE =graph.<em style="color:blue">filterOnEdges</em>(new FilterFunction
+     &lt;Edge&lt;Long, Double&gt;&gt;() {
+        public boolean <em style="color:brown">filter</em>(Edge&lt;Long, Double&gt; e) {
+            return (e.getValue() &gt; 0);
+       }
+
+   });
+</code></pre>
+<br><br>
+<p>If we want to apply the filter function to the vertices and edges at the same time then we can use the  <strong>subgraph()</strong> method as shown in the code snippet below:</p>
+<pre><code>graph.<em style="color:blue">subgraph</em>(
+    new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
+            public boolean <em style="color:brown">filter</em>(Vertex&lt;Long, Long&gt; vertex) {
+                // keep only vertices with positive values
+                return (vertex.getValue() &gt; 0);
+           }
+       },
+    new FilterFunction&lt;Edge&lt;Long, Long&gt;&gt;() {
+            public boolean <em style="color:brown">filter</em>(Edge&lt;Long, Long&gt; edge) {
+                // keep only edges with positive values
+                return (edge.getValue() &gt; 0);
+            }
+    })
+</code></pre><br>
+<p>
+If we continue our discussion with the twitter data set, then we could for example, use this filter method to obtain users with number of followers
+exceeding a certain threshold. However, in order to do this filtering, we would first need to store the indegree information of every user as it's 
+Vertex value. Once we have the follower information for every Vertex, then it is straightforward to apply the filter function by changing the threshold from zero to the desired value in <em>return (vertex.getValue() &gt; 0)</em>.  We are going to see how to update the vertex values in a graph, with information retrieved from some other DataSet, in the next tutorial.
+</p><br>
+-->
+	<p><h4><a style="margin-left: 100px" href="./tutorial2.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial4.html"><em>Next--></em></a></h4></p>
+	<br><br>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="./dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

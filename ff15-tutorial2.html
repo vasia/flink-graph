@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="./favicon.ico">
+
+    <title>Tutorial2</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+
+    <script src="./assets/js/ie-emulation-modes-warning.js"></script>
+
+
+  </head>
+
+  <body>
+
+ <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="./flink-forward.html">Gellyschool@FF15</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tutorials<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+          <li><a href="./ff15-tutorial0.html">Tutorial#0: Graphs 101</a></li>
+        <li><a href="./ff15-tutorial1.html">Tutorial#1: Degree Distributions</a></li>
+        <li><a href="./ff15-tutorial2.html">Tutorial#2: PageRank on the ReplyGraph</a></li>
+        <li><a href="./ff15-tutorial3.html">Tutorial#3: People You Might Know</a></li>
+              </ul>
+            </li>
+            <li><a href="https://github.com/vasia/gelly-school/tree/ff-solutions">Solutions</a></li>
+            <li><a href="https://ci.apache.org/projects/flink/flink-docs-release-0.9/libs/gelly_guide.html">Gelly Docs</a></li> 
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <!-- Begin page content -->
+    <div class="container">
+		      <div class="page-header">
+        <h1>Know your Graph</h1>
+      </div>
+      <h3>Tell me about you, Gelly!</h3>
+      <p>In this tutorial, we are going to learn how to compute several simple graph properties with Gelly.
+        <br>In particular, you will implement a program that computes
+      <ul>
+      <li>The range of node IDs (maximum and minimum)</li>
+      <li>The degree distribution (the fraction of nodes in the network with a certain degree)</li>
+      </ul>
+      </p>
+         <h4>Graph Properties</h4>
+      <p>Gelly has a set of methods that retrieve basic information from the input Graph. For example, you can calculate the total number of vertices (also known as <i>size</i>) and the total number of edges (also known as <i>volume</i>). If you want to analyze the IDs, you can retrieve the vertex IDs and the edge pair IDs in a DataSet. Finally, Gelly has methods to compute graph degrees. The degree of a vertex is defined as <i>the number of edges incident to this vertex</i>. In Gelly, we differentiate the degree type, depending on the edge direction:
+      <ul>
+        <li><b>In-degree</b> is the number of incident edges for which the vertex is the target.
+        <li><b>Out-degree</b> is the number of incident edges for which the vertex is the source.
+        <li><b>Degree</b> is the number of incident edges, without considering edge direction (both edges where the vertex is the source and edges where the vertex is the target are counted).
+      </ul>
+      </p>
+    <p>The list of available properties methods and their return types is shown below.</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">
+<span style="color: #008800; font-style: italic">// get the IDs of the vertices as a DataSet</span>
+DataSet<span style="color: #666666">&lt;</span>K<span style="color: #666666">&gt;</span> <span style="color: #BB4444">getVertexIds</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get the source-target pairs of the edge IDs as a DataSet</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> K<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> getEdgeIds</span><span style="color: #666666">()</span> 
+
+<span style="color: #008800; font-style: italic">// get a DataSet of &lt;vertex ID, in-degree&gt; pairs for all vertices</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> inDegrees</span><span style="color: #666666">()</span> 
+
+<span style="color: #008800; font-style: italic">// get a DataSet of &lt;vertex ID, out-degree&gt; pairs for all vertices</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> outDegrees</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get a DataSet of &lt;vertex ID, degree&gt; pairs for all vertices, where degree is the sum of in- and out- degrees</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>K<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span><span style="color: #BB4444"> getDegrees</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get the number of vertices</span>
+<span style="color: #666666; font-weight: bold">long</span> <span style="color: #BB4444">numberOfVertices</span><span style="color: #666666">()</span>
+
+<span style="color: #008800; font-style: italic">// get the number of edges</span>
+<span style="color: #666666; font-weight: bold">long</span> <span style="color: #BB4444 ">numberOfEdges</span><span style="color: #666666">()</span>
+</pre></div>
+
+<p><br>Let's see the results of these methods when applied to the example graph given below:</p>
+<p><img src="./images/tut2_ex1.png" hspace="20"/>
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
+.tg .tg-3tbr{font-family:Arial, Helvetica, sans-serif !important;;text-align:right;vertical-align:top}
+.tg .tg-8fc1{font-weight:bold;font-family:Arial, Helvetica, sans-serif !important;;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-8fc1">Method</th>
+    <th class="tg-8fc1">Result</th>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">getVertexIds()</td>
+    <td class="tg-3tbr">{1, 2, 3, 4, 5}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">getEdgeIds()</td>
+    <td class="tg-3tbr">{(1, 2), (1, 3), (2, 3), (2, 4), (3, 4), (4, 5), (5, 2)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">inDegrees()</td>
+    <td class="tg-3tbr">{(1, 0), (2, 1), (3, 2), (4, 2), (5, 1)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">outDegrees()</td>
+    <td class="tg-3tbr">{(1, 2), (2, 2), (3, 1), (4, 1), (5, 1)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">getDegrees()</td>
+    <td class="tg-3tbr">{(1, 2), (2, 3), (3, 3), (4, 3), (5, 2)}</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">numberOfVertices()</td>
+    <td class="tg-3tbr">5</td>
+  </tr>
+  <tr>
+    <td class="tg-8fc1">numberOfEdges()</td>
+    <td class="tg-3tbr">7</td>
+  </tr>
+</table>
+</p>
+
+<p><br>Using the properties methods and by combining them with standard transformations of the Flink DataSet API, one can answer several interesting questions about a graph:
+   <ul>
+    <li>Which is the vertex with the most neighbors?
+    <li>How many out-going edges does a vertex have on average?
+    <li>How many edges are there where the source ID is lower than the target ID?
+   </ul>
+</p>
+<p>Let's see how we can get the answers to these questions with Gelly.</p>
+<p>The vertex with the most neighbors is the vertex with the maximum degree in the graph. In order to find this vertex, we simply have to call <b>getDegrees()</b> and then use a max aggregation function on the degrees DataSet to get the ID of the max-degree vertex:</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/** find the vertex with the maximum degree **/</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple1<span style="color: #666666">&lt;</span>Long<span style="color: #666666">&gt;&gt;</span> maxInDegreeVertex <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">getDegrees</span><span style="color: #666666">().</span><span style="color: #BB4444">maxBy</span><span style="color: #666666">(1).</span><span style="color: #BB4444">project</span><span style="color: #666666">(0);</span>
+</pre></div>
+
+
+<p><br>The answer to the second question is essentially the computation of the average out-degree. In order to compute that, we first retrieve the out-degrees of all vertices in a DataSet using the <b>outDegree()</b> method. Then, we sum up all the out-degrees using the sum aggregation function on the degrees DataSet. Finally, we divide the sum by the total number of vertices, which we retrieve using <b>numberOfVertices()</b>:</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/** get the number of vertices **/</span>
+<span style="color: #666666; font-weight: bold">long</span> numVertices <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">numberOfVertices</span><span style="color: #666666">();</span>
+
+<span style="color: #008800; font-style: italic">/** compute the average node out-degree **/</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> verticesWithDegrees <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">outDegrees</span><span style="color: #666666">();</span>
+
+DataSet<span style="color: #666666">&lt;</span>Double<span style="color: #666666">&gt;</span> avgOutDegree <span style="color: #666666">=</span> verticesWithDegrees<span style="color: #666666">.</span><span style="color: #BB4444">sum</span><span style="color: #666666">(1).</span><span style="color: #BB4444">map</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> AvgNodeDegreeMapper<span style="color: #666666">(</span>numVertices<span style="color: #666666">));</span>
+</pre></div>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF; font-weight: bold">private</span> <span style="color: #AA22FF; font-weight: bold">static</span> <span style="color: #AA22FF; font-weight: bold">final</span> <span style="color: #AA22FF; font-weight: bold">class</span> <span style="color: #0000FF">AvgNodeDegreeMapper</span> <span style="color: #AA22FF; font-weight: bold">implements</span> MapFunction<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;,</span> Double<span style="color: #666666">&gt;</span> <span style="color: #666666">{</span>
+
+    <span style="color: #AA22FF; font-weight: bold">private</span> <span style="color: #00BB00; font-weight: bold">long</span> numberOfVertices<span style="color: #666666">;</span>
+
+    <span style="color: #AA22FF; font-weight: bold">public</span> <span style="color: #00A000">AvgNodeDegreeMapper</span><span style="color: #666666">(</span><span style="color: #666666; font-weight: bold">long</span> numberOfVertices<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+      <span style="color: #AA22FF; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #BB4444">numberOfVertices</span> <span style="color: #666666">=</span> numberOfVertices<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #AA22FF; font-weight: bold">public</span> Double <span style="color: #00A000">map</span><span style="color: #666666">(</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;</span> sumTuple<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+      <span style="color: #AA22FF; font-weight: bold">return</span> <span style="color: #666666">(</span><span style="color: #00BB00; font-weight: bold">double</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>sumTuple<span style="color: #666666">.</span><span style="color: #BB4444">f1</span> <span style="color: #666666">/</span> numberOfVertices<span style="color: #666666">)</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+
+<p><br>We can answer the final question by retrieving the edge ID pairs with <b>getEdgeIds()</b>, applying a simple filter transformation, and counting the elements of the resulting DataSet:</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #00BB00; font-weight: bold">long</span> orderedEdges <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">getEdgeIds</span><span style="color: #666666">().</span><span style="color: #BB4444">filter</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> OrderedEdgesFilter<span style="color: #666666">()).</span><span style="color: #BB4444">count</span><span style="color: #666666">();</span></pre></div>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">
+<span style="color: #AA22FF; font-weight: bold">private</span> <span style="color: #AA22FF; font-weight: bold">static</span> <span style="color: #AA22FF; font-weight: bold">final</span> <span style="color: #AA22FF; font-weight: bold">class</span> <span style="color: #0000FF">OrderedEdgesFilter</span> <span style="color: #AA22FF; font-weight: bold">implements</span> FilterFunction<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span>Long<span style="color: #666666">&gt;&gt;</span> <span style="color: #666666">{</span>
+    
+  <span style="color: #AA22FF">@Override</span>
+  <span style="color: #AA22FF; font-weight: bold">public</span> <span style="color: #00BB00; font-weight: bold">boolean</span> <span style="color: #00A000">filter</span><span style="color: #666666">(</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;</span> edge<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+    <span style="color: #AA22FF; font-weight: bold">return</span> edge<span style="color: #666666">.</span><span style="color: #BB4444">f0</span> <span style="color: #666666">&lt;</span> edge<span style="color: #666666">.</span><span style="color: #BB4444">f1</span><span style="color: #666666">;</span>
+  <span style="color: #666666">}</span>
+<span style="color: #666666">};</span>
+</pre></div>
+
+<p><br>Go ahead and try these out with the <a href=http://konect.uni-koblenz.de/networks/munmun_twitter_social>Twitter dataset</a> we used for Tutorial#1! Can you reproduce any of the network information available in the dataset webpage?</p>
+
+<h3>The task</h3>
+<p>Now that you are familiar with Gelly's properties methods, let's try to compute something a little more advanced. Create a graph using the same Twitter data as before.
+Use the sekeleton code we provide below or copy it directly from the <a href="https://github.com/vasia/gelly-school/blob/gelly-tutorials/src/main/java/flink/gelly/school/Tutorial2.java">Github repository</a>.</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// set up the execution environment</span>
+<span style="color: #AA22FF; font-weight: bold">final</span> ExecutionEnvironment env <span style="color: #666666">=</span> ExecutionEnvironment<span style="color: #666666">.</span><span style="color: #BB4444">getExecutionEnvironment</span><span style="color: #666666">();</span>
+
+<span style="color: #008800; font-style: italic">// Create the Graph</span>
+Graph<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> graph <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromCsvReader</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;/path/to/the/input/file&quot;</span><span style="color: #666666">,</span> env<span style="color: #666666">)</span>
+      <span style="color: #666666">.</span><span style="color: #BB4444">fieldDelimiterEdges</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot; &quot;</span><span style="color: #666666">)</span> <span style="color: #008800; font-style: italic">// node IDs are separated by spaces</span>
+      <span style="color: #666666">.</span><span style="color: #BB4444">ignoreCommentsEdges</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;%&quot;</span><span style="color: #666666">)</span> <span style="color: #008800; font-style: italic">// comments start with &quot;%&quot;</span>
+      <span style="color: #666666">.</span><span style="color: #BB4444">keyType</span><span style="color: #666666">(</span>Long<span style="color: #666666">.</span><span style="color: #BB4444">class</span><span style="color: #666666">);</span> <span style="color: #008800; font-style: italic">// no vertex or edge values</span>
+</pre></div>
+
+<br><p>As you probably noticed, we have used a different method here to create the graph, <b>fromCsvReader()</b>. This method is a shorter way for creating the graph, equivalent to reading the DataSets with <b>readCsvFile()</b> and then calling <b>fromTupleDataSet</b>. It is particularly convenient when the edges have no associated value, as we do not need to define a mapper to initialize the values to NullValue.</p>
+
+<br><h4>Step #1: Compute the range of vertex IDs</h4>
+<p>What is the maximum vertex ID and what is the minimum vertex ID?</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/** Step #1: Compute the range of node IDs **/</span>
+
+<span style="color: #008800; font-style: italic">// Get the node IDs in a DataSet&lt;Long&gt; and map it to a DataSet&lt;Tuple1&lt;Long&gt;:</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple1<span style="color: #666666">&lt;</span>Long<span style="color: #666666">&gt;&gt;</span> vertexIDs <span style="color: #666666">= ...</span>
+
+<span style="color: #008800; font-style: italic">// Get and print the min node ID</span>
+vertexIDs<span style="color: #666666">.</span><span style="color: #BB4444">minBy</span><span style="color: #666666">(...).</span><span style="color: #BB4444">printOnTaskManager</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;Min node id&quot;</span><span style="color: #666666">);</span>
+
+<span style="color: #008800; font-style: italic">// Get and print the max node ID</span>
+vertexIDs<span style="color: #666666">.</span><span style="color: #BB4444">maxBy</span><span style="color: #666666">(...).</span><span style="color: #BB4444">printOnTaskManager</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;Max node id&quot;</span><span style="color: #666666">);</span>
+</pre></div>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/**</span>
+<span style="color: #008800; font-style: italic">* Wraps a Long value in a Tuple1&lt;Long&gt;</span>
+<span style="color: #008800; font-style: italic">*/</span>
+
+<span style="color: #AA22FF; font-weight: bold">private</span> <span style="color: #AA22FF; font-weight: bold">static</span> <span style="color: #AA22FF; font-weight: bold">final</span> <span style="color: #AA22FF; font-weight: bold">class</span> <span style="color: #0000FF">TupleWrapperMap</span> <span style="color: #AA22FF; font-weight: bold">implements</span> MapFunction<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Tuple1<span style="color: #666666">&lt;</span>Long<span style="color: #666666">&gt;&gt;</span> <span style="color: #666666">{</span>
+
+  <span style="color: #AA22FF">@Override</span>
+  <span style="color: #AA22FF; font-weight: bold">public</span> Tuple1<span style="color: #666666">&lt;</span>Long<span style="color: #666666">&gt;</span> <span style="color: #00A000">map</span><span style="color: #666666">(</span>Long id<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+    <span style="color: #AA22FF; font-weight: bold">return</span> <span style="color: #666666">...</span>
+  <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><br>Note that DataSet's aggregation functions only work on Tuple types, thus we need to wrap the vertexIds in a Tuple1.</p>
+
+<br><h4>Step #2: Compute the degree distributions</h4>
+<p>The <b>degree distribution</b> of a network is the probability distribution of the degrees over the network. Essentially, the degree distribution tells us how often a certain degree appears in the input graph. In the example graph in the figure above, 2 out of 5 nodes have a degree equal to 3 (nodes 3 and 4). Thus, the degree distribution of 3 is 0.4. Similarly, the degree distribution of 4 is 0.2 (only one out of the 5 nodes has degree 4; node 2).</p>
+
+<p>The degree distribution can be obtained by computing the fraction of nodes that have each degree value. To do that, we can first compute the degrees for each vertex in the graph and the total number of vertices. Then, we need to count how many vertices have each degree value. Once we have the sums, we only need to divide by the total number of vertices to get the degree distributions for each degree:</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Get the degrees in a DataSet</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> degrees <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+
+<span style="color: #008800; font-style: italic">// Get the total number of vertices</span>
+<span style="color: #AA22FF; font-weight: bold">final</span> Long numberOfVertices <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> degreeDistributions <span style="color: #666666">=</span> degrees<span style="color: #666666">.</span><span style="color: #BB4444">map</span><span style="color: #666666">(...)...</span>
+
+<span style="color: #008800; font-style: italic">// Print the degree distributions</span>
+degreeDistributions<span style="color: #666666">.</span><span style="color: #BB4444">printOnTaskManager</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;Degree sums&quot;</span><span style="color: #666666">);</span>
+
+<span style="color: #008800; font-style: italic">// execute the program</span>
+env<span style="color: #666666">.</span><span style="color: #BB4444">execute</span><span style="color: #666666">();</span>
+</pre></div>
+
+<br><h4>What does it look like?</h4>
+<p>Trying running your code with the Twitter input data. What do the degree distributions look like? What fraction of nodes has a degree value of 1? Do your finding agree with the degree distribution figures in the network page?
+The degree distribution of a network is more interesting information that computing averages, because it can help you figure out whether your graph is <i>skewed</i>, i.e. whether there is a small fraction nodes that have disproportionally higher degrees than the rest of the network. We will revisit this concept of skew, when we will introduce gather-sum-apply iterations in <a href="./tutorial8.html">Tutorial#8</a>.
+
+<p><h4><a style="margin-left: 100px" href="./tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial3.html"><em>Next--></em></a></h4></p>
+	</div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="./dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
