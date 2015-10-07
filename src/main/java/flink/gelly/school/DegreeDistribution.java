@@ -52,7 +52,7 @@ public class DegreeDistribution {
 		final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
 		// Create a Graph
-		DataSet<Tuple3<String, String, NullValue>> twitterEdges = env.readCsvFile(input)
+		DataSet<Tuple3<String, String, NullValue>> edges = env.readCsvFile(input)
 				.fieldDelimiter(" ")	// node IDs are separated by spaces
 				.ignoreComments("%")	// comments start with "%"
 				.types(String.class, String.class)	// read the node IDs as Longs
@@ -67,7 +67,7 @@ public class DegreeDistribution {
 					}
 				});
 
-		Graph<String, NullValue, NullValue> graph = Graph.fromTupleDataSet(twitterEdges, env);
+		Graph<String, NullValue, NullValue> graph = Graph.fromTupleDataSet(edges, env);
 
 		/** Compute the degree distributions **/
 
