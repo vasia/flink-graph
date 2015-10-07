@@ -34,7 +34,7 @@ import org.apache.flink.util.Collector;
 
 /**
  * 
- * This is a reference implementation for the Gellyschool training task "People You Might Know".
+ * This is the skeleton for the Gellyschool training task "People You Might Know".
  *
  * In social networks, we are often shown a list of users we might know
  * or we might want to connect to.
@@ -62,8 +62,7 @@ public class PeopleYouMightKnow {
 	private static String output = null;
 	private static int threshold = 20;
 
-	
-	@SuppressWarnings("serial")
+
 	public static void main(String[] args) throws Exception {
 	
 		// parse parameters
@@ -75,98 +74,69 @@ public class PeopleYouMightKnow {
 		ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
 		// Read the input file of edges with String Ids
-		DataSet<Edge<String, NullValue>> edges = env.readCsvFile(input)
-				.fieldDelimiter("\t")
-				.lineDelimiter("\n")
-				.includeFields("11")
-				.types(String.class, String.class)
-				.map(new MapFunction<Tuple2<String, String>, Edge<String, NullValue>>() {
-
-					public Edge<String, NullValue> map(Tuple2<String, String> input) {
-						return new Edge<String, NullValue>(input.f0, input.f1, NullValue.getInstance());
-					}
-				});
+		// Hint: use includeFields() to only read the first 2 columns of the input
+		// and a mapper to create Edges with values of type NullValue
+//		DataSet<Edge<String, NullValue>> edges = env.readCsvFile(input)
+//				...
+//				.map(new MapFunction<Tuple2<String, String>, Edge<String, NullValue>>() {
+//					...
+//				});
 
 		// Create a Graph from the input edges
 		// and initialize the vertices with a HashSet
 		// whose only element is the vertex ID itself
-		Graph<String, HashSet<String>, NullValue> graph = Graph.fromDataSet(edges,
-				new MapFunction<String, HashSet<String>>() {
-
-					public HashSet<String> map(String id) {
-
-						HashSet<String> initialSet = new HashSet<String>();
-						initialSet.add(id);
-						return initialSet;
-					}
-				}, env);
+//		Graph<String, HashSet<String>, NullValue> graph = Graph.fromDataSet(edges,
+//				new MapFunction<String, HashSet<String>>() {
+//
+//					public HashSet<String> map(String id) {
+//
+//						...
+//					}
+//				}, env);
 		
 		
 		// Fill in the HashSet of each vertex with its neighbors' IDs
-		DataSet<Tuple2<String, HashSet<String>>> verticesWithNeighbors =
-				graph.reduceOnNeighbors(new ReduceNeighborsFunction<HashSet<String>>() {
-			
-			public HashSet<String> reduceNeighbors(HashSet<String> first,
-					HashSet<String> second) {
-				for (String id: first) {
-					second.add(id);
-				}
-					return second;
-			}
-		}, EdgeDirection.ALL);
+		// Hint: use the {@link org.apache.flink.graph.Graph#reduceOnNeighbors} method
+		// and set the EdgeDirection to ALL
+//		DataSet<Tuple2<String, HashSet<String>>> verticesWithNeighbors = ...
 		
 		// Attach the neighbor values to the vertices of the graph
-		Graph<String, HashSet<String>, NullValue> graphWithNeighbors =
-				graph.joinWithVertices(verticesWithNeighbors,
-						new MapFunction<Tuple2<HashSet<String>, HashSet<String>>, HashSet<String>>() {
+		// Hint: Use the {@link org.apache.flink.graph.Graph#joinWithVertices} method
+//		Graph<String, HashSet<String>, NullValue> graphWithNeighbors = ...
 
-							public HashSet<String> map(
-									Tuple2<HashSet<String>, HashSet<String>> in) {
-								return in.f1;
-							}
-				});
+		// Compute the "people you might know list"
+//		DataSet<Tuple2<String, String>> verticesWithList =
+//				graphWithNeighbors.groupReduceOnNeighbors(
+//					new NeighborsFunctionWithVertexValue<String, HashSet<String>, NullValue,
+//					Tuple2<String, String>>() {
+//	
+//						public void iterateNeighbors(Vertex<String, HashSet<String>> vertex,
+//								Iterable<Tuple2<Edge<String, NullValue>, Vertex<String, HashSet<String>>>> neighbors,
+//								Collector<Tuple2<String, String>> out) {
+//	
+//							HashMap<String, Integer> recommendations = new HashMap<String, Integer>();
+//	
+//							for (Tuple2<Edge<String, NullValue>, Vertex<String, HashSet<String>>> t: neighbors) {
+//								// for every friend in the neighbors' friend list
+//								for (String friendOfFriend: t.f1.getValue()) {
+//									// exclude the vertex itself
+//									// if new candidate is found, add the ID to the HashSet with score 1
+//									// if an existing friend is found, increase its score 
+//									...
+//								}
+//							}
+//							// only output friends-of-friends that appeared at least <threshold> times
+//							for (Entry<String, Integer> friend: recommendations.entrySet()) {
+//								if (...) {
+//									out.collect(new Tuple2<String, String>(vertex.getId(), friend.getKey()));	
+//								}
+//							}
+//						}
+//	
+//			}, EdgeDirection.ALL);
 
-		// Compute "people you might know list"
-		DataSet<Tuple2<String, String>> verticesWithList =
-				graphWithNeighbors.groupReduceOnNeighbors(
-					new NeighborsFunctionWithVertexValue<String, HashSet<String>, NullValue,
-					Tuple2<String, String>>() {
-	
-						public void iterateNeighbors(Vertex<String, HashSet<String>> vertex,
-								Iterable<Tuple2<Edge<String, NullValue>, Vertex<String, HashSet<String>>>> neighbors,
-								Collector<Tuple2<String, String>> out) {
-	
-							HashMap<String, Integer> recommendations = new HashMap<String, Integer>();
-	
-							for (Tuple2<Edge<String, NullValue>, Vertex<String, HashSet<String>>> t: neighbors) {
-								for (String friendOfFriend: t.f1.getValue()) {
-									// exclude the vertex itself
-									if(!(friendOfFriend.equals(vertex.getId()))) {
-										if (!(vertex.getValue().contains(friendOfFriend))) {
-											// new candidate found
-											if (recommendations.containsKey(friendOfFriend)) {
-												int scoreSoFar = recommendations.get(friendOfFriend);
-												// increase the occurrence score
-												recommendations.put(friendOfFriend, scoreSoFar+1);
-											}
-											else {
-												recommendations.put(friendOfFriend, 1);
-											}
-										}	
-									}
-								}
-							}
-							// only output friends-of-friends that appeared at least <threshold> times
-							for (Entry<String, Integer> friend: recommendations.entrySet()) {
-								if (friend.getValue() > threshold) {
-									out.collect(new Tuple2<String, String>(vertex.getId(), friend.getKey()));	
-								}
-							}
-						}
-	
-			}, EdgeDirection.ALL);
-
-		verticesWithList.writeAsCsv(output, "\n", "\t");
+		// write the result to the output path
+//		verticesWithList.writeAsCsv(output, "\n", "\t");
 		env.execute();
 	}
 }

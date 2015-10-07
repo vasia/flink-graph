@@ -18,6 +18,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.graph.Edge;
 import org.apache.flink.graph.EdgeDirection;
@@ -25,10 +26,9 @@ import org.apache.flink.graph.Graph;
 import org.apache.flink.graph.ReduceEdgesFunction;
 import org.apache.flink.graph.Vertex;
 import org.apache.flink.graph.library.PageRankAlgorithm;
-import org.apache.flink.graph.utils.Tuple3ToEdgeMap;
 
 /**
- * This is a reference implementation for the Gellyschool training task "PageRank on ReplyGraph".
+ * This is the skeleton for the Gellyschool training task "PageRank on ReplyGraph".
  * 
  * The task is to create a Graph from Apache Flink mailing list data,
  * calculate the transition probabilities (edge weights), and run the
@@ -46,7 +46,7 @@ import org.apache.flink.graph.utils.Tuple3ToEdgeMap;
  *   --output path-to-output-directory
  * <p>
  * Optional parameters:
- *   --numIterations the number of iterations to run (default value: 10) 
+ *   --numIterations the number of iterations to run (default value: 10)
  */
 public class PageRankWithEdgeWeights {
 	
@@ -55,8 +55,6 @@ public class PageRankWithEdgeWeights {
 	private static String output = null;
 	private static int numIterations = 10;
 
-	
-	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
 	
 		// parse parameters
@@ -68,53 +66,43 @@ public class PageRankWithEdgeWeights {
 		ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
 		// read the Edge DataSet from the input file
-		DataSet<Edge<String, Double>> links = env.readCsvFile(input)
-				.fieldDelimiter("\t")
-				.lineDelimiter("\n")
-				.types(String.class, String.class, Double.class)
-				.map(new Tuple3ToEdgeMap<String, Double>());
+		// DataSet<Tuple3<String, String, Double>> links = env.readCsvFile(input) ...
+				// set the field and line delimiters
+				// set the field types
+
 
 		// create a Graph with vertex values initialized to 1.0 (the initial rank)
-		Graph<String, Double, Double> network = Graph.fromDataSet(links,
-				new MapFunction<String, Double>() {
-					public Double map(String value) throws Exception {
-						return 1.0;
-					}
-				}, env);
+//		Graph<String, Double, Double> network = Graph.fromTupleDataSet(links,
+//				new MapFunction<String, Double>() {
+//					...
+//				}, env);
 
 		// for each vertex calculate the total weight of its outgoing edges
-		DataSet<Tuple2<String, Double>> sumEdgeWeights = 
-				network.reduceOnEdges(new SumWeight(), EdgeDirection.OUT);
+		// hint: use the {@link org.apache.flink.graph.Graph#reduceOnEdges} method
+//		DataSet<Tuple2<String, Double>> sumEdgeWeights = ...
 
 		// assign the transition probabilities as edge weights:
-		// divide edge weight by the total weight of outgoing edges for that source 
-		Graph<String, Double, Double> networkWithWeights = network
-				.joinWithEdgesOnSource(sumEdgeWeights,
-						new MapFunction<Tuple2<Double, Double>, Double>() {
-							public Double map(Tuple2<Double, Double> value) {
-								return value.f0 / value.f1;
-							}
-						});
+		// divide edge weight by the total weight of outgoing edges for that source
+		// hint: use the {@link org.apache.flink.graph.Graph#joinWithEdgesOnSource} method
+//		Graph<String, Double, Double> networkWithWeights = ...
 
 		// run the Page Rank algorithm on the weighted graph
-		DataSet<Vertex<String, Double>> pageRanks = networkWithWeights.run(
-				new PageRankAlgorithm<String>(DAMPENING_FACTOR, numIterations))
-				.getVertices();
+//		DataSet<Vertex<String, Double>> pageRanks = networkWithWeights.run(
+//				new PageRankAlgorithm<String>(...))...
 
 		// write the output and execute the program
-		pageRanks.writeAsCsv(output, "\n", "\t");
+//		pageRanks.writeAsCsv(...);
 		env.execute();
 
 	}
 	
 	// This neighborhood function calculates the total weight of outgoing edges for a vertex
-	@SuppressWarnings("serial")
-	static final class SumWeight implements ReduceEdgesFunction<Double> {
-	
-		@Override
-		public Double reduceEdges(Double firstEdgeValue, Double secondEdgeValue) {
-			return firstEdgeValue + secondEdgeValue;
-		}
-	}
+//	static final class SumWeight implements ReduceEdgesFunction<Double> {
+//	
+//		@Override
+//		public Double reduceEdges(Double firstEdgeValue, Double secondEdgeValue) {
+//			...
+//		}
+//	}
 
 }

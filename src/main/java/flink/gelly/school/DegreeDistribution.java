@@ -40,7 +40,6 @@ public class DegreeDistribution {
 	private static String input = null;
 	private static String output = null;
 
-	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
 
 		// parse parameters
@@ -52,36 +51,30 @@ public class DegreeDistribution {
 		final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
 		// Create a Graph
-		DataSet<Tuple3<String, String, NullValue>> twitterEdges = env.readCsvFile(input)
-				.fieldDelimiter(" ")	// node IDs are separated by spaces
-				.ignoreComments("%")	// comments start with "%"
-				.types(String.class, String.class)	// read the node IDs as Longs
+		// Read the input file of edges with String Ids
+		// Hint: use includeFields() to only read the first 2 columns of the input
+		// and a mapper to set the 3rd field to NullValue
+//		DataSet<Tuple3<String, String, NullValue>> edges = env.readCsvFile(input)
+//				...
 
-				// set the edge value to NullValue with a mapper
-				.map(new MapFunction<Tuple2<String, String>, Tuple3<String, String, NullValue>>() {
-
-					@Override
-					public Tuple3<String, String, NullValue> map(Tuple2<String, String> tuple) {
-						return new Tuple3<String, String, NullValue>(
-								tuple.f0, tuple.f1, NullValue.getInstance());
-					}
-				});
-
-		Graph<String, NullValue, NullValue> graph = Graph.fromTupleDataSet(twitterEdges, env);
+//		Graph<String, NullValue, NullValue> graph = Graph.fromTupleDataSet(edges, env);
 
 		/** Compute the degree distributions **/
 
 		// Get the degrees in a DataSet
-		DataSet<Tuple2<String, Long>> degrees = graph.getDegrees();
+//		DataSet<Tuple2<String, Long>> degrees = ...
 
 		// Get the total number of vertices
-		final Long numberOfVertices = graph.numberOfVertices();
+//		final Long numberOfVertices = ...
 
-		DataSet<Tuple2<Long, Double>> degreeDistributions = degrees.map(new AppendOneMap())
-				.groupBy(1).sum(2).map(new ComputeProbabilityMap(numberOfVertices));
+		// Compute the degree distributions.
+		// Hint: Append a count of 1 to each [vertexId-degree] pair and then groupBy the degree
+		// and sum the ones to produce the total number of vertices with each degree.
+		// Then, apply a mapper to compute the distribution
+//		DataSet<Tuple2<Long, Double>> degreeDistributions = ...
 
 		// Print the degree distributions
-		degreeDistributions.writeAsCsv(output, "\n", "\t");
+//		degreeDistributions.writeAsCsv(output, "\n", "\t");
 
 		env.execute();
 	}
@@ -93,35 +86,27 @@ public class DegreeDistribution {
 	/**
 	 * Adds a third field to the input Tuple2 with value=1
 	 */
-	@SuppressWarnings("serial")
-	@ForwardedFields("f0; f1")
-	private static final class AppendOneMap implements MapFunction<Tuple2<String, Long>,
-		Tuple3<String, Long, Integer>> {
-
-		@Override
-		public Tuple3<String, Long, Integer> map(Tuple2<String, Long> idWithDegree) {
-			return new Tuple3<String, Long, Integer>(idWithDegree.f0, idWithDegree.f1, 1);
-		}
-	}
+//	private static final class AppendOneMap implements MapFunction<Tuple2<String, Long>,
+//		Tuple3<String, Long, Integer>> {
+//
+//	...
+//	}
 
 	/**
 	 * Computes the fraction of nodes in the graph with a certain degree
 	 */
-	@SuppressWarnings("serial")
-	@ForwardedFields("f0")
-	private static final class ComputeProbabilityMap implements MapFunction<Tuple3<String, Long, Integer>,
-		Tuple2<Long, Double>> {
-
-		private final long numVertices;
-
-		public ComputeProbabilityMap(long vertices) {
-			this.numVertices = vertices;
-		}
-
-		@Override
-		public Tuple2<Long, Double> map(Tuple3<String, Long, Integer> degreeWithSum) {
-			return new Tuple2<Long, Double>(
-					degreeWithSum.f1, (double) degreeWithSum.f2 / (double) numVertices);
-		}
-	}
+//	private static final class ComputeProbabilityMap implements MapFunction<Tuple3<String, Long, Integer>,
+//		Tuple2<Long, Double>> {
+//
+//		private final long numVertices;
+//
+//		public ComputeProbabilityMap(long vertices) {
+//			this.numVertices = vertices;
+//		}
+//
+//		@Override
+//		public Tuple2<Long, Double> map(Tuple3<String, Long, Integer> degreeWithSum) {
+//			return ...
+//		}
+//	}
 }
