@@ -60,81 +60,71 @@
         <h1>PageRank on the ReplyGraph</h1>
       </div>
       <h3>How high do I rank, Gelly?</h3>
-      <p>In this tutorial, we are going to analyze the structure of the Flink community, as this is reflected in the dev-mailing list. We are going to use the Reply Graph, normalize its weights and then run Gelly's PageRank algorithm on it.
-
-      <h4>Data</h4>
-      For this tutorial, we are going to use a Twitter graph from the <a href="http://konect.uni-koblenz.de/">Koblenz Network Collection</a>.
-      You can download the data from <a href="http://konect.uni-koblenz.de/networks/munmun_twitter_social">this page</a>, where you will also find several properties and metrics of the network. Nodes in this network represent Twitter users and an edge shows that the left user follows the right one.   
-      The edges file is quite small and you can easily open it and check it out on your laptop. You will see that the first two lines start with “%” and contain information about the data. Each of the following lines defines a directed, unweighted edge and IDs are separated by a space character: <br><br>
-
-      <p><em> % asym unweighted<br>
-              % 834797 465017 465017<br>
-              1 2 <br>
-              1 3 <br>
-              1 4 <br>
-              1 5 <br>
-             ...</em></p><br>
+      <p>In this tutorial, we are going to analyze the structure of the Flink community in more detail, using Gelly's PageRank library algorithm.
+      <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> is an algorithm that was first used to rank web search engine results. Today, the algorithm and many variations are used in various graph application domains. The idea of PageRank is that <em>important</em> or <em>relevant</em> pages tend to link to other important pages. The algorithm operates in iterations, where pages distribute their scores to their neighbors (pages they have links to) and subsequently update their scores based on the partial values they receive.</p>
+      <p>However, not all page links have the same value. In order to consider the importance of a link from one page to another, scores are divided by the total number of out-links of the source page. Thus, a page with 10 links will distribute 1/10 of its score to each neighbor, while a page with 100 links, will distribute 1/100 of its score to each neighboring page. This process computes what is often called the <em>transition probablities</em>, i.e. the probability that some page will lead to other page while surfing the web.</p>
+      <p>Taking this idea a bit further, it might be the case that not all neighbors of a page have the same importance. For example, think of a social network. You may have hundreds of Facebook friends, but you interact more with some of them than with others. This <em>degree of interaction</em> is reflected in the Reply Graph data by the number of replies between two e-mail addresses and we are going to exploit it in our PageRank implementation.</p>
       
-      <h4>Step#1: Load the data in a DataSet</h4>
-      <p>You can read this file using Flink’s <b>readCsvFile()</b> method. Flink’s CSV reader has convenient methods that lets us
-      define the line delimiter and the field delimiter. In our case lines are separated by the new line character "\n" and fields by spaces.
-      You can also ignore comments; lines that start with a certain character. Using this feature, we can instruct Flink to ignore the first 2 lines of the file.
-      Finally, we have to define the field types. We will read the edge IDs as Longs. Since there are no edge values, we will use a simple mapper to set the third field of the edges to NullValue:</p>
-  
-<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #1:  Load the data in a DataSet</span>
-DataSet<span style="color: #666666">&lt;</span>Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;&gt;</span> twitterEdges <span style="color: #666666">=</span> env<span style="color: #666666">.</span><span style="color: #BB4444">readCsvFile</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;/path/to/the/input/file&quot;</span><span style="color: #666666">)</span>
-            <span style="color: #666666">.</span><span style="color: #BB4444">fieldDelimiter</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;...&quot;</span><span style="color: #666666">)</span>  <span style="color: #008800; font-style: italic">// node IDs are separated by spaces</span>
-            <span style="color: #666666">.</span><span style="color: #BB4444">ignoreComments</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;...&quot;</span><span style="color: #666666">)</span>  <span style="color: #008800; font-style: italic">// comments start with &quot;%&quot;</span>
-            <span style="color: #666666">.</span><span style="color: #BB4444">types</span><span style="color: #666666">(...)</span> <span style="color: #008800; font-style: italic">// read the node IDs as Longs</span>
+<h3>The task</h3>
+<p>First, read the Reply Graph as an Edge DataSet and use it to generate a Graph, like you did in the previous tutorial. Note that this time, we will use the edge values, so make sure you read all three fields of the input records.
+Then, normalize the edge weights to make then reflect the transition probabilities: each vertex calculates the sum of the weights of its out-going edges. Then, each edge weight is divided by the sum of its source vertex to produce the normalized weight. For example, consider vertex A with three out-neighbors, B, C, and D. Let edge A-B have weight 3, and let both edges A-C and A-D have weight 1. The sum of weights for vertex 1 will be 3+1+1=5 and the normalized weights will be 0.6, 0.2, and 0.2 respectively. 
+Finally, apply the Gelly PageRank algorithm to the weighted Graph.
+<p>Follow the steps below or grab <a href="https://github.com/vasia/gelly-school/blob/ff-skeleton/src/main/java/flink/gelly/school/PageRankWithEdgeWeights.java">the skeleton code</a> from Github to get started!</p>
 
-            <span style="color: #008800; font-style: italic">// set the edge value to NullValue with a mapper</span>
-            <span style="color: #666666">.</span><span style="color: #BB4444">map</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> MapFunction<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;,</span> Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;&gt;()</span> <span style="color: #666666">{</span>
+<br>
+<h4>Step#1: Create the Graph and initialize the ranks</h4>
+<p>When creating the Graph, read the edge values as <em>Double</em> types and initialize the Vertex values to 1.0.</p>
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// read the Edge DataSet from the input file</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple3<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> links <span style="color: #666666">=</span> env<span style="color: #666666">.</span><span style="color: #BB4444">readCsvFile</span><span style="color: #666666">(</span>input<span style="color: #666666">)</span> <span style="color: #666666">...</span>
+<span style="color: #008800; font-style: italic">// set the field and line delimiters</span>
+<span style="color: #008800; font-style: italic">// set the field types</span>
 
-              <span style="color: #AA22FF">@Override</span>
-              <span style="color: #AA22FF; font-weight: bold">public</span> Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> map<span style="color: #666666">(</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;</span> tuple<span style="color: #666666">)</span> <span style="color: #666666">{</span>
-                <span style="color: #AA22FF; font-weight: bold">return</span> <span style="color: #AA22FF; font-weight: bold">new</span> Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(...);</span>
-              <span style="color: #666666">}</span>
-            <span style="color: #666666">});</span>
-</pre></div><br>
 
-      <h4>Step#2: Create a Graph and initialize the Vertex values</h4>
-
-      <p>Now we are ready to create the Graph! When creating a graph from edges, Gelly allows us to initialize the vertices by defining a mapper. The mapper is given as a parameter to the graph creation metho and lets us map each vertex ID to an arbitrary value. Here, we will initialize each vertex with a value equal to its ID, i.e. vertex 1 will have value 1, vertex 2 will have value 2, vertex 42 will have value 42 and so on.</p>
-
-<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #2: Create a Graph and initialize vertex values</span>
-Graph<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> graph <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTupleDataSet</span><span style="color: #666666">(...,</span> <span style="color: #AA22FF; font-weight: bold">new</span> InitVertices<span style="color: #666666">(),</span> env<span style="color: #666666">);</span>
+<span style="color: #008800; font-style: italic">// create a Graph with vertex values initialized to 1.0 (the initial rank)</span>
+Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> network <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTupleDataSet</span><span style="color: #666666">(</span>links<span style="color: #666666">,</span>
+    <span style="color: #AA22FF; font-weight: bold">new</span> MapFunction<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;()</span> <span style="color: #666666">{</span>
+      <span style="color: #666666">...</span>
+    <span style="color: #666666">},</span> env<span style="color: #666666">);</span>
 </pre></div>
 
-<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/**</span>
-<span style="color: #008800; font-style: italic"> * Initializes the vertex values with the vertex ID</span>
-<span style="color: #008800; font-style: italic"> */</span>
-<span style="color: #AA22FF; font-weight: bold">public</span> <span style="color: #AA22FF; font-weight: bold">static</span> <span style="color: #AA22FF; font-weight: bold">final</span> <span style="color: #AA22FF; font-weight: bold">class</span> <span style="color: #0000FF">InitVertices</span> <span style="color: #AA22FF; font-weight: bold">implements</span> MapFunction<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;</span> <span style="color: #666666">{</span>
+<br>
+<h4>Step#2: Calculate the transition probabilities</h4>
+<p>We can calculate the transition probabilities in two steps. First, each vertex computes the total weight of its out-edges and then each edge weight is scaled, by diving with its source vertex values. The total edge weight calculation can be realized using a Gelly <a href="https://ci.apache.org/projects/flink/flink-docs-release-0.9/libs/gelly_guide.html#neighborhood-methods">neighborhood method</a>. Neighborhood methods allow users to compute aggrgegations on the neighbors of each vertex in parallel. For this tutorial, all a vertex needs to do it sum up the weights of its out-edges. For the second step, use Gelly's <em>join</em> transformations. <strong>joinWithEdgesOnSource</strong> lets you join a dataset with the edges of your graph, using the edge's source ID as the join key. It receives a map function that lets you update the edge weights, by applying a transformation on current edge weights the dataset record that matches the source Id.</p>
 
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// for each vertex calculate the total weight of its outgoing edges</span>
+<span style="color: #008800; font-style: italic">// hint: use the {@link org.apache.flink.graph.Graph#reduceOnEdges} method</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> sumEdgeWeights <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+
+<span style="color: #008800; font-style: italic">// assign the transition probabilities as edge weights:</span>
+<span style="color: #008800; font-style: italic">// divide edge weight by the total weight of outgoing edges for that source</span>
+<span style="color: #008800; font-style: italic">// hint: use the {@link org.apache.flink.graph.Graph#joinWithEdgesOnSource} method</span>
+Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> networkWithWeights <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+
+<span style="color: #008800; font-style: italic">// This neighborhood function calculates the total weight of outgoing edges for a vertex</span>
+<span style="color: #AA22FF; font-weight: bold">static</span> <span style="color: #AA22FF; font-weight: bold">final</span> <span style="color: #AA22FF; font-weight: bold">class</span> <span style="color: #0000FF">SumWeight</span> <span style="color: #AA22FF; font-weight: bold">implements</span> ReduceEdgesFunction<span style="color: #666666">&lt;</span>Double<span style="color: #666666">&gt;</span> <span style="color: #666666">{</span>
+  
   <span style="color: #AA22FF">@Override</span>
-  <span style="color: #AA22FF; font-weight: bold">public</span> Long <span style="color: #00A000">map</span><span style="color: #666666">(</span>Long vertexId<span style="color: #666666">)</span> <span style="color: #666666">{</span>
-    <span style="color: #AA22FF; font-weight: bold">return</span> vertexId<span style="color: #666666">;</span>
+  <span style="color: #AA22FF; font-weight: bold">public</span> Double <span style="color: #00A000">reduceEdges</span><span style="color: #666666">(</span>Double firstEdgeValue<span style="color: #666666">,</span> Double secondEdgeValue<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+    <span style="color: #666666">...</span>
   <span style="color: #666666">}</span>
 <span style="color: #666666">}</span>
 </pre></div>
 
+<br><h4>Step #3: Run PageRank</h4>
+<p>Once you have computed the weighted Reply Graph with the appropriate transition probabilities, you can easily run Gelly's PageRank algorithm by calling Graph's <strong>run()</strong> method. The algorithm receives two parameters. The first one is the <em>dampening factor</em>. It defines the probability that a surfer who is randomly following links will continue surfing. This constant is generally set to 0.85. The second parameter defines the number of iteration steps to execute. For our dataset, you can set this parameter to 10 iterations.</p>
 
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// run the Page Rank algorithm on the weighted graph</span>
+DataSet<span style="color: #666666">&lt;</span>Vertex<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> pageRanks <span style="color: #666666">=</span> networkWithWeights<span style="color: #666666">.</span><span style="color: #BB4444">run</span><span style="color: #666666">(</span>
+    <span style="color: #AA22FF; font-weight: bold">new</span> PageRankAlgorithm<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;(...))...</span>
 
-  
-      <br><h4>Step #3: Run Connected Components</h4>
-      <p> Connectivity is one of the very basic and highly useful concepts in graph theory. It is a measure of robustness and can give us information on existing paths between nodes. A directed graph is called <i>weakly connected</i> if replacing all of its directed edges with undirected edges produces a connected (undirected) graph. In other words, all nodes can be reached from all other nodes in the network, following undirected edges. Groups of nodes in a graph that can be reached from each other following undirected edges are called <i>Connected Components</i>. Thus, a graph with a single connected component is weakly connected.
-        <br>The following image shows a graph with two components:</p>
-
-        <p><img src="./images/tut1_ex3.png" hspace="20"/></p>
-
-      <p>Gelly provides a collection of graph algorithms for easily analyzing graphs. These algorithms are available as library methods and can be used by simply calling the <b>run()</b> method on the input graph. Computing connected components is one of them. In this algorithm, initially, each vertex belongs to its own component (its ID). The algorithm proceeds in iterations, where vertices exchange component IDs with their neighbors, until all vertices that belong to the same component have adopted the same ID. We will leave the details on how iterations work in Gelly for <a href="./tutorial7.html">Tutorial#7</a>. For now, all you need to know is that calling <b>ConnectedComponents()</b> on your graph will return a DataSet of vertices, where the vertex values correspond to the component ID. The library method takes only one parameter, the maximum number of iterations. You can set this to 10 for the given dataset.</p> 
-
-<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #3: Run Connected Components</span>
-DataSet<span style="color: #666666">&lt;</span>Vertex<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> verticesWithComponents <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">run</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> ConnectedComponents<span style="color: #666666">(...)).</span><span style="color: #BB4444">getVertices</span><span style="color: #666666">();</span>
+<span style="color: #008800; font-style: italic">// write the output and execute the program</span>
+pageRanks<span style="color: #666666">.</span><span style="color: #BB4444">writeAsCsv</span><span style="color: #666666">(...);</span>
+env<span style="color: #666666">.</span><span style="color: #BB4444">execute</span><span style="color: #666666">();</span>
 </pre></div>
 
+
 <br><h4>Piece of cake!</h4>
-<p>If you've made it so far and you've filled in the gaps, you can print and inspect the results. You should see that all vertices have been assigned the component ID 1, which means that the given Twitter graph is indeed weakly connected!
-  <br>In the next tutorial, we are going to see how to retrieve vertices and edges from a graph and how to compute several metrics and properties. Until then, you might want to play around with the rest of Gelly's <a href="./library.html">library methods</a> and compute PageRank or discover communities in your graph!</p><br>
+<p>If you've made it so far and you've filled in the gaps, you open the output files and inspect the results!
 
 <p><h4><a style="margin-left: 100px" href="./ff15-tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./ff15-tutorial3.html"><em>Next--></em></a></h4></p>
 <br><br>
