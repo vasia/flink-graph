@@ -57,68 +57,10 @@
     <!-- Begin page content -->
     <div class="container">
       <div class="page-header">
-        <h1>Create a Graph and run a library method</h1>
+        <h1>PageRank on the ReplyGraph</h1>
       </div>
-      <h3>Hello, Gelly!</h3>
-      <p>In this first tutorial, we are going to learn how to
-      <ul>
-      <li>Create a Graph from a text file of edges</li>
-      <li>Run a Gelly library method</li>
-      </ul>
-      <h4>Some Basics</h4>
-      <p>
-      In Gelly, vertices and edges are defined as Flink <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html#data-types">Tuples</a>. Tuples are composite data types that contain a fixed number of fields.
-      A Vertex is a <i>Tuple2</i>, where the first field corresponds to the Vertex ID and the second field corresponds to the Vertex value.
-      An Edge is a <i>Tuple3</i>, where the first field is the ID of the source vertex, the second field is the ID of the target vertex and the third field is the edge value.</p>
-
-<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and value=0.8</span>
-Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> v <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;(42,</span> <span style="color: #666666">0.8);</span>
-
-<span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with value=&quot;foo&quot;</span>
-Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> String<span style="color: #666666">&gt;</span> e <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> String<span style="color: #666666">&gt;(5,</span> <span style="color: #666666">6,</span> <span style="color: #BB4444">&quot;foo&quot;</span><span style="color: #666666">);</span>
-</pre></div>
-
-<br><p>To define vertices and edges without associated values, we use the <b>NullValue</b> type:</p>
-
-<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and no value</span>
-Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> v <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(42,</span> NullValue<span style="color: #666666">.</span><span style="color: #BB4444">getInstance</span><span style="color: #666666">());</span>
-
-<span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with no value</span>
-Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> e <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(5,</span> <span style="color: #666666">6,</span> NullValue<span style="color: #666666">.</span><span style="color: #BB4444">getInstance</span><span style="color: #666666">());</span>
-</pre></div>
-
-
-
-<br><p>Graphs can be represented in many different ways: a list of edges, an <a href="https://en.wikipedia.org/wiki/Adjacency_list">adjacency list</a>,
-      an <a href="https://en.wikipedia.org/wiki/Adjacency_matrix">adjacency matrix</a>, a list of vertices and a list of edges.
-      In Gelly, Graphs are represented by a set of vertices and a set of edges. Internally, these sets are Flink <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html#dataset-abstraction"> DataSet</a>s. They might be distributed over several nodes in a cluster or they might never get materialized!
-      You can create a Graph in Gelly by providing both the vertices and edges DataSets or just the edges, in case the vertices have no associated values.
-      </p>
-      <p><img src="./images/tut1_ex2.png" hspace="20"/> <img src="./images/tut1_ex1.png" hspace="20"/></p>
-
-      Vertices and edges are usually given as plain text files or in the form of collections. Luckily, Flink comes with utilities for creating DataSets from many different data sources. You can find a complete reference in the <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html#data-sources">Flink documentation</a>. You can create Graphs from DataSets of Tuples, as well as from Vertex and Edge DataSets:
-
-<p><div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">ExecutionEnvironment env <span style="color: #666666">=</span> ExecutionEnvironment<span style="color: #666666">.</span><span style="color: #BB4444">getExecutionEnvironment</span><span style="color: #666666">();</span>
-
-<span style="color: #008800; font-style: italic">// create a Graph from Vertex and Edge DataSets</span>
-DataSet<span style="color: #666666">&lt;</span>Vertex<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> vertices <span style="color: #666666">=</span> <span style="color: #666666">...</span>
-DataSet<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> edges <span style="color: #666666">=</span> <span style="color: #666666">...</span>
-
-Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> g1 <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromDataSet</span><span style="color: #666666">(</span>vertices<span style="color: #666666">,</span> edges<span style="color: #666666">,</span> env<span style="color: #666666">);</span>
-
-<span style="color: #008800; font-style: italic">// create a Graph from a Tuple3 DataSet</span>
-DataSet<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> tupleEdges <span style="color: #666666">=</span> <span style="color: #666666">...</span>
-
-Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> g2 <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTupleDataSet</span><span style="color: #666666">(</span>tupleEdges<span style="color: #666666">,</span> env<span style="color: #666666">);</span>
-</pre></div></p>
-
-<p>As you probably noticed, Graph expects three types: the vertex ID type, the vertex value type and the edge value type. </p>
-  
-
-      <h3>Let's get started!</h3> 
-      <p>Now that you have seen how to represent graphs in Gelly, it's time to analyze some real data!
-      Go ahead and get the skeleton code of this tutorial from the <a href="https://github.com/vasia/gelly-school/blob/gelly-tutorials/src/main/java/flink/gelly/school/Tutorial1.java">Github repository</a> or copy and fill in the code snippets that we provide below.
-      </p>
+      <h3>How high do I rank, Gelly?</h3>
+      <p>In this tutorial, we are going to analyze the structure of the Flink community, as this is reflected in the dev-mailing list. We are going to use the Reply Graph, normalize its weights and then run Gelly's PageRank algorithm on it.
 
       <h4>Data</h4>
       For this tutorial, we are going to use a Twitter graph from the <a href="http://konect.uni-koblenz.de/">Koblenz Network Collection</a>.
@@ -194,7 +136,7 @@ DataSet<span style="color: #666666">&lt;</span>Vertex<span style="color: #666666
 <p>If you've made it so far and you've filled in the gaps, you can print and inspect the results. You should see that all vertices have been assigned the component ID 1, which means that the given Twitter graph is indeed weakly connected!
   <br>In the next tutorial, we are going to see how to retrieve vertices and edges from a graph and how to compute several metrics and properties. Until then, you might want to play around with the rest of Gelly's <a href="./library.html">library methods</a> and compute PageRank or discover communities in your graph!</p><br>
 
-<p><h4><a style="margin-left: 100px" href="./tutorial0.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial2.html"><em>Next--></em></a></h4></p>
+<p><h4><a style="margin-left: 100px" href="./ff15-tutorial1.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./ff15-tutorial3.html"><em>Next--></em></a></h4></p>
 <br><br>
 </div> <!-- /container -->
 

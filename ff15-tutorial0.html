@@ -85,43 +85,97 @@ We can attach optional labels on the nodes and edges to show their values:</p>
 			<p>Graphs can be either <b>directed</b> or <b>undirected</b>. In directed graphs, edges (and the relationships that they represent) have a pre-defined direction.
         We call the node where the edge starts from the <b>source</b> and the node where it ends the <b>target</b> node.
         The relationships "follows" and "likes" that we saw before define directed edges. Undirected edges have no direction. This usually means that the relationship is present in both directions. For example, "Tom Cruise plays in the same movie as Ken Watanabe" defines an undirected edge (Ken Watanabe also plays in the same movie as Tom Cruise).</p>
-			
-      <br>
-            <h3>What can you do with Graphs?</h3>
-            <p>By analyzing graphs we can answer many interesting questions!
-            <ul>
-            <li>Who is the most influential user on Twitter?</li>
+
+<h3>What can you do with Graphs?</h3>
+  <p>By analyzing graphs we can answer many interesting questions!
+    <ul>
+      <li>Who is the most influential user on Twitter?</li>
 			<li>Which webpage should appear first for a particular web query?</li>
 			<li>What is the optimal path to propagate information in a computer network?</li>
 			<li>How many hops do I need to go from A to B?</li>
 			<li>How similar are the nodes in my network?</li>
-			</ul>
-			All of these questions and the algorithms we use to answer help us build applications that exploit the graph structure for social network analysis, web graph analysis, machine learning, recommenders and more.</p>
-			
-      <br>
-      <h3>When and why Gelly?</h3>
-      <p>Gelly is designed to deal with large, distributed graphs. Such graphs are usually generated as intermediate results of long data-analysis pipelines, built with tools like <a href="https://flink.apache.org/">Apache Flink</a> and <a href="https://hadoop.apache.org/"> Hadoop</a>. Gelly is meant to seamlessly integrate with Flink’s <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html">DataSet API</a> code to let you easily build long and complex data processing pipelines like the following:</p>
-      <p><img src="./images/gelly_pipeline.png" /> </p>
+  	</ul>
+	All of these questions and the algorithms we use to answer help us build applications that exploit the graph structure for social network analysis, web graph analysis, machine learning, recommenders and more.</p>
 
-      <p>If this is the kind of problems you are dealing with, then you're in the right place! Even though all tutorials here use datasets that are small enough to be processed on a commodity laptop, the same methods and algorithms can be applied to large distributed graphs.</p>
+<h3>When and why Gelly?</h3>
+  <p>Gelly is designed to deal with large, distributed graphs. Such graphs are usually generated as intermediate results of long data-analysis pipelines, built with tools like <a href="https://flink.apache.org/">Apache Flink</a> and <a href="https://hadoop.apache.org/"> Hadoop</a>. Gelly is meant to seamlessly integrate with Flink’s <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html">DataSet API</a> code to let you easily build long and complex data processing pipelines like the following:</p>
+  <p><img src="./images/gelly_pipeline.png" /> </p>
 
-      <p>If you are looking to process medium-sized graphs on a single machine, we would suggest you take a look into the following tools:
-        <ul>
-          <li><a href="http://snap.stanford.edu/">SNAP</a>
-          <li><a href="https://gephi.github.io/">Gephi</a>
-          <li><a href="https://networkx.github.io/">NetworkX</a>
-        </ul>
-      </p>
+  <p>If this is the kind of problems you are dealing with, then you're in the right place! Even though all tutorials here use datasets that are small enough to be processed on a commodity laptop, the same methods and algorithms can be applied to large distributed graphs.</p>
+
+  <p>If you are looking to process medium-sized graphs on a single machine, we would suggest you take a look into the following tools:
+    <ul>
+      <li><a href="http://snap.stanford.edu/">SNAP</a>
+      <li><a href="https://gephi.github.io/">Gephi</a>
+      <li><a href="https://networkx.github.io/">NetworkX</a>
+    </ul>
+  </p>
 
       <p>If you are looking to efficiently process billion-edge graphs on a single machine, then you might want to follow <a href="http://www.frankmcsherry.org/">Frank McSherry’s blog</a>.</p>
 
-<br>
-			<h3>Now what?</h3> 
-             <p>For the rest of the tutorials you are going to have to do some coding with Gelly! Open your favorite IDE and create a Maven project, adding Gelly as dependency. <br>You can find more details on how to do this in <a href="https://ci.apache.org/projects/flink/flink-docs-master/libs/gelly_guide.html#using-gelly">the Gelly docs</a>.</p>
-			
-			<h4><em>Good Luck!</em></h4>
+ <h3>Some Basics</h3>
+      <p>
+      In Gelly, vertices and edges are defined as Flink <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html#data-types">Tuples</a>. Tuples are composite data types that contain a fixed number of fields.
+      A Vertex is a <i>Tuple2</i>, where the first field corresponds to the Vertex ID and the second field corresponds to the Vertex value.
+      An Edge is a <i>Tuple3</i>, where the first field is the ID of the source vertex, the second field is the ID of the target vertex and the third field is the edge value.</p>
 
-				<p><h4><a style="margin-left: 100px" href="./flink-forward.html"><em><--Home</em></a> <a style="margin-left: 650px" href="./ff15-tutorial1.html">Next--></a></h4></p>
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and value=0.8</span>
+Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> v <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;(42,</span> <span style="color: #666666">0.8);</span>
+
+<span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with value=&quot;foo&quot;</span>
+Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> String<span style="color: #666666">&gt;</span> e <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> String<span style="color: #666666">&gt;(5,</span> <span style="color: #666666">6,</span> <span style="color: #BB4444">&quot;foo&quot;</span><span style="color: #666666">);</span>
+</pre></div>
+
+<br><p>To define vertices and edges without associated values, we use the <b>NullValue</b> type:</p>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and no value</span>
+Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> v <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(42,</span> NullValue<span style="color: #666666">.</span><span style="color: #BB4444">getInstance</span><span style="color: #666666">());</span>
+
+<span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with no value</span>
+Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> e <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(5,</span> <span style="color: #666666">6,</span> NullValue<span style="color: #666666">.</span><span style="color: #BB4444">getInstance</span><span style="color: #666666">());</span>
+</pre></div>
+
+
+
+<br><p>Graphs can be represented in many different ways: a list of edges, an <a href="https://en.wikipedia.org/wiki/Adjacency_list">adjacency list</a>,
+      an <a href="https://en.wikipedia.org/wiki/Adjacency_matrix">adjacency matrix</a>, a list of vertices and a list of edges.
+      In Gelly, Graphs are represented by a set of vertices and a set of edges. Internally, these sets are Flink <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html#dataset-abstraction"> DataSet</a>s. They might be distributed over several nodes in a cluster or they might never get materialized!
+      You can create a Graph in Gelly by providing both the vertices and edges DataSets or just the edges, in case the vertices have no associated values.
+      </p>
+      <p><img src="./images/tut1_ex2.png" hspace="20"/> <img src="./images/tut1_ex1.png" hspace="20"/></p>
+
+      Vertices and edges are usually given as plain text files or in the form of collections. Luckily, Flink comes with utilities for creating DataSets from many different data sources. You can find a complete reference in the <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html#data-sources">Flink documentation</a>. You can create Graphs from DataSets of Tuples, as well as from Vertex and Edge DataSets:
+
+<p><div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">ExecutionEnvironment env <span style="color: #666666">=</span> ExecutionEnvironment<span style="color: #666666">.</span><span style="color: #BB4444">getExecutionEnvironment</span><span style="color: #666666">();</span>
+
+<span style="color: #008800; font-style: italic">// create a Graph from Vertex and Edge DataSets</span>
+DataSet<span style="color: #666666">&lt;</span>Vertex<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> vertices <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+DataSet<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> edges <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+
+Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> g1 <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromDataSet</span><span style="color: #666666">(</span>vertices<span style="color: #666666">,</span> edges<span style="color: #666666">,</span> env<span style="color: #666666">);</span>
+
+<span style="color: #008800; font-style: italic">// create a Graph from a Tuple3 DataSet</span>
+DataSet<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> tupleEdges <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+
+Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> g2 <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTupleDataSet</span><span style="color: #666666">(</span>tupleEdges<span style="color: #666666">,</span> env<span style="color: #666666">);</span>
+</pre></div></p>
+
+<p>As you probably noticed, Graph expects three types: the vertex ID type, the vertex value type and the edge value type. </p>
+
+<h3>Let's get started!</h3> 
+<p>Now that you have seen how to represent graphs in Gelly, it's time to analyze some real data!
+For the series of these tutorials, we are going to use data from the Apache Flink development mailing list archive. If you attended the training sessions on the DataSet API, then you have worked with this data already. For the Gelly training, we are going to be analyzing the Reply Graph, i.e. the graph that captures reply connections between mails in the archives of Apache Flink’s developer mailing list. The graph is provided as a list of records with three fields: the sender e-mail address, the receiver e-mail address and the number of reply connections between these two e-mail addresses.<br>Here is a short extract of the file:</p>
+
+<p><em>sewen@apache.org,rmetzger@apache.org,72<br>
+aljoscha@apache.org,sewen@apache.org,40<br>
+fhueske@apache.org,rmetzger@apache.org,22<br>
+rmetzger@apache.org,fhueske@apache.org,22
+</em></p>
+
+Proceed to <a href="./ff15-tutorial1.html">Tutorial#1</a> to try out some of Gelly's methods on this Graph!
+<br><br>
+
+<p><h4><a style="margin-left: 100px" href="./flink-forward.html"><em><--Home</em></a> <a style="margin-left: 650px" href="./ff15-tutorial1.html">Next--></a></h4></p>
     </div> <!-- /container -->
 
 
