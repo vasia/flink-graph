@@ -57,87 +57,108 @@
 <!-- Begin page content -->
     <div class="container">
       <div class="page-header">
-        <h1>Simple Transformations</h1>
+        <h1>People you Might Know</h1>
       </div>
-      <p>Coming soon...</p>
-      <!-- 
-<h4>Fidget with your Graph</h4>
-<p>In this tutorial, we will see some simple transformations which can be performed on a Graph in Gelly.</p><br>
-<h4>Map</h4> <img src="./images/mapping.jpg" align="right" />
-<p>Gelly allows us to apply map transformation on the Vertex values or Edge values. <strong>mapVertices()</strong> and <strong>mapEdges()</strong> return a new Graph, where the IDs of the vertices (or edges) remain unchanged, while the values are transformed according to the provided user-defined map function. The map functions also allow changing the type of the vertex or edge values.<br><br> Let's see this with some examples.<br>
-<strong>Changing Vertex value:</strong> To increment the value of all the vertices by one, call the <em>mapVertices()</em> method with a MapFunction which returns the input Vertex value incremented by one.</p>
+      <h3>Have we met before, Gelly?</h3>
+      <p>In social networks, we are often shown a list of users we might know or we might want to connect to. For this last exercise, we will implement a simple application of this concept. For each user, we are going to create a list of neighbors' neighbors, who are not already in the user's friends list. Then, we are going to recommend people who appear in this list at least as many times as a user-defined threshold. The idea is that if you are friends with Alice, and Alice is friends with Bob, then there is a chance you might also know Bob. The more friends you have that are friends with Bob, the higher the chance you also know him (or might like to know him).</p>
 
-<pre><code>    Graph&lt;Long, Double, NullValue&gt; updatedVerticesGraph = graph.<em style="color:blue">mapVertices</em>(
-                    new MapFunction&lt;Vertex&lt;Long, Double&gt;, Double&gt;() {
-                        public Double <em style="color:brown">map</em>(Vertex&lt;Long, Double&gt; value) {
-                            return value.getValue() + 1;
-                        }
-			});
-</code></pre><br>
+      <h3>Neighborhood Methods</h3>
+      <p>In order to complete this exercise, we need to talk a little bit more about Gelly's <em>neighborhood methods</em>. We already saw one of them in <a href="./ff15-tutorial2.html">Tutorial#2</a> and used it to calculate the sum of the values of the edges for each vertex. Here, we explain in more detail how these methods work.</p>
+      <p>Neighborhood methods allow vertices to perform an aggregation on their first-hop neighborhood. <strong>reduceOnEdges</strong> can be used to compute an aggregation on the values of the neighboring edges of a vertex and <strong>reduceOnNeighbors</strong> can be used to compute an aggregation on the values of the neighboring vertices. These methods assume associative and commutative aggregations (like sum, min, and max) and exploit combiners internally, significantly improving performance. The neighborhood scope is defined by the <strong>EdgeDirection</strong> parameter, which takes the values <b>IN</b>, <b>OUT</b> or <b>ALL</b>. IN will gather all in-coming edges (neighbors) of a vertex, OUT will gather all out-going edges (neighbors), while ALL will gather all edges (neighbors).
+      For example, assume that you want to select the minimum ID of all in-neighbors for each vertex in the following graph:</p>
+      <p><img src="./images/ff15-tut3-neighborhood.png" hspace="20"/></p>
+      <p>Vertices 2, 3, and 5 each have one in-neighbor, while 4 has four in-neighbors. Aggregations are applied on pairs of values and then get  combined, until a single value is produced:</p>
+      <p><img src="./images/ff15-tut3-reduceOnNeighbors.png" hspace="20"/></p>
 
-                    
-<p><strong>Changing Edge type:</strong> Call the <em>mapEdges()</em> method with a MapFunction that takes as input an Edge with value of type NullValue and  returns a Double value initialised to 1.0. 					
-<pre><code>
-    Graph&lt;Long, Double, Double&gt; updatedEdgesGraph = updatedVerticesGraph.<em style="color:blue">mapEdges</em>(
-            new MapFunction&lt;Edge&lt;Long, NullValue&gt;, Double&gt;() {
-                public Double <em style="color:brown">map</em>(Edge&lt;Long, NullValue&gt; value) {
-                    return 1.0;
-                }
-            });
-</code></pre></p><br><br>
+      <p>Sometimes, we want to compute more complex aggregations that a simple minimum, for which we might need to access all neighboring values of a vertex together. Gelly has special neighborhood methods for such cases, namely <b>groupReduceonEdges</b> and <b>groupReduceOnNeighbors</b>. With these methods, we also have the flexibility to return zero, one or more values per vertex.</p>
+      <b>groupReduceonEdges</b> creates one group per vertex, where you can access the edges (of the specified <b>EdgeDirection</b>) and their values (if the graph is weighted).
+      These are the groups for the example graph above and EdgeDirection.OUT:
+      <p><img src="./images/ff15-tut3-groupReduceOnEdges.png" hspace="10"/></p>
+      <b>groupReduceOnNeighbors</b> creates one group per vertex, where, apart from the edges, you can also access the neighboring vertices, including their values.
+      These are the groups for the example graph above and EdgeDirection.IN:
+      <p><img src="./images/ff15-tut3-groupReduceOnNeighbors.png" hspace="20"/></p>
+      
 
-<h4>Reverse</h4>
-<p>This is a very handy transformation which allows us to easily reverse all the links in our Graph. It returns a new Graph where the direction of all edges has been reversed. It can can be called simply as follows:	</p>
-<pre><code>    Graph&lt;Long, Double, NullValue&gt; reverseEdges = graph.<em style="color:blue">reverse()</em>;
-</code></pre><br>
-For example, by calling this method on our twitter data set, the 'follows' relation among users gets reversed.<br>
-<p><img src="./images/reverse.jpg" /></p>
-<br><br><br>
+      <h3>The task</h3>
+      <p>Start by creating a Graph from the edges input, like in the previous tutorials, wihout reading the edge weights. Then, use a neighborhood method to gather the IDs of all neighbors of a vertex inside a HashSet. Update the vertex values to this neighborhood HashSet, using a Gelly join method. Finally, use another neighborhood method to compare each node's neighborhood with the one of its neighbors, to find vertices that they don't have in common (candidates for recommendation). Use a HashMap to count how many times you come across a candidate vertex. Finally, output the Ids of friends-of-friends that you came across at least as many times as aspecified threshold value.<br>Follow the steps below or grab the <a href="https://github.com/vasia/gelly-school/blob/ff-skeleton/src/main/java/flink/gelly/school/PeopleYouMightKnow.java">skeleton code</a> from Github to get started!</p><br>
 
-<h4>Filter</h4>
-<img src="./images/filtering.jpg" align="right" />
-<p>A filter transformation applies a user-defined filter function on the vertices or edges of the Graph. <strong>filterOnEdges()</strong> creates a sub-graph of the original graph, keeping only the edges that satisfy the provided predicate. <strong>filterOnVertices()</strong> applies a filter on the vertices of the graph removing edges whose source and/or target do not satisfy the vertex predicate.</p><br>
-<p><strong>Keep only vertices with positive values:</strong> Call the <em>filterOnVertices()</em> method with a filter function which returns true only if the Vertex value is greater than zero.
-<pre><code> Graph&lt;Long, Double, Double&gt; filtered =graph.<em style="color:blue">filterOnVertices</em>(new FilterFunction
-  &lt;Vertex&lt;Long, Double&gt;&gt;() {
-        public boolean <em style="color:brown">filter</em>(Vertex&lt;Long, Double&gt; vertex) {
-            return (vertex.getValue() &gt; 0);
-       }
-   });</pre></code>
-</p><br>
-<p><strong>Keep only edges with positive values:</strong> Call the <em>filterOnVertices()</em> method with a filter function which returns true only if the Edge value is greater than zero.
-<pre><code>
-    Graph&lt;Long, Double, Double&gt; filteredE =graph.<em style="color:blue">filterOnEdges</em>(new FilterFunction
-     &lt;Edge&lt;Long, Double&gt;&gt;() {
-        public boolean <em style="color:brown">filter</em>(Edge&lt;Long, Double&gt; e) {
-            return (e.getValue() &gt; 0);
-       }
+      <h4>Step#1: Create the Graph and initialize the vertex values</h4>
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Read the input file of edges with String Ids</span>
+<span style="color: #008800; font-style: italic">// Hint: use includeFields() to only read the first 2 columns of the input</span>
+<span style="color: #008800; font-style: italic">// and a mapper to create Edges with values of type NullValue</span>
+DataSet<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;&gt;</span> edges <span style="color: #666666">=</span> env<span style="color: #666666">.</span><span style="color: #BB4444">readCsvFile</span><span style="color: #666666">(</span>input<span style="color: #666666">)</span>
+    <span style="color: #666666">...</span>
+    <span style="color: #666666">.</span><span style="color: #BB4444">map</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> MapFunction<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> String<span style="color: #666666">&gt;,</span> Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;&gt;()</span> <span style="color: #666666">{</span>
+          <span style="color: #666666">...</span>
+    <span style="color: #666666">});</span>
 
-   });
-</code></pre>
-<br><br>
-<p>If we want to apply the filter function to the vertices and edges at the same time then we can use the  <strong>subgraph()</strong> method as shown in the code snippet below:</p>
-<pre><code>graph.<em style="color:blue">subgraph</em>(
-    new FilterFunction&lt;Vertex&lt;Long, Long&gt;&gt;() {
-            public boolean <em style="color:brown">filter</em>(Vertex&lt;Long, Long&gt; vertex) {
-                // keep only vertices with positive values
-                return (vertex.getValue() &gt; 0);
-           }
-       },
-    new FilterFunction&lt;Edge&lt;Long, Long&gt;&gt;() {
-            public boolean <em style="color:brown">filter</em>(Edge&lt;Long, Long&gt; edge) {
-                // keep only edges with positive values
-                return (edge.getValue() &gt; 0);
-            }
-    })
-</code></pre><br>
-<p>
-If we continue our discussion with the twitter data set, then we could for example, use this filter method to obtain users with number of followers
-exceeding a certain threshold. However, in order to do this filtering, we would first need to store the indegree information of every user as it's 
-Vertex value. Once we have the follower information for every Vertex, then it is straightforward to apply the filter function by changing the threshold from zero to the desired value in <em>return (vertex.getValue() &gt; 0)</em>.  We are going to see how to update the vertex values in a graph, with information retrieved from some other DataSet, in the next tutorial.
-</p><br>
--->
-	<p><h4><a style="margin-left: 100px" href="./tutorial2.html"><em><--Previous</em></a> <a style="margin-left: 650px" href="./tutorial4.html"><em>Next--></em></a></h4></p>
+<span style="color: #008800; font-style: italic">// Create a Graph from the input edges</span>
+<span style="color: #008800; font-style: italic">// and initialize the vertices with a HashSet</span>
+<span style="color: #008800; font-style: italic">// whose only element is the vertex ID itself</span>
+Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;,</span> NullValue<span style="color: #666666">&gt;</span> graph <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromDataSet</span><span style="color: #666666">(</span>edges<span style="color: #666666">,</span>
+    <span style="color: #AA22FF; font-weight: bold">new</span> MapFunction<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;&gt;()</span> <span style="color: #666666">{</span>
+
+        <span style="color: #AA22FF; font-weight: bold">public</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;</span> <span style="color: #00A000">map</span><span style="color: #666666">(</span>String id<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+
+      <span style="color: #666666">...</span>
+    <span style="color: #666666">}</span>
+  <span style="color: #666666">},</span> env<span style="color: #666666">);</span>
+</pre></div>
+
+<br>
+<h4>Step#2: Fill in the HashSet of each vertex with its neighbors' IDs</h4>
+<p>Use <b>reduceOnNeighbors</b> to create a HashSet of all the neighbors for each vertex. Then, attach the computed HashSets as vertex values to the original graph:</p>
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Fill in the HashSet of each vertex with its neighbors&#39; IDs</span>
+<span style="color: #008800; font-style: italic">// Hint: use the {@link org.apache.flink.graph.Graph#reduceOnNeighbors} method</span>
+<span style="color: #008800; font-style: italic">// and set the EdgeDirection to ALL</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;&gt;&gt;</span> verticesWithNeighbors <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+    
+<span style="color: #008800; font-style: italic">// Attach the neighbor values to the vertices of the graph</span>
+<span style="color: #008800; font-style: italic">// Hint: Use the {@link org.apache.flink.graph.Graph#joinWithVertices} method</span>
+Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;,</span> NullValue<span style="color: #666666">&gt;</span> graphWithNeighbors <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+</pre></div>
+
+<br>
+<h4>Step#3: Compute the "People you Might Know" list</h4>
+
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Compute the &quot;people you might know list&quot;</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> String<span style="color: #666666">&gt;&gt;</span> verticesWithList <span style="color: #666666">=</span>
+      graphWithNeighbors<span style="color: #666666">.</span><span style="color: #BB4444">groupReduceOnNeighbors</span><span style="color: #666666">(</span>
+          <span style="color: #AA22FF; font-weight: bold">new</span> NeighborsFunctionWithVertexValue<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;,</span> NullValue<span style="color: #666666">,</span> Tuple2<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> String<span style="color: #666666">&gt;&gt;()</span> <span style="color: #666666">{</span>
+            
+            <span style="color: #AA22FF; font-weight: bold">public</span> <span style="color: #00BB00; font-weight: bold">void</span> <span style="color: #00A000">iterateNeighbors</span><span style="color: #666666">(</span>Vertex<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;&gt;</span> vertex<span style="color: #666666">,</span>
+              Iterable<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;,</span> Vertex<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;&gt;&gt;&gt;</span> neighbors<span style="color: #666666">,</span>
+              Collector<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> String<span style="color: #666666">&gt;&gt;</span> out<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+          
+              HashMap<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Integer<span style="color: #666666">&gt;</span> recommendations <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> HashMap<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Integer<span style="color: #666666">&gt;();</span>
+              
+              <span style="color: #AA22FF; font-weight: bold">for</span> <span style="color: #666666">(</span>Tuple2<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;,</span> Vertex<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> HashSet<span style="color: #666666">&lt;</span>String<span style="color: #666666">&gt;&gt;&gt;</span> <span style="color: #A0A000">t:</span> neighbors<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+
+              <span style="color: #008800; font-style: italic">// for every friend in the neighbors&#39; friend list</span>
+              <span style="color: #AA22FF; font-weight: bold">for</span> <span style="color: #666666">(</span>String <span style="color: #A0A000">friendOfFriend:</span> t<span style="color: #666666">.</span><span style="color: #BB4444">f1</span><span style="color: #666666">.</span><span style="color: #BB4444">getValue</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+              <span style="color: #008800; font-style: italic">// exclude the vertex itself</span>
+              <span style="color: #008800; font-style: italic">// if new candidate is found, add the ID to the HashSet with score 1</span>
+              <span style="color: #008800; font-style: italic">// if an existing friend is found, increase its score </span>
+              <span style="color: #666666">...</span>
+              <span style="color: #666666">}</span>
+            <span style="color: #666666">}</span>
+          
+            <span style="color: #008800; font-style: italic">// only output friends-of-friends that appeared at least &lt;threshold&gt; times</span>
+            <span style="color: #AA22FF; font-weight: bold">for</span> <span style="color: #666666">(</span>Entry<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Integer<span style="color: #666666">&gt;</span> <span style="color: #A0A000">friend:</span> recommendations<span style="color: #666666">.</span><span style="color: #BB4444">entrySet</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+              <span style="color: #AA22FF; font-weight: bold">if</span> <span style="color: #666666">(...)</span> <span style="color: #666666">{</span>
+                out<span style="color: #666666">.</span><span style="color: #BB4444">collect</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> Tuple2<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> String<span style="color: #666666">&gt;(</span>vertex<span style="color: #666666">.</span><span style="color: #BB4444">getId</span><span style="color: #666666">(),</span> friend<span style="color: #666666">.</span><span style="color: #BB4444">getKey</span><span style="color: #666666">()));</span>  
+              <span style="color: #666666">}</span>
+            <span style="color: #666666">}</span>
+          <span style="color: #666666">}</span>
+    <span style="color: #666666">},</span> EdgeDirection<span style="color: #666666">.</span><span style="color: #BB4444">ALL</span><span style="color: #666666">);</span>
+</pre></div>
+
+<br>
+<h4>That's all!</h4>
+<p>Go ahead and inspect the results. You should see pairs of e-mail addresses where the second one is a recommended friend for the first one.</p>
+<p>If you liked Gelly and you want to know more, keep an eye on the <a href="./index.html">Gellyschool website</a>. We'll be updating it soon with more tutorials, covering iterations and other Gelly features. <br>Hope you enjoyed your time at Gellyschool!</p>
+
+	<p><h4><a style="margin-left: 100px" href="./ff15-tutorial2.html"><em><--Previous</em></a></h4></p>
 	<br><br>
     </div> <!-- /container -->
 
