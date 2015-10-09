@@ -98,7 +98,18 @@ public class PeopleYouMightKnow {
 		// Fill in the HashSet of each vertex with its neighbors' IDs
 		// Hint: use the {@link org.apache.flink.graph.Graph#reduceOnNeighbors} method
 		// and set the EdgeDirection to ALL
-//		DataSet<Tuple2<String, HashSet<String>>> verticesWithNeighbors = ...
+//		DataSet<Tuple2<String, HashSet<String>>> verticesWithNeighbors = 
+//				new ReduceNeighborsFunction<HashSet<String>>() {
+
+//					@Override
+//					public HashSet<String> reduceNeighbors(
+//							HashSet<String> firstNeighborValue,
+//							HashSet<String> secondNeighborValue) {
+						
+//						return ...
+//					}
+					
+//				}, EdgeDirection.ALL);
 		
 		// Attach the neighbor values to the vertices of the graph
 		// Hint: Use the {@link org.apache.flink.graph.Graph#joinWithVertices} method
