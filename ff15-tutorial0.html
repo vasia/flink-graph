@@ -153,7 +153,7 @@ DataSet<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">
 Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> g1 <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromDataSet</span><span style="color: #666666">(</span>vertices<span style="color: #666666">,</span> edges<span style="color: #666666">,</span> env<span style="color: #666666">);</span>
 
 <span style="color: #008800; font-style: italic">// create a Graph from a Tuple3 DataSet</span>
-DataSet<span style="color: #666666">&lt;</span>Edge<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> tupleEdges <span style="color: #666666">=</span> <span style="color: #666666">...</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple3<span style="color: #666666">&lt;</span>String<span style="color: #666666">, </span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> tupleEdges <span style="color: #666666">=</span> <span style="color: #666666">...</span>
 
 Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> g2 <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTupleDataSet</span><span style="color: #666666">(</span>tupleEdges<span style="color: #666666">,</span> env<span style="color: #666666">);</span>
 </pre></div></p>
