@@ -50,7 +50,7 @@ public class Tutorial1_Solution {
 		Graph<Long, Long, NullValue> graph = Graph.fromTupleDataSet(twitterEdges, new InitVertices(), env);
 
 		// Step #3: Run Connected Components
-		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(new ConnectedComponents(10)).getVertices();
+		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(new ConnectedComponents<Long, NullValue>(10));
 
 		// Print the result
 		verticesWithComponents.print();

@@ -10,7 +10,7 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-gelly</artifactId>
-            <version>0.10-SNAPSHOT</version>
+            <version>0.10.0</version>
         </dependency>
     </dependencies>
     <build>
