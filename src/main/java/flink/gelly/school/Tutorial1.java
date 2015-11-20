@@ -25,7 +25,6 @@ import org.apache.flink.types.NullValue;
  */
 public class Tutorial1 {
 
-	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
 
 		// set up the execution environment
@@ -33,27 +32,18 @@ public class Tutorial1 {
 
 		/**
 		 * TODO: remove the comments and fill in the "..."
-		 * 
+		 *
 		// Step #1: Load the data in a DataSet 
-		DataSet<Tuple3<Long, Long, NullValue>> twitterEdges = env.readCsvFile("/path/to/the/input/file")
+		DataSet<Tuple2<Long, Long>> twitterEdges = env.readCsvFile("/path/to/the/input/file")
 				.fieldDelimiter("...")	// node IDs are separated by spaces
 				.ignoreComments("...")	// comments start with "%"
-				.types(...)	// read the node IDs as Longs
-
-				// set the edge value to NullValue with a mapper
-				.map(new MapFunction<Tuple2<Long, Long>, Tuple3<Long, Long, NullValue>>() {
-
-					@Override
-					public Tuple3<Long, Long, NullValue> map(Tuple2<Long, Long> tuple) {
-						return new Tuple3<Long, Long, NullValue>(...);
-					}
-				});
+				.types(...);	// read the node IDs as Longs
 
 		// Step #2: Create a Graph and initialize vertex values
-		Graph<Long, Long, NullValue> graph = Graph.fromTupleDataSet(..., new InitVertices(), env);
+		Graph<Long, Long, NullValue> graph = Graph.fromTuple2DataSet(..., new InitVertices(), env);
 
 		// Step #3: Run Connected Components
-		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(...).getVertices();
+		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(...);
 
 		// Print the result
 		verticesWithComponents.print();
