@@ -78,23 +78,62 @@
       A Vertex is a <i>Tuple2</i>, where the first field corresponds to the Vertex ID and the second field corresponds to the Vertex value.
       An Edge is a <i>Tuple3</i>, where the first field is the ID of the source vertex, the second field is the ID of the target vertex and the third field is the edge value.</p>
 
+
+<div id="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#java" data-toggle="tab">Java</a></li>
+        <li><a href="#scala" data-toggle="tab">Scala</a></li>
+    </ul>
+    <div id="my-tab-content" class="tab-content">
+        
+        <div class="tab-pane active" id="java">
+
 <div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and value=0.8</span>
 Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> v <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;(42,</span> <span style="color: #666666">0.8);</span>
 
 <span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with value=&quot;foo&quot;</span>
 Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> String<span style="color: #666666">&gt;</span> e <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> String<span style="color: #666666">&gt;(5,</span> <span style="color: #666666">6,</span> <span style="color: #BB4444">&quot;foo&quot;</span><span style="color: #666666">);</span>
 </pre></div>
+        </div>
+        <div class="tab-pane" id="scala">
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and value=0.8</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> v <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> <span style="color: #0000FF">Vertex</span><span style="color: #666666">(42,</span> <span style="color: #666666">0.8)</span>
+
+<span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with value=&quot;foo&quot;</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> e <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> <span style="color: #0000FF">Edge</span><span style="color: #666666">(5,</span> <span style="color: #666666">6,</span> <span style="color: #BB4444">&quot;foo&quot;</span><span style="color: #666666">)</span>
+</pre></div>
+        </div>
+    </div>
+</div>
 
 <br><p>To define vertices and edges without associated values, we use the <b>NullValue</b> type:</p>
 
+<div id="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#java1" data-toggle="tab">Java</a></li>
+        <li><a href="#scala1" data-toggle="tab">Scala</a></li>
+    </ul>
+    <div id="my-tab-content" class="tab-content">
+        
+        <div class="tab-pane active" id="java1">
 <div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and no value</span>
 Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> v <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Vertex<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(42,</span> NullValue<span style="color: #666666">.</span><span style="color: #BB4444">getInstance</span><span style="color: #666666">());</span>
 
 <span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with no value</span>
 Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> e <span style="color: #666666">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">,</span> Integer<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(5,</span> <span style="color: #666666">6,</span> NullValue<span style="color: #666666">.</span><span style="color: #BB4444">getInstance</span><span style="color: #666666">());</span>
 </pre></div>
+        </div>
+        <div class="tab-pane" id="scala1">
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// create a vertex with ID=42 and no value</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> v <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> <span style="color: #0000FF">Vertex</span><span style="color: #666666">(42,</span> <span style="color: #0000FF">NullValue</span><span style="color: #666666">.</span>getInstance<span style="color: #666666">)</span>
 
+<span style="color: #008800; font-style: italic">// create an edge from 5 to 6 with no value</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> e <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #AA22FF; font-weight: bold">new</span> <span style="color: #0000FF">Edge</span><span style="color: #666666">(5,</span> <span style="color: #666666">6,</span> <span style="color: #0000FF">NullValue</span><span style="color: #666666">.</span>getInstance<span style="color: #666666">)</span>
+</pre></div>
 
+        </div>
+    </div>
+</div>
 
 <br><p>Graphs can be represented in many different ways: a list of edges, an <a href="https://en.wikipedia.org/wiki/Adjacency_list">adjacency list</a>,
       an <a href="https://en.wikipedia.org/wiki/Adjacency_matrix">adjacency matrix</a>, a list of vertices and a list of edges.
@@ -104,6 +143,15 @@ Edge<span style="color: #666666">&lt;</span>Integer<span style="color: #666666">
       <p><img src="./images/tut1_ex2.png" hspace="20"/> <img src="./images/tut1_ex1.png" hspace="20"/></p>
 
       Vertices and edges are usually given as plain text files or in the form of collections. Luckily, Flink comes with utilities for creating DataSets from many different data sources. You can find a complete reference in the <a href="https://ci.apache.org/projects/flink/flink-docs-master/apis/programming_guide.html#data-sources">Flink documentation</a>. You can create Graphs from DataSets of Tuples, as well as from Vertex and Edge DataSets:
+
+<div id="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#java2" data-toggle="tab">Java</a></li>
+        <li><a href="#scala2" data-toggle="tab">Scala</a></li>
+    </ul>
+    <div id="my-tab-content" class="tab-content">
+        
+        <div class="tab-pane active" id="java2">
 
 <p><div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">ExecutionEnvironment env <span style="color: #666666">=</span> ExecutionEnvironment<span style="color: #666666">.</span><span style="color: #BB4444">getExecutionEnvironment</span><span style="color: #666666">();</span>
 
@@ -117,8 +165,28 @@ Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">
 DataSet<span style="color: #666666">&lt;</span>Tuple3<span style="color: #666666">&lt;</span>String<span style="color: #666666">, </span>String<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;&gt;</span> tupleEdges <span style="color: #666666">=</span> <span style="color: #666666">...</span>
 
 Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">,</span> NullValue<span style="color: #666666">,</span> Double<span style="color: #666666">&gt;</span> g2 <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTupleDataSet</span><span style="color: #666666">(</span>tupleEdges<span style="color: #666666">,</span> env<span style="color: #666666">);</span>
-</pre></div></p>
+</pre></div>
 
+        </div>
+        <div class="tab-pane" id="scala2">
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF; font-weight: bold">val</span> env <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #0000FF">ExecutionEnvironment</span><span style="color: #666666">.</span>getExecutionEnvironment
+
+<span style="color: #008800; font-style: italic">// create a Graph from Vertex and Edge DataSets</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> vertices<span style="color: #AA22FF; font-weight: bold">:</span> <span style="color: #0000FF">DataSet</span><span style="color: #666666">[</span>Vertex<span style="color: #666666">[</span>String, Long]]</span> <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #666666">...</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> edges<span style="color: #AA22FF; font-weight: bold">:</span> <span style="color: #0000FF">DataSet</span><span style="color: #666666">[</span>Edge[String, Double<span style="color: #666666">]]</span> <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #666666">...</span>
+
+<span style="color: #AA22FF; font-weight: bold">val</span> g1 <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #0000FF">Graph</span><span style="color: #666666">.</span>fromDataSet<span style="color: #666666">(</span>vertices<span style="color: #666666">,</span> edges<span style="color: #666666">,</span> env<span style="color: #666666">)</span>
+
+<span style="color: #008800; font-style: italic">// create a Graph from a Tuple3 DataSet</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> tupleEdges<span style="color: #AA22FF; font-weight: bold">:</span> <span style="color: #0000FF">DataSet</span><span style="color: #666666">[(</span>String, String, Double<span style="color: #666666">)]</span> <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #666666">...</span>
+
+<span style="color: #AA22FF; font-weight: bold">val</span> g2 <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #0000FF">Graph</span><span style="color: #666666">.</span>fromTupleDataSet<span style="color: #666666">(</span>tupleEdges<span style="color: #666666">,</span> env<span style="color: #666666">)</span>
+</pre></div>
+        </div>
+    </div>
+</div>
+
+<br>
 <p>As you probably noticed, Graph expects three types: the vertex ID type, the vertex value type and the edge value type. </p>
 	
 
@@ -146,28 +214,48 @@ Graph<span style="color: #666666">&lt;</span>String<span style="color: #666666">
       You can also ignore comments; lines that start with a certain character. Using this feature, we can instruct Flink to ignore the first 2 lines of the file.
 			Finally, we have to define the field types. We will read the edge IDs as Longs. Since there are no edge values, we will use a simple mapper to set the third field of the edges to NullValue:</p>
 	
+<div id="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#java3" data-toggle="tab">Java</a></li>
+        <li><a href="#scala3" data-toggle="tab">Scala</a></li>
+    </ul>
+    <div id="my-tab-content" class="tab-content">
+        
+        <div class="tab-pane active" id="java3">
 <div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #1:  Load the data in a DataSet</span>
-DataSet<span style="color: #666666">&lt;</span>Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;&gt;</span> twitterEdges <span style="color: #666666">=</span> env<span style="color: #666666">.</span><span style="color: #BB4444">readCsvFile</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;/path/to/the/input/file&quot;</span><span style="color: #666666">)</span>
+DataSet<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> twitterEdges <span style="color: #666666">=</span> env<span style="color: #666666">.</span><span style="color: #BB4444">readCsvFile</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;/path/to/the/input/file&quot;</span><span style="color: #666666">)</span>
             <span style="color: #666666">.</span><span style="color: #BB4444">fieldDelimiter</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;...&quot;</span><span style="color: #666666">)</span>  <span style="color: #008800; font-style: italic">// node IDs are separated by spaces</span>
             <span style="color: #666666">.</span><span style="color: #BB4444">ignoreComments</span><span style="color: #666666">(</span><span style="color: #BB4444">&quot;...&quot;</span><span style="color: #666666">)</span>  <span style="color: #008800; font-style: italic">// comments start with &quot;%&quot;</span>
-            <span style="color: #666666">.</span><span style="color: #BB4444">types</span><span style="color: #666666">(...)</span> <span style="color: #008800; font-style: italic">// read the node IDs as Longs</span>
+            <span style="color: #666666">.</span><span style="color: #BB4444">types</span><span style="color: #666666">(...);</span> <span style="color: #008800; font-style: italic">// read the node IDs as Longs</span>
+</pre></div>
+        </div>
+        <div class="tab-pane" id="scala3">
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #1:  Load the data in a DataSet</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> twitterEdges <span style="color: #AA22FF; font-weight: bold">=</span> env<span style="color: #666666">.</span>readCsvFile<span style="color: #666666">[(</span>Long, Long<span style="color: #666666">)](</span>
+    <span style="color: #BB4444">&quot;/path/to/the/input/file&quot;</span><span style="color: #666666">,</span>
+    fieldDelimiter <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #BB4444">&quot;...&quot;</span><span style="color: #666666">,</span>  <span style="color: #008800; font-style: italic">// node IDs are separated by spaces</span>
+    ignoreComments <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #BB4444">&quot;...&quot;</span><span style="color: #666666">)</span><span style="color: #008800; font-style: italic"> // comments start with &quot;%&quot;</span>
+</pre></div>
 
-            <span style="color: #008800; font-style: italic">// set the edge value to NullValue with a mapper</span>
-            <span style="color: #666666">.</span><span style="color: #BB4444">map</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> MapFunction<span style="color: #666666">&lt;</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;,</span> Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;&gt;()</span> <span style="color: #666666">{</span>
-
-              <span style="color: #AA22FF">@Override</span>
-              <span style="color: #AA22FF; font-weight: bold">public</span> Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> map<span style="color: #666666">(</span>Tuple2<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;</span> tuple<span style="color: #666666">)</span> <span style="color: #666666">{</span>
-                <span style="color: #AA22FF; font-weight: bold">return</span> <span style="color: #AA22FF; font-weight: bold">new</span> Tuple3<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;(...);</span>
-              <span style="color: #666666">}</span>
-            <span style="color: #666666">});</span>
-</pre></div><br>
+        </div>
+    </div>
+</div>
+<br>
 
 		  <h4>Step#2: Create a Graph and initialize the Vertex values</h4>
 
 			<p>Now we are ready to create the Graph! When creating a graph from edges, Gelly allows us to initialize the vertices by defining a mapper. The mapper is given as a parameter to the graph creation metho and lets us map each vertex ID to an arbitrary value. Here, we will initialize each vertex with a value equal to its ID, i.e. vertex 1 will have value 1, vertex 2 will have value 2, vertex 42 will have value 42 and so on.</p>
 
+<div id="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#java4" data-toggle="tab">Java</a></li>
+        <li><a href="#scala4" data-toggle="tab">Scala</a></li>
+    </ul>
+    <div id="my-tab-content" class="tab-content">
+        
+        <div class="tab-pane active" id="java4">
 <div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #2: Create a Graph and initialize vertex values</span>
-Graph<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> graph <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTupleDataSet</span><span style="color: #666666">(...,</span> <span style="color: #AA22FF; font-weight: bold">new</span> InitVertices<span style="color: #666666">(),</span> env<span style="color: #666666">);</span>
+Graph<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;</span> graph <span style="color: #666666">=</span> Graph<span style="color: #666666">.</span><span style="color: #BB4444">fromTuple2DataSet</span><span style="color: #666666">(...,</span> <span style="color: #AA22FF; font-weight: bold">new</span> InitVertices<span style="color: #666666">(),</span> env<span style="color: #666666">);</span>
 </pre></div>
 
 <div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/**</span>
@@ -181,9 +269,21 @@ Graph<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,<
   <span style="color: #666666">}</span>
 <span style="color: #666666">}</span>
 </pre></div>
-
-
-
+        </div>
+        <div class="tab-pane" id="scala4">
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #2: Create a Graph and initialize vertex values</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> graph2 <span style="color: #AA22FF; font-weight: bold">=</span> <span style="color: #0000FF">Graph</span><span style="color: #666666">.</span>fromTuple2DataSet<span style="color: #666666">[</span>Long, Long<span style="color: #666666">](</span>edges<span style="color: #666666">,</span> <span style="color: #AA22FF; font-weight: bold">new</span> <span style="color: #0000FF">InitVertices</span><span style="color: #666666">,</span> env<span style="color: #666666">)</span>
+</pre></div>
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">/**</span>
+<span style="color: #008800; font-style: italic"> * Initializes the vertex values with the vertex ID</span>
+<span style="color: #008800; font-style: italic"> */</span>
+<span style="color: #AA22FF; font-weight: bold">private</span> <span style="color: #AA22FF; font-weight: bold">final</span> <span style="color: #AA22FF; font-weight: bold">class</span> <span style="color: #0000FF">InitVertices</span> <span style="color: #AA22FF; font-weight: bold">extends</span> <span style="color: #0000FF">MapFunction</span><span style="color: #666666">[</span>Long, Long<span style="color: #666666">]</span> <span style="color: #666666">{</span>
+  <span style="color: #AA22FF; font-weight: bold">override</span> <span style="color: #AA22FF; font-weight: bold">def</span> map<span style="color: #666666">(</span>id<span style="color: #AA22FF; font-weight: bold">:</span> Long<span style="color: #666666">)</span> <span style="color: #AA22FF; font-weight: bold">=</span> id
+<span style="color: #666666">}</span>
+</pre></div>
+        </div>
+    </div>
+</div>
 	
 			<br><h4>Step #3: Run Connected Components</h4>
 			<p> Connectivity is one of the very basic and highly useful concepts in graph theory. It is a measure of robustness and can give us information on existing paths between nodes. A directed graph is called <i>weakly connected</i> if replacing all of its directed edges with undirected edges produces a connected (undirected) graph. In other words, all nodes can be reached from all other nodes in the network, following undirected edges. Groups of nodes in a graph that can be reached from each other following undirected edges are called <i>Connected Components</i>. Thus, a graph with a single connected component is weakly connected.
@@ -193,9 +293,26 @@ Graph<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,<
 
 			<p>Gelly provides a collection of graph algorithms for easily analyzing graphs. These algorithms are available as library methods and can be used by simply calling the <b>run()</b> method on the input graph. Computing connected components is one of them. In this algorithm, initially, each vertex belongs to its own component (its ID). The algorithm proceeds in iterations, where vertices exchange component IDs with their neighbors, until all vertices that belong to the same component have adopted the same ID. We will leave the details on how iterations work in Gelly for <a href="./tutorial7.html">Tutorial#7</a>. For now, all you need to know is that calling <b>ConnectedComponents()</b> on your graph will return a DataSet of vertices, where the vertex values correspond to the component ID. The library method takes only one parameter, the maximum number of iterations. You can set this to 10 for the given dataset.</p> 
 
+<div id="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#java5" data-toggle="tab">Java</a></li>
+        <li><a href="#scala5" data-toggle="tab">Scala</a></li>
+    </ul>
+    <div id="my-tab-content" class="tab-content">
+        
+        <div class="tab-pane active" id="java5">
 <div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">// Step #3: Run Connected Components</span>
-DataSet<span style="color: #666666">&lt;</span>Vertex<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> verticesWithComponents <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">run</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> ConnectedComponents<span style="color: #666666">(...)).</span><span style="color: #BB4444">getVertices</span><span style="color: #666666">();</span>
+DataSet<span style="color: #666666">&lt;</span>Vertex<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> Long<span style="color: #666666">&gt;&gt;</span> verticesWithComponents <span style="color: #666666">=</span> graph<span style="color: #666666">.</span><span style="color: #BB4444">run</span><span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> ConnectedComponents<span style="color: #666666">&lt;</span>Long<span style="color: #666666">,</span> NullValue<span style="color: #666666">&gt;&gt;</span><span style="color: #666666">(...));</span>
 </pre></div>
+        </div>
+        <div class="tab-pane" id="scala5">
+<div style="background: #f8f8f8; overflow:auto;width:auto;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic">//Step #3: Run Connected Components</span>
+<span style="color: #AA22FF; font-weight: bold">val</span> verticesWithComponents <span style="color: #AA22FF; font-weight: bold">=</span> graph<span style="color: #666666">.</span>run<span style="color: #666666">(</span><span style="color: #AA22FF; font-weight: bold">new</span> <span style="color: #0000FF">ConnectedComponents</span><span style="color: #666666">[</span>Long, NullValue<span style="color: #666666">](...))</span>
+</pre></div>
+
+        </div>
+    </div>
+</div>
 
 <br><h4>Piece of cake!</h4>
 <p>If you've made it so far and you've filled in the gaps, you can print and inspect the results. You should see that all vertices have been assigned the component ID 1, which means that the given Twitter graph is indeed weakly connected!
