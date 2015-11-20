@@ -4,7 +4,6 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.graph.Graph;
 import org.apache.flink.graph.Vertex;
 import org.apache.flink.graph.library.ConnectedComponents;
@@ -25,29 +24,19 @@ import org.apache.flink.types.NullValue;
  */
 public class Tutorial1_Solution {
 
-	@SuppressWarnings("serial")
 	public static void main(String[] args) throws Exception {
 
 		// set up the execution environment
 		final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
 		// Step #1: Load the data in a DataSet 
-		DataSet<Tuple3<Long, Long, NullValue>> twitterEdges = env.readCsvFile("/path/to/the/input/file")
+		DataSet<Tuple2<Long, Long>> twitterEdges = env.readCsvFile("/path/to/the/input/file")
 				.fieldDelimiter(" ")	// node IDs are separated by spaces
 				.ignoreComments("%")	// comments start with "%"
-				.types(Long.class, Long.class)	// read the node IDs as Longs
-
-				// set the edge value to NullValue with a mapper
-				.map(new MapFunction<Tuple2<Long, Long>, Tuple3<Long, Long, NullValue>>() {
-
-					@Override
-					public Tuple3<Long, Long, NullValue> map(Tuple2<Long, Long> tuple) {
-						return new Tuple3<Long, Long, NullValue>(tuple.f0, tuple.f1, NullValue.getInstance());
-					}
-				});
+				.types(Long.class, Long.class);	// read the node IDs as Longs
 
 		// Step #2: Create a Graph and initialize vertex values
-		Graph<Long, Long, NullValue> graph = Graph.fromTupleDataSet(twitterEdges, new InitVertices(), env);
+		Graph<Long, Long, NullValue> graph = Graph.fromTuple2DataSet(twitterEdges, new InitVertices(), env);
 
 		// Step #3: Run Connected Components
 		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(new ConnectedComponents<Long, NullValue>(10));
