@@ -20,7 +20,7 @@ import org.apache.flink.types.NullValue
  *
  */
 object Tutorial1_Solution {
-    def main(args: Array[String]) {
+  def main(args: Array[String]) {
 
     // set up the execution environment
     val env = ExecutionEnvironment.getExecutionEnvironment
@@ -39,7 +39,7 @@ object Tutorial1_Solution {
 
     // Print the result
     verticesWithComponents.print()
-    }
+  }
 
 
     /**
