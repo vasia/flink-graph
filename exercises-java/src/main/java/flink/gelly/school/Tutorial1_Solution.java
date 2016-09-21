@@ -39,7 +39,7 @@ public class Tutorial1_Solution {
 		Graph<Long, Long, NullValue> graph = Graph.fromTuple2DataSet(twitterEdges, new InitVertices(), env);
 
 		// Step #3: Run Connected Components
-		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(new ConnectedComponents<Long, NullValue>(10));
+		DataSet<Vertex<Long, Long>> verticesWithComponents = graph.run(new ConnectedComponents<Long, Long, NullValue>(10));
 
 		// Print the result
 		verticesWithComponents.print();
